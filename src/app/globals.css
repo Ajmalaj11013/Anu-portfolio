@@ -3,86 +3,79 @@
 @tailwind utilities;
 
 :root {
-  /* 1. Ivory Beige — Main background, sections, text areas */
-  --ivory-beige: #EDE8DF;
-  /* 2. Sand — Cards, sections, hover states */
-  --sand: #C9BBA7;
-  /* 3. Olive Grey — Text, icons, accents */
-  --olive-grey: #6B6A56;
-  /* 4. Charcoal — Headings, navigation */
-  --charcoal: #2A2A26;
-  /* 5. Deep Brown — Highlights, buttons, lines */
-  --deep-brown: #4A3B2F;
-  /* 6. Black — Text (dark mode), contrast elements */
-  --pure-black: #0E0E0E;
+  /* Paper White — Primary Background, Hover Text */
+  --paper-white: #F4F2ED;
+  /* Stone — Section Card, Surface */
+  --stone-surface: #D8D5CD;
+  /* Muted Taupe — Subtle Accents, Details */
+  --muted-taupe: #B7A28B;
+  /* Warm Grey — Text, Icons, Secondary Elements */
+  --warm-grey: #8C8980;
+  /* Graphite — Headings, Navigation, Typography */
+  --graphite: #373632;
+  /* Soft Black — Film Section, Depth, Overlays, Hover Background */
+  --soft-black: #171715;
 }
 
 html,
 body {
   scroll-behavior: smooth;
-  background-color: #EDE8DF !important;
-  color: #6B6A56;
+  background-color: #F4F2ED !important;
+  color: #8C8980;
   font-feature-settings: "kern" 1, "liga" 1;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   position: relative;
 }
 
-/* Main background, sections, text areas: Ivory Beige (#EDE8DF) */
+/* Primary Background: Paper White (#F4F2ED) */
 .editorial-paper-surface {
-  background-color: #EDE8DF !important;
+  background-color: #F4F2ED !important;
 }
 
-/* Cards, sections, hover states: Sand (#C9BBA7) */
-.sand-card-surface {
-  background-color: rgba(201, 187, 167, 0.38);
-  transition: background-color 0.35s ease, border-color 0.35s ease;
+/* Section Card & Surface: Stone (#D8D5CD) */
+.stone-card-surface {
+  background-color: #D8D5CD;
+  border-color: #B7A28B;
+  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease;
 }
 
-.sand-card-surface:hover {
-  background-color: #C9BBA7;
-}
-
-/* Subtle Film Grain Overlay that preserves the exact #EDE8DF Ivory Beige luminance */
+/* Subtle Film Grain Overlay preserving #F4F2ED Paper White luminance */
 .film-grain-overlay {
   pointer-events: none;
   position: fixed;
   inset: 0;
   z-index: 9999;
-  opacity: 0.12;
+  opacity: 0.1;
   mix-blend-mode: soft-light;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='editorialGrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23editorialGrain)' opacity='0.15'/%3E%3C/svg%3E");
 }
 
-/* Natural image rendering without sepia color cast */
+/* Natural image rendering without color cast */
 .editorial-image-grade {
   transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.group:hover .editorial-image-grade {
-  /* preserve natural colors on hover */
-}
-
-/* Textured dark stone footer banner */
+/* Textured dark footer banner (Soft Black #171715) */
 .dark-stone-banner {
-  background-color: #0E0E0E;
+  background-color: #171715;
   background-image:
-    linear-gradient(to right, rgba(14, 14, 14, 0.84), rgba(74, 59, 47, 0.68), rgba(14, 14, 14, 0.86)),
+    linear-gradient(to right, rgba(23, 23, 21, 0.88), rgba(55, 54, 50, 0.72), rgba(23, 23, 21, 0.9)),
     url("https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1800&q=80");
   background-size: cover;
   background-position: center;
 }
 
-/* Custom subtle scrollbar using #EDE8DF, #C9BBA7, and #6B6A56 */
+/* Custom subtle scrollbar using #F4F2ED, #D8D5CD, and #B7A28B */
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #EDE8DF;
+  background: #F4F2ED;
 }
 ::-webkit-scrollbar-thumb {
-  background: #C9BBA7;
+  background: #D8D5CD;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #6B6A56;
+  background: #B7A28B;
 }

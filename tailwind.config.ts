@@ -9,12 +9,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ivory: "#EDE8DF",
-        sand: "#C9BBA7",
-        olive: "#6B6A56",
-        charcoal: "#2A2A26",
-        deepbrown: "#4A3B2F",
-        pureblack: "#0E0E0E",
+        ivory: "#F4F2ED",
+        sand: "#D8D5CD",
+        olive: "#8C8980",
+        charcoal: "#373632",
+        deepbrown: "#B7A28B",
+        pureblack: "#171715",
       },
       fontFamily: {
         serif: ["var(--font-playfair)", "Georgia", "serif"],
@@ -27,4 +27,3 @@ const config: Config = {
 };
 
 export default config;
-

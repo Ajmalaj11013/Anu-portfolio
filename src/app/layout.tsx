@@ -39,8 +39,8 @@ export default function RootLayout({
       className={`${playfair.variable} ${inter.variable} ${signature.variable}`}
     >
       <body
-        style={{ backgroundColor: "#EDE8DF", color: "#6B6A56" }}
-        className="font-sans bg-[#EDE8DF] text-[#6B6A56] antialiased selection:bg-[#C9BBA7] selection:text-[#2A2A26]"
+        style={{ backgroundColor: "#F4F2ED", color: "#8C8980" }}
+        className="font-sans bg-[#F4F2ED] text-[#8C8980] antialiased selection:bg-[#171715] selection:text-[#F4F2ED]"
       >
         {children}
       </body>
