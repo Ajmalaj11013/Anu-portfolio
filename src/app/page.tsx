@@ -292,18 +292,19 @@ export default function PortfolioApp() {
         {/* ==================== 1. HOME VIEW ==================== */}
         {view === "home" && (
           <div className="max-w-[1400px] mx-auto px-5 sm:px-10 pb-20 bg-[#EDE8DF]">
-            {/* Hero Banner: Contrast element #0E0E0E + Deep Brown #4A3B2F */}
-            <section className="relative w-full h-[520px] sm:h-[600px] lg:h-[680px] overflow-hidden mt-3 sm:mt-6 border border-[#4A3B2F]/30 bg-[#0E0E0E]">
+            {/* Hero Banner: Pure image colors without background tint interference */}
+            <section className="relative w-full h-[520px] sm:h-[600px] lg:h-[680px] overflow-hidden mt-3 sm:mt-6 border border-[#4A3B2F]/30 isolate">
               <img
                 src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=2000&q=85"
                 alt="Editorial fashion portrait in sculptural drapery"
-                className="w-full h-full object-cover object-center editorial-image-grade"
+                className="w-full h-full object-cover object-center"
               />
+              {/* Subtle left/bottom vignette only behind text so the subject and image colors stay 100% natural */}
               <div
-                className="absolute inset-0"
+                className="absolute inset-0 pointer-events-none"
                 style={{
                   background:
-                    "linear-gradient(100deg, rgba(14,14,14,0.82) 0%, rgba(74,59,47,0.58) 48%, rgba(42,42,38,0.45) 100%)",
+                    "linear-gradient(90deg, rgba(14,14,14,0.45) 0%, rgba(14,14,14,0.12) 45%, rgba(14,14,14,0) 75%), linear-gradient(0deg, rgba(14,14,14,0.38) 0%, rgba(14,14,14,0) 45%)",
                 }}
               />
 
@@ -619,17 +620,17 @@ export default function PortfolioApp() {
         {view === "photography" && (
           <div className="max-w-[1400px] mx-auto px-5 sm:px-10 pb-20 bg-[#EDE8DF]">
             {/* Photography Hero Banner */}
-            <section className="relative w-full h-[280px] sm:h-[360px] lg:h-[400px] overflow-hidden mt-3 sm:mt-6 border border-[#4A3B2F]/30 bg-[#0E0E0E]">
+            <section className="relative w-full h-[280px] sm:h-[360px] lg:h-[400px] overflow-hidden mt-3 sm:mt-6 border border-[#4A3B2F]/30 isolate">
               <img
                 src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=2000&q=85"
                 alt="Photography Header"
-                className="w-full h-full object-cover object-center editorial-image-grade"
+                className="w-full h-full object-cover object-center"
               />
               <div
-                className="absolute inset-0"
+                className="absolute inset-0 pointer-events-none"
                 style={{
                   background:
-                    "linear-gradient(95deg, rgba(14,14,14,0.82) 0%, rgba(74,59,47,0.52) 55%, rgba(14,14,14,0.25) 100%)",
+                    "linear-gradient(90deg, rgba(14,14,14,0.45) 0%, rgba(14,14,14,0.12) 50%, rgba(14,14,14,0) 80%)",
                 }}
               />
               <div className="absolute inset-0 p-6 sm:p-12 lg:p-16 flex flex-col justify-end">
@@ -719,17 +720,17 @@ export default function PortfolioApp() {
         {view === "films" && (
           <div className="max-w-[1400px] mx-auto px-5 sm:px-10 pb-20 bg-[#EDE8DF]">
             {/* Films Hero Banner */}
-            <section className="relative w-full h-[300px] sm:h-[380px] lg:h-[440px] overflow-hidden mt-3 sm:mt-6 border border-[#4A3B2F]/30 bg-[#0E0E0E]">
+            <section className="relative w-full h-[300px] sm:h-[380px] lg:h-[440px] overflow-hidden mt-3 sm:mt-6 border border-[#4A3B2F]/30 isolate">
               <img
                 src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=2000&q=85"
                 alt="Films Header"
-                className="w-full h-full object-cover object-center editorial-image-grade"
+                className="w-full h-full object-cover object-center"
               />
               <div
-                className="absolute inset-0"
+                className="absolute inset-0 pointer-events-none"
                 style={{
                   background:
-                    "linear-gradient(95deg, rgba(14,14,14,0.85) 0%, rgba(74,59,47,0.55) 55%, rgba(14,14,14,0.35) 100%)",
+                    "linear-gradient(90deg, rgba(14,14,14,0.48) 0%, rgba(14,14,14,0.15) 50%, rgba(14,14,14,0) 80%)",
                 }}
               />
               <div className="absolute inset-0 p-6 sm:p-12 lg:p-16 flex flex-col justify-end">
