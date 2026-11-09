@@ -625,7 +625,7 @@ export default function PortfolioApp() {
               {[
                 { label: "ALL", value: "all" },
                 { label: "FASHION & EDITORIAL", value: "fashion" },
-                { label: "HOSPITALITY & SPACES", value: "hospitality" },
+                { label: "PRODUCT", value: "hospitality" },
                 { label: "ARCHITECTURE", value: "architecture" },
                 { label: "FOOD & STILL LIFE", value: "food" },
               ].map((tab) => (
@@ -1197,8 +1197,8 @@ export default function PortfolioApp() {
                       <option value="Fashion Editorial">
                         Fashion Editorial
                       </option>
-                      <option value="Hospitality & Spaces">
-                        Hospitality &amp; Spaces
+                      <option value="Product">
+                        Product
                       </option>
                       <option value="Architecture">Architecture</option>
                       <option value="Food & Still Life">

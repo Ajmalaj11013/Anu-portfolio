@@ -50,7 +50,7 @@ export const PROJECTS: Project[] = [
     type: "photography",
     year: "2024",
     role: "Interior & Atmosphere Photography",
-    discipline: "Hospitality & Spaces",
+    discipline: "Product",
     description:
       "Capturing the warm afternoon stillness of a brutalist-inspired sanctuary. Natural light filters through botanical textures, limewash walls and handcrafted timber furniture.",
     coverImage:
@@ -254,7 +254,7 @@ export const PHOTOGRAPHY_SECTIONS = [
     ],
   },
   {
-    title: "HOSPITALITY & SPACES",
+    title: "PRODUCT",
     slug: "hospitality",
     images: [
       {
