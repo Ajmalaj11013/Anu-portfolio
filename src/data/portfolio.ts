@@ -331,6 +331,32 @@ export const PHOTOGRAPHY_SECTIONS = [
       },
     ],
   },
+  {
+    title: "DOCUMENTARY",
+    slug: "documentary",
+    images: [
+      {
+        src: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=85",
+        projectId: "the-river-between",
+        caption: "The River Between",
+      },
+      {
+        src: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&q=85",
+        projectId: "the-river-between",
+        caption: "Morning Mist",
+      },
+      {
+        src: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=900&q=85",
+        projectId: "the-river-between",
+        caption: "Quiet Resilience",
+      },
+      {
+        src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=85",
+        projectId: "the-river-between",
+        caption: "Highland Passage",
+      },
+    ],
+  },
 ];
 
 export const FILM_CATEGORIES = [

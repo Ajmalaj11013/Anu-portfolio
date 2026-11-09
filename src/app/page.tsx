@@ -375,6 +375,14 @@ export default function PortfolioApp() {
                       STILL LIFE
                     </button>
                     <button
+                      onClick={() =>
+                        navigateToCategory("photography", "documentary")
+                      }
+                      className="text-left hover:text-[#EDE8DF] transition-colors"
+                    >
+                      DOCUMENTARY
+                    </button>
+                    <button
                       onClick={() => navigateToCategory("films", "all")}
                       className="text-left hover:text-[#EDE8DF] transition-colors"
                     >
@@ -614,8 +622,8 @@ export default function PortfolioApp() {
                   Photography
                 </h1>
                 <p className="text-[10px] sm:text-[11px] tracking-[0.24em] uppercase text-[#C9BBA7]">
-                  FASHION &bull; HOSPITALITY &bull; ARCHITECTURE &bull; FOOD
-                  &amp; STILL LIFE &bull; PRODUCT
+                  FASHION &amp; EDITORIAL &bull; PRODUCT &bull; ARCHITECTURE
+                  &bull; ADVERTISING &bull; DOCUMENTARY
                 </p>
               </div>
             </section>
@@ -628,6 +636,7 @@ export default function PortfolioApp() {
                 { label: "PRODUCT", value: "hospitality" },
                 { label: "ARCHITECTURE", value: "architecture" },
                 { label: "ADVERTISING", value: "food" },
+                { label: "DOCUMENTARY", value: "documentary" },
               ].map((tab) => (
                 <button
                   key={tab.value}
