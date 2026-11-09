@@ -3,32 +3,44 @@
 @tailwind utilities;
 
 :root {
+  /* 1. Ivory Beige — Main background, sections, text areas */
   --ivory-beige: #EDE8DF;
+  /* 2. Sand — Cards, sections, hover states */
   --sand: #C9BBA7;
+  /* 3. Olive Grey — Text, icons, accents */
   --olive-grey: #6B6A56;
+  /* 4. Charcoal — Headings, navigation */
   --charcoal: #2A2A26;
+  /* 5. Deep Brown — Highlights, buttons, lines */
   --deep-brown: #4A3B2F;
+  /* 6. Black — Text (dark mode), contrast elements */
   --pure-black: #0E0E0E;
 }
 
-html {
-  scroll-behavior: smooth;
-  background-color: #EDE8DF;
-  color: #2A2A26;
-}
-
+html,
 body {
-  background-color: #EDE8DF;
-  color: #2A2A26;
+  scroll-behavior: smooth;
+  background-color: #EDE8DF !important;
+  color: #6B6A56;
   font-feature-settings: "kern" 1, "liga" 1;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   position: relative;
 }
 
-/* Pure Ivory Beige (#EDE8DF) Main Surface */
+/* Main background, sections, text areas: Ivory Beige (#EDE8DF) */
 .editorial-paper-surface {
   background-color: #EDE8DF !important;
+}
+
+/* Cards, sections, hover states: Sand (#C9BBA7) */
+.sand-card-surface {
+  background-color: rgba(201, 187, 167, 0.38);
+  transition: background-color 0.35s ease, border-color 0.35s ease;
+}
+
+.sand-card-surface:hover {
+  background-color: #C9BBA7;
 }
 
 /* Subtle Film Grain Overlay that preserves the exact #EDE8DF Ivory Beige luminance */
@@ -37,33 +49,26 @@ body {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  opacity: 0.14;
+  opacity: 0.12;
   mix-blend-mode: soft-light;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='editorialGrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23editorialGrain)' opacity='0.15'/%3E%3C/svg%3E");
 }
 
-/* Subtle Plaster / Stone Texture for Hero & Cards */
-.stone-plaster-texture {
-  background-image:
-    linear-gradient(135deg, rgba(237, 232, 223, 0.4) 0%, rgba(201, 187, 167, 0.28) 100%),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='plaster'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' result='noise'/%3E%3CfeDiffuseLighting in='noise' lighting-color='%23EDE8DF' surfaceScale='1.4'%3E%3CfeDistantLight azimuth='45' elevation='60'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23plaster)' opacity='0.12'/%3E%3C/svg%3E");
-}
-
-/* Warm Cinematic LUT filter for photography to match the earthy, golden-brown grade in the design */
+/* Warm Cinematic LUT filter for photography */
 .editorial-image-grade {
-  filter: sepia(0.16) contrast(1.04) brightness(0.95) saturate(0.88);
+  filter: sepia(0.14) contrast(1.04) brightness(0.96) saturate(0.9);
   transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), filter 0.5s ease;
 }
 
 .group:hover .editorial-image-grade {
-  filter: sepia(0.1) contrast(1.06) brightness(0.98) saturate(0.94);
+  filter: sepia(0.08) contrast(1.06) brightness(0.99) saturate(0.95);
 }
 
-/* Textured dark stone footer banner (from the bottom of the design sheet) */
+/* Textured dark stone footer banner */
 .dark-stone-banner {
-  background-color: #2A2A26;
+  background-color: #0E0E0E;
   background-image:
-    linear-gradient(to right, rgba(14, 14, 14, 0.78), rgba(74, 59, 47, 0.65), rgba(14, 14, 14, 0.82)),
+    linear-gradient(to right, rgba(14, 14, 14, 0.84), rgba(74, 59, 47, 0.68), rgba(14, 14, 14, 0.86)),
     url("https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1800&q=80");
   background-size: cover;
   background-position: center;
