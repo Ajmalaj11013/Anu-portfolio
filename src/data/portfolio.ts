@@ -89,12 +89,12 @@ export const PROJECTS: Project[] = [
   {
     id: "the-seasonal-table",
     title: "The Seasonal Table",
-    category: "FOOD & STILL LIFE",
+    category: "ADVERTISING",
     categorySlug: "food",
     type: "photography",
     year: "2024",
     role: "Photography & Creative Direction",
-    discipline: "Food & Still Life",
+    discipline: "Advertising",
     description:
       "A quiet exploration of seasonal produce, texture and light — where food becomes a study in form, colour and atmosphere.",
     coverImage:
@@ -167,7 +167,7 @@ export const PROJECTS: Project[] = [
     type: "photography",
     year: "2024",
     role: "Photographer",
-    discipline: "Food & Still Life",
+    discipline: "Advertising",
     description:
       "Tactile botanical apothecary bottles, hand-thrown ceramics and raw linen captured under directional chiaroscuro lighting.",
     coverImage:
@@ -306,7 +306,7 @@ export const PHOTOGRAPHY_SECTIONS = [
     ],
   },
   {
-    title: "FOOD & STILL LIFE",
+    title: "ADVERTISING",
     slug: "food",
     images: [
       {

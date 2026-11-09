@@ -563,7 +563,7 @@ export default function PortfolioApp() {
                   </div>
                   <div className="sm:col-span-4 space-y-2 border-l border-[#C9BBA7] pl-4">
                     <p className="text-[10px] tracking-[0.2em] uppercase text-[#2A2A26] font-medium">
-                      FOOD &amp; STILL LIFE
+                      ADVERTISING
                     </p>
                     <button
                       onClick={() => navigateToCategory("photography", "food")}
@@ -627,7 +627,7 @@ export default function PortfolioApp() {
                 { label: "FASHION & EDITORIAL", value: "fashion" },
                 { label: "PRODUCT", value: "hospitality" },
                 { label: "ARCHITECTURE", value: "architecture" },
-                { label: "FOOD & STILL LIFE", value: "food" },
+                { label: "ADVERTISING", value: "food" },
               ].map((tab) => (
                 <button
                   key={tab.value}
@@ -1201,8 +1201,8 @@ export default function PortfolioApp() {
                         Product
                       </option>
                       <option value="Architecture">Architecture</option>
-                      <option value="Food & Still Life">
-                        Food &amp; Still Life
+                      <option value="Advertising">
+                        Advertising
                       </option>
                       <option value="Fashion / Campaign Film">
                         Fashion / Campaign Film
