@@ -33,6 +33,7 @@ export default function PortfolioApp() {
   const [activeProjectId, setActiveProjectId] = useState<string>(
     "the-seasonal-table"
   );
+  const [homeCategoryFilter, setHomeCategoryFilter] = useState<string>("all");
   const [photoFilter, setPhotoFilter] = useState<string>("all");
   const [filmFilter, setFilmFilter] = useState<string>("all");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -53,7 +54,6 @@ export default function PortfolioApp() {
     timeline: "",
   });
 
-  // Scroll to top when view changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setMobileMenuOpen(false);
@@ -83,7 +83,7 @@ export default function PortfolioApp() {
   );
   const prevProject =
     PROJECTS[
-    (currentProjectIndex - 1 + PROJECTS.length) % PROJECTS.length
+      (currentProjectIndex - 1 + PROJECTS.length) % PROJECTS.length
     ];
   const nextProject =
     PROJECTS[(currentProjectIndex + 1) % PROJECTS.length];
@@ -94,19 +94,22 @@ export default function PortfolioApp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-ivory text-charcoal film-grain">
-      {/* TOP NAVIGATION BAR */}
-      <header className="sticky top-0 z-40 bg-ivory/95 backdrop-blur-sm border-b border-sand/40 transition-colors">
+    <div className="min-h-screen flex flex-col bg-[#EDE8DF] text-[#2A2A26] editorial-paper-surface relative">
+      {/* Authentic Film Grain & Tactile Paper Fiber Overlay across the entire viewport */}
+      <div className="film-grain-overlay" aria-hidden="true" />
+
+      {/* TOP NAVIGATION BAR (#EDE8DF Ivory Beige background, #2A2A26 Charcoal headings & navigation, #4A3B2F Deep Brown lines) */}
+      <header className="sticky top-0 z-40 bg-[#EDE8DF]/95 backdrop-blur-sm border-b border-[#C9BBA7] transition-colors">
         <div className="max-w-[1400px] mx-auto px-5 sm:px-10 h-16 sm:h-20 flex items-center justify-between">
           <button
             onClick={() => setView("home")}
-            className="font-serif text-xl sm:text-2xl tracking-[0.22em] text-charcoal hover:opacity-75 transition-opacity uppercase"
+            className="font-serif text-xl sm:text-2xl tracking-[0.22em] text-[#2A2A26] hover:text-[#4A3B2F] transition-colors uppercase"
           >
             AJNAS
           </button>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8 lg:space-x-10 text-[11px] tracking-[0.22em] uppercase font-normal text-charcoal/80">
+          {/* Desktop Navigation (#2A2A26 Charcoal & #6B6A56 Olive Grey) */}
+          <nav className="hidden md:flex items-center space-x-8 lg:space-x-10 text-[10px] tracking-[0.24em] uppercase font-normal text-[#6B6A56]">
             <button
               onClick={() => {
                 if (view !== "home") {
@@ -122,48 +125,53 @@ export default function PortfolioApp() {
                     ?.scrollIntoView({ behavior: "smooth" });
                 }
               }}
-              className={`hover:text-charcoal transition-colors py-1 ${view === "home"
-                  ? "text-charcoal border-b border-charcoal"
+              className={`hover:text-[#2A2A26] transition-colors py-1 ${
+                view === "home"
+                  ? "text-[#2A2A26] font-medium border-b border-[#4A3B2F]"
                   : ""
-                }`}
+              }`}
             >
               WORK
             </button>
             <button
               onClick={() => navigateToCategory("photography", "all")}
-              className={`hover:text-charcoal transition-colors py-1 ${view === "photography" ||
-                  (view === "project" && currentProject.type === "photography")
-                  ? "text-charcoal border-b border-charcoal"
+              className={`hover:text-[#2A2A26] transition-colors py-1 ${
+                view === "photography" ||
+                (view === "project" && currentProject.type === "photography")
+                  ? "text-[#2A2A26] font-medium border-b border-[#4A3B2F]"
                   : ""
-                }`}
+              }`}
             >
               PHOTOGRAPHY
             </button>
             <button
               onClick={() => navigateToCategory("films", "all")}
-              className={`hover:text-charcoal transition-colors py-1 ${view === "films" ||
-                  (view === "project" && currentProject.type === "film")
-                  ? "text-charcoal border-b border-charcoal"
+              className={`hover:text-[#2A2A26] transition-colors py-1 ${
+                view === "films" ||
+                (view === "project" && currentProject.type === "film")
+                  ? "text-[#2A2A26] font-medium border-b border-[#4A3B2F]"
                   : ""
-                }`}
+              }`}
             >
               FILMS
             </button>
             <button
               onClick={() => setView("about")}
-              className={`hover:text-charcoal transition-colors py-1 ${view === "about"
-                  ? "text-charcoal border-b border-charcoal"
+              className={`hover:text-[#2A2A26] transition-colors py-1 ${
+                view === "about"
+                  ? "text-[#2A2A26] font-medium border-b border-[#4A3B2F]"
                   : ""
-                }`}
+              }`}
             >
               ABOUT
             </button>
             <button
               onClick={() => setView("contact")}
-              className={`hover:text-charcoal transition-colors py-1 ${view === "contact"
-                  ? "text-charcoal border-b border-charcoal"
+              className={`hover:text-[#2A2A26] transition-colors py-1 ${
+                view === "contact"
+                  ? "text-[#2A2A26] font-medium border-b border-[#4A3B2F]"
                   : ""
-                }`}
+              }`}
             >
               CONTACT
             </button>
@@ -173,30 +181,30 @@ export default function PortfolioApp() {
           <button
             onClick={() => setMobileMenuOpen(true)}
             aria-label="Open Navigation Menu"
-            className="md:hidden p-2 text-charcoal hover:opacity-70 transition-opacity"
+            className="md:hidden p-2 text-[#2A2A26] hover:text-[#4A3B2F] transition-colors"
           >
             <Menu className="w-5 h-5 stroke-[1.5]" />
           </button>
         </div>
       </header>
 
-      {/* DARK MOBILE OVERLAY DRAWER (Matches the #0E0E0E mobile menu mockup) */}
+      {/* DARK MOBILE OVERLAY DRAWER (#0E0E0E Pure Black contrast surface as specified in Colour Palette) */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-pureblack text-ivory flex flex-col justify-between p-6 sm:p-10 animate-fadeIn">
+        <div className="fixed inset-0 z-50 bg-[#0E0E0E] text-[#EDE8DF] flex flex-col justify-between p-6 sm:p-10">
           <div className="flex items-center justify-between">
             <button
               onClick={() => {
                 setView("home");
                 setMobileMenuOpen(false);
               }}
-              className="font-serif text-xl tracking-[0.22em] text-ivory uppercase"
+              className="font-serif text-xl tracking-[0.22em] text-[#EDE8DF] uppercase"
             >
               AJNAS
             </button>
             <button
               onClick={() => setMobileMenuOpen(false)}
               aria-label="Close Navigation Menu"
-              className="p-2 text-ivory/80 hover:text-ivory"
+              className="p-2 text-[#C9BBA7] hover:text-[#EDE8DF]"
             >
               <X className="w-5 h-5 stroke-[1.5]" />
             </button>
@@ -209,20 +217,20 @@ export default function PortfolioApp() {
                   setView("home");
                   setMobileMenuOpen(false);
                 }}
-                className="block text-sm tracking-[0.25em] uppercase text-ivory hover:text-sand transition-colors mb-4"
+                className="block text-sm tracking-[0.25em] uppercase text-[#EDE8DF] hover:text-[#C9BBA7] transition-colors mb-4"
               >
                 WORK
               </button>
-              <div className="pl-5 space-y-3 border-l border-ivory/15">
+              <div className="pl-5 space-y-3 border-l border-[#4A3B2F]">
                 <button
                   onClick={() => navigateToCategory("photography", "all")}
-                  className="block text-xs tracking-[0.22em] uppercase text-ivory/75 hover:text-ivory transition-colors"
+                  className="block text-xs tracking-[0.22em] uppercase text-[#C9BBA7] hover:text-[#EDE8DF] transition-colors"
                 >
                   PHOTOGRAPHY
                 </button>
                 <button
                   onClick={() => navigateToCategory("films", "all")}
-                  className="block text-xs tracking-[0.22em] uppercase text-ivory/75 hover:text-ivory transition-colors"
+                  className="block text-xs tracking-[0.22em] uppercase text-[#C9BBA7] hover:text-[#EDE8DF] transition-colors"
                 >
                   FILMS
                 </button>
@@ -231,20 +239,20 @@ export default function PortfolioApp() {
 
             <button
               onClick={() => setView("about")}
-              className="block text-sm tracking-[0.25em] uppercase text-ivory hover:text-sand transition-colors"
+              className="block text-sm tracking-[0.25em] uppercase text-[#EDE8DF] hover:text-[#C9BBA7] transition-colors"
             >
               ABOUT
             </button>
 
             <button
               onClick={() => setView("contact")}
-              className="block text-sm tracking-[0.25em] uppercase text-ivory hover:text-sand transition-colors"
+              className="block text-sm tracking-[0.25em] uppercase text-[#EDE8DF] hover:text-[#C9BBA7] transition-colors"
             >
               CONTACT
             </button>
           </div>
 
-          <div className="pt-6 border-t border-ivory/15 space-y-3 text-xs text-ivory/60">
+          <div className="pt-6 border-t border-[#4A3B2F]/60 space-y-3 text-xs text-[#C9BBA7]">
             <div className="flex items-center space-x-6 tracking-wider">
               <a
                 href="#instagram"
@@ -252,7 +260,7 @@ export default function PortfolioApp() {
                   e.preventDefault();
                   setMobileMenuOpen(false);
                 }}
-                className="hover:text-ivory transition-colors"
+                className="hover:text-[#EDE8DF] transition-colors"
               >
                 Instagram
               </a>
@@ -262,12 +270,12 @@ export default function PortfolioApp() {
                   e.preventDefault();
                   setMobileMenuOpen(false);
                 }}
-                className="hover:text-ivory transition-colors"
+                className="hover:text-[#EDE8DF] transition-colors"
               >
                 Vimeo
               </a>
             </div>
-            <p className="tracking-wide text-ivory/50">ajnas@studio.com</p>
+            <p className="tracking-wide text-[#6B6A56]">ajnas@studio.com</p>
           </div>
         </div>
       )}
@@ -277,42 +285,57 @@ export default function PortfolioApp() {
         {/* ==================== 1. HOME VIEW ==================== */}
         {view === "home" && (
           <div className="max-w-[1400px] mx-auto px-5 sm:px-10 pb-20">
-            {/* Hero Banner */}
-            <section className="relative w-full h-[520px] sm:h-[600px] lg:h-[680px] overflow-hidden mt-2 sm:mt-4">
+            {/* Hero Banner with warm plaster shadow & #4A3B2F / #0E0E0E atmospheric overlay */}
+            <section className="relative w-full h-[520px] sm:h-[600px] lg:h-[680px] overflow-hidden mt-3 sm:mt-6 border border-[#C9BBA7]">
               <img
                 src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=2000&q=85"
-                alt="Editorial fashion portrait in sculptural drapery"
-                className="w-full h-full object-cover object-center scale-[1.01] transition-transform duration-1000"
+                alt="Editorial fashion portrait in sculptural drapery against textured plaster wall"
+                className="w-full h-full object-cover object-center editorial-image-grade"
               />
-              {/* Editorial Warm Cinematic Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-pureblack/75 via-deepbrown/40 to-pureblack/45" />
-              <div className="absolute inset-0 bg-gradient-to-t from-pureblack/70 via-transparent to-transparent" />
+              {/* Warm Earthy & Cinematic Gradient matching the design's sun-drenched shadow wall */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(100deg, rgba(14,14,14,0.82) 0%, rgba(74,59,47,0.58) 48%, rgba(42,42,38,0.45) 100%)",
+                }}
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "radial-gradient(circle at 65% 35%, rgba(201,187,167,0.18) 0%, rgba(14,14,14,0.55) 85%)",
+                }}
+              />
 
               <div className="absolute inset-0 p-6 sm:p-12 lg:p-16 flex flex-col justify-end sm:justify-between">
-                <div className="hidden sm:block" />
+                <div className="hidden sm:flex items-center justify-between text-[10px] tracking-[0.24em] uppercase text-[#C9BBA7]/80">
+                  <span>STILL &amp; MOVING IMAGE</span>
+                  <span>01 / 06</span>
+                </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8">
                   {/* Left Hero Copy */}
-                  <div className="max-w-lg text-ivory space-y-4">
-                    <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight font-normal">
+                  <div className="max-w-lg text-[#EDE8DF] space-y-4">
+                    <h1 className="font-serif text-4xl sm:text-5xl lg:text-[62px] leading-[1.08] tracking-tight font-normal text-[#EDE8DF]">
                       Images with
                       <br />a point of view.
                     </h1>
-                    <p className="text-[10px] sm:text-[11px] tracking-[0.25em] uppercase text-sand font-medium pt-1">
+                    <p className="text-[10px] sm:text-[11px] tracking-[0.26em] uppercase text-[#C9BBA7] font-medium pt-1">
                       PHOTOGRAPHER &amp; FILM DIRECTOR
                     </p>
-                    <p className="text-xs sm:text-sm text-ivory/80 leading-relaxed max-w-sm font-light">
+                    <p className="text-xs sm:text-sm text-[#EDE8DF]/85 leading-relaxed max-w-sm font-light">
                       Fashion, spaces, objects and stories — explored through
                       editorial photography and moving image.
                     </p>
-                    <div className="pt-2">
+                    <div className="pt-3">
                       <button
                         onClick={() => {
                           document
                             .getElementById("selected-work")
                             ?.scrollIntoView({ behavior: "smooth" });
                         }}
-                        className="inline-flex items-center space-x-3 text-[11px] tracking-[0.22em] uppercase text-ivory border-b border-ivory/40 pb-1.5 hover:border-ivory transition-all group"
+                        className="inline-flex items-center space-x-3 text-[10px] tracking-[0.24em] uppercase text-[#EDE8DF] border-b border-[#C9BBA7]/60 pb-1.5 hover:border-[#EDE8DF] hover:text-[#C9BBA7] transition-all group"
                       >
                         <span>EXPLORE SELECTED WORK</span>
                         <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -321,10 +344,10 @@ export default function PortfolioApp() {
                   </div>
 
                   {/* Right Hero Discipline List (Desktop) */}
-                  <div className="hidden md:flex flex-col space-y-2 text-[10px] tracking-[0.24em] uppercase text-ivory/80 border-l border-ivory/25 pl-6 py-1">
+                  <div className="hidden md:flex flex-col space-y-2.5 text-[10px] tracking-[0.24em] uppercase text-[#C9BBA7] border-l border-[#C9BBA7]/35 pl-6 py-1">
                     <button
                       onClick={() => navigateToCategory("photography", "fashion")}
-                      className="text-left hover:text-ivory transition-colors"
+                      className="text-left hover:text-[#EDE8DF] transition-colors"
                     >
                       FASHION
                     </button>
@@ -332,7 +355,7 @@ export default function PortfolioApp() {
                       onClick={() =>
                         navigateToCategory("photography", "architecture")
                       }
-                      className="text-left hover:text-ivory transition-colors"
+                      className="text-left hover:text-[#EDE8DF] transition-colors"
                     >
                       ARCHITECTURE
                     </button>
@@ -340,25 +363,25 @@ export default function PortfolioApp() {
                       onClick={() =>
                         navigateToCategory("photography", "hospitality")
                       }
-                      className="text-left hover:text-ivory transition-colors"
+                      className="text-left hover:text-[#EDE8DF] transition-colors"
                     >
                       HOSPITALITY
                     </button>
                     <button
                       onClick={() => navigateToCategory("photography", "food")}
-                      className="text-left hover:text-ivory transition-colors"
+                      className="text-left hover:text-[#EDE8DF] transition-colors"
                     >
                       FOOD
                     </button>
                     <button
                       onClick={() => navigateToCategory("photography", "food")}
-                      className="text-left hover:text-ivory transition-colors"
+                      className="text-left hover:text-[#EDE8DF] transition-colors"
                     >
                       STILL LIFE
                     </button>
                     <button
                       onClick={() => navigateToCategory("films", "all")}
-                      className="text-left hover:text-ivory transition-colors"
+                      className="text-left hover:text-[#EDE8DF] transition-colors"
                     >
                       MOVING IMAGE
                     </button>
@@ -368,7 +391,7 @@ export default function PortfolioApp() {
             </section>
 
             {/* Mobile Discipline Strip below hero */}
-            <div className="md:hidden flex flex-wrap gap-x-5 gap-y-2 py-4 border-b border-sand/50 text-[10px] tracking-[0.2em] uppercase text-olive">
+            <div className="md:hidden flex flex-wrap gap-x-5 gap-y-2 py-4 border-b border-[#C9BBA7] text-[10px] tracking-[0.2em] uppercase text-[#6B6A56]">
               <button onClick={() => navigateToCategory("photography", "fashion")}>
                 FASHION
               </button>
@@ -390,15 +413,38 @@ export default function PortfolioApp() {
               </button>
             </div>
 
-            {/* SELECTED WORK STRIP (6-column desktop grid as in mockup 1) */}
+            {/* SELECTED WORK STRIP (6-column desktop grid + filter tabs from Design Sheet 2) */}
             <section id="selected-work" className="pt-14 sm:pt-20">
-              <div className="flex items-center justify-between mb-6 sm:mb-8">
-                <h2 className="text-[11px] tracking-[0.24em] uppercase text-charcoal font-medium">
-                  SELECTED WORK
-                </h2>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 pb-3 border-b border-[#4A3B2F]/20">
+                <div className="flex items-center space-x-6">
+                  <h2 className="text-[11px] tracking-[0.24em] uppercase text-[#2A2A26] font-medium">
+                    SELECTED WORK
+                  </h2>
+                  <div className="hidden lg:flex items-center space-x-5 text-[9px] tracking-[0.22em] uppercase text-[#6B6A56]">
+                    {[
+                      { label: "ALL", val: "all" },
+                      { label: "FASHION", val: "fashion" },
+                      { label: "ARCHITECTURE", val: "architecture" },
+                      { label: "HOSPITALITY", val: "hospitality" },
+                      { label: "FOOD", val: "food" },
+                    ].map((cat) => (
+                      <button
+                        key={cat.val}
+                        onClick={() => setHomeCategoryFilter(cat.val)}
+                        className={`transition-colors ${
+                          homeCategoryFilter === cat.val
+                            ? "text-[#2A2A26] font-medium underline underline-offset-4 decoration-[#4A3B2F]"
+                            : "hover:text-[#2A2A26]"
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <button
                   onClick={() => navigateToCategory("photography", "all")}
-                  className="inline-flex items-center space-x-2 text-[10px] tracking-[0.22em] uppercase text-olive hover:text-charcoal transition-colors group"
+                  className="inline-flex items-center space-x-2 text-[10px] tracking-[0.22em] uppercase text-[#6B6A56] hover:text-[#2A2A26] transition-colors group"
                 >
                   <span>VIEW ALL</span>
                   <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -406,59 +452,65 @@ export default function PortfolioApp() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 sm:gap-3.5">
-                {PROJECTS.slice(0, 6).map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => navigateToProject(item.id)}
-                    className="group cursor-pointer flex flex-col"
-                  >
-                    <div className="relative aspect-[3/4] w-full overflow-hidden bg-sand/30 mb-3">
-                      <img
-                        src={item.coverImage}
-                        alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                      />
-                      {item.type === "film" && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-pureblack/20 group-hover:bg-pureblack/35 transition-colors">
-                          <div className="w-9 h-9 rounded-full border border-ivory/80 flex items-center justify-center bg-pureblack/30 backdrop-blur-[2px]">
-                            <Play className="w-3.5 h-3.5 text-ivory fill-ivory ml-0.5" />
+                {PROJECTS.filter((item) =>
+                  homeCategoryFilter === "all"
+                    ? true
+                    : item.categorySlug === homeCategoryFilter
+                )
+                  .slice(0, 6)
+                  .map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => navigateToProject(item.id)}
+                      className="group cursor-pointer flex flex-col p-2 -m-2 rounded-sm hover:bg-[#C9BBA7]/35 transition-colors duration-300"
+                    >
+                      <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#C9BBA7] border border-[#C9BBA7] mb-3">
+                        <img
+                          src={item.coverImage}
+                          alt={item.title}
+                          className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
+                        />
+                        {item.type === "film" && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-[#0E0E0E]/25 group-hover:bg-[#0E0E0E]/40 transition-colors">
+                            <div className="w-9 h-9 rounded-full border border-[#EDE8DF]/80 flex items-center justify-center bg-[#0E0E0E]/40 backdrop-blur-[2px]">
+                              <Play className="w-3.5 h-3.5 text-[#EDE8DF] fill-[#EDE8DF] ml-0.5" />
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="text-[10px] tracking-[0.18em] uppercase text-charcoal font-medium group-hover:text-deepbrown transition-colors">
-                          {item.title}
-                        </h3>
-                        <p className="text-[9px] tracking-[0.15em] uppercase text-olive mt-0.5">
-                          {item.category} / {item.year}
-                        </p>
+                        )}
                       </div>
-                      <ArrowRight className="w-3 h-3 text-olive sm:hidden mt-0.5" />
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="text-[10px] tracking-[0.18em] uppercase text-[#2A2A26] font-medium group-hover:text-[#4A3B2F] transition-colors">
+                            {item.title}
+                          </h3>
+                          <p className="text-[9px] tracking-[0.15em] uppercase text-[#6B6A56] mt-0.5">
+                            {item.category} / {item.year}
+                          </p>
+                        </div>
+                        <ArrowRight className="w-3 h-3 text-[#6B6A56] sm:hidden mt-0.5" />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </section>
 
-            {/* TWO-COLUMN PHOTOGRAPHY & FILMS FEATURE BOXES */}
+            {/* TWO-COLUMN PHOTOGRAPHY & FILMS FEATURE CARDS (Using #C9BBA7 Sand card texture & hover state as specified in Colour Palette) */}
             <section className="pt-16 sm:pt-24 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
               {/* Photography Card */}
-              <div className="border border-sand/60 p-6 sm:p-9 bg-ivory/60 flex flex-col justify-between">
-                <div className="flex items-start justify-between mb-4">
+              <div className="border border-[#C9BBA7] p-6 sm:p-9 stone-plaster-texture hover:bg-[#C9BBA7]/35 transition-colors duration-500 flex flex-col justify-between">
+                <div className="flex items-start justify-between mb-5">
                   <div>
-                    <h2 className="font-serif text-xl sm:text-2xl tracking-[0.08em] uppercase text-charcoal">
+                    <h2 className="font-serif text-xl sm:text-2xl tracking-[0.08em] uppercase text-[#2A2A26]">
                       PHOTOGRAPHY
                     </h2>
-                    <p className="text-xs text-olive mt-2 max-w-xs leading-relaxed">
+                    <p className="text-xs text-[#6B6A56] mt-2 max-w-xs leading-relaxed">
                       Fashion, hospitality, architecture, food, product and
                       portraiture.
                     </p>
                   </div>
                   <button
                     onClick={() => navigateToCategory("photography", "all")}
-                    className="inline-flex items-center space-x-1.5 text-[10px] tracking-[0.2em] uppercase text-olive hover:text-charcoal transition-colors"
+                    className="inline-flex items-center space-x-1.5 text-[10px] tracking-[0.2em] uppercase text-[#6B6A56] hover:text-[#2A2A26] transition-colors"
                   >
                     <span>VIEW ALL</span>
                     <ArrowRight className="w-3 h-3" />
@@ -467,61 +519,61 @@ export default function PortfolioApp() {
 
                 <div
                   onClick={() => navigateToCategory("photography", "all")}
-                  className="relative aspect-[16/9] w-full overflow-hidden cursor-pointer group mt-2"
+                  className="relative aspect-[16/9] w-full overflow-hidden cursor-pointer group border border-[#C9BBA7]"
                 >
                   <img
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85"
                     alt="Photography showcase"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-pureblack/30 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E0E]/40 to-transparent" />
                 </div>
               </div>
 
               {/* Films Card */}
-              <div className="border border-sand/60 p-6 sm:p-9 bg-ivory/60 flex flex-col justify-between">
-                <div className="flex items-start justify-between mb-4">
+              <div className="border border-[#C9BBA7] p-6 sm:p-9 stone-plaster-texture hover:bg-[#C9BBA7]/35 transition-colors duration-500 flex flex-col justify-between">
+                <div className="flex items-start justify-between mb-5">
                   <div>
-                    <h2 className="font-serif text-xl sm:text-2xl tracking-[0.08em] uppercase text-charcoal">
+                    <h2 className="font-serif text-xl sm:text-2xl tracking-[0.08em] uppercase text-[#2A2A26]">
                       FILMS
                     </h2>
-                    <p className="text-xs text-olive mt-2 max-w-xs leading-relaxed">
+                    <p className="text-xs text-[#6B6A56] mt-2 max-w-xs leading-relaxed">
                       Fashion films, advertising films, editorial documentaries
                       and visual narratives.
                     </p>
                   </div>
                   <button
                     onClick={() => navigateToCategory("films", "all")}
-                    className="inline-flex items-center space-x-1.5 text-[10px] tracking-[0.2em] uppercase text-olive hover:text-charcoal transition-colors"
+                    className="inline-flex items-center space-x-1.5 text-[10px] tracking-[0.2em] uppercase text-[#6B6A56] hover:text-[#2A2A26] transition-colors"
                   >
                     <span>VIEW ALL</span>
                     <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center">
                   <div
                     onClick={() => navigateToCategory("films", "all")}
-                    className="sm:col-span-8 relative aspect-[16/9] w-full overflow-hidden cursor-pointer group"
+                    className="sm:col-span-8 relative aspect-[16/9] w-full overflow-hidden cursor-pointer group border border-[#C9BBA7]"
                   >
                     <img
                       src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=85"
                       alt="Films showcase"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-pureblack/25 flex items-center justify-center group-hover:bg-pureblack/40 transition-colors">
-                      <div className="w-11 h-11 rounded-full border border-ivory/80 flex items-center justify-center bg-pureblack/40">
-                        <Play className="w-4 h-4 text-ivory fill-ivory ml-0.5" />
+                    <div className="absolute inset-0 bg-[#0E0E0E]/30 flex items-center justify-center group-hover:bg-[#0E0E0E]/45 transition-colors">
+                      <div className="w-11 h-11 rounded-full border border-[#EDE8DF]/85 flex items-center justify-center bg-[#0E0E0E]/45">
+                        <Play className="w-4 h-4 text-[#EDE8DF] fill-[#EDE8DF] ml-0.5" />
                       </div>
                     </div>
                   </div>
-                  <div className="sm:col-span-4 space-y-2">
-                    <p className="text-[10px] tracking-[0.2em] uppercase text-charcoal font-medium">
+                  <div className="sm:col-span-4 space-y-2 border-l border-[#C9BBA7] pl-4">
+                    <p className="text-[10px] tracking-[0.2em] uppercase text-[#2A2A26] font-medium">
                       FOOD &amp; STILL LIFE
                     </p>
                     <button
                       onClick={() => navigateToCategory("photography", "food")}
-                      className="inline-flex items-center space-x-1.5 text-[11px] text-olive hover:text-charcoal transition-colors"
+                      className="inline-flex items-center space-x-1.5 text-[11px] text-[#6B6A56] hover:text-[#4A3B2F] transition-colors"
                     >
                       <span>View projects</span>
                       <ArrowRight className="w-3 h-3" />
@@ -533,39 +585,113 @@ export default function PortfolioApp() {
 
             {/* HOME ABOUT PREVIEW SECTION */}
             <section className="pt-16 sm:pt-24">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center border-t border-[#C9BBA7] pt-14">
                 <div className="lg:col-span-5">
-                  <div className="aspect-[4/3] w-full overflow-hidden bg-sand/30">
+                  <div className="aspect-[4/3] w-full overflow-hidden bg-[#C9BBA7] border border-[#C9BBA7]">
                     <img
                       src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=85"
-                      alt="Architectural coastal frame"
-                      className="w-full h-full object-cover"
+                      alt="Architectural concrete frame overlooking the sea"
+                      className="w-full h-full object-cover editorial-image-grade"
                     />
                   </div>
                 </div>
                 <div className="lg:col-span-7 space-y-5 max-w-xl">
-                  <p className="text-[10px] tracking-[0.24em] uppercase text-olive">
+                  <p className="text-[10px] tracking-[0.24em] uppercase text-[#6B6A56]">
                     ABOUT
                   </p>
-                  <h2 className="font-serif text-2xl sm:text-3xl lg:text-[32px] leading-[1.3] text-charcoal font-normal">
+                  <h2 className="font-serif text-2xl sm:text-3xl lg:text-[32px] leading-[1.3] text-[#2A2A26] font-normal">
                     I am an independent image-maker and film director working
                     across fashion, still life, architecture, hospitality and
                     moving image.
                   </h2>
-                  <p className="text-xs sm:text-sm text-olive leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#6B6A56] leading-relaxed">
                     My practice explores the relationship between form,
                     atmosphere and storytelling, bringing an editorial
                     sensibility to both still and moving images.
                   </p>
-                  <div className="pt-1">
+                  <div className="pt-2 flex items-center space-x-6">
                     <button
                       onClick={() => setView("about")}
-                      className="inline-flex items-center space-x-2 text-[10px] tracking-[0.22em] uppercase text-charcoal border-b border-charcoal/40 pb-1 hover:border-charcoal transition-colors group"
+                      className="inline-flex items-center space-x-2 text-[10px] tracking-[0.22em] uppercase text-[#2A2A26] border-b border-[#4A3B2F] pb-1 hover:text-[#4A3B2F] transition-colors group"
                     >
                       <span>MORE ABOUT</span>
                       <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
+                </div>
+              </div>
+            </section>
+
+            {/* BRAND PALETTE & EDITORIAL ATMOSPHERE STRIP (Directly mirrors Sheet 2: "Timeless. Minimal. Editorial." & Swatches) */}
+            <section className="mt-20 pt-14 border-t border-[#C9BBA7]">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                <div className="lg:col-span-5 space-y-4">
+                  <p className="text-[10px] tracking-[0.24em] uppercase text-[#6B6A56]">
+                    AESTHETIC &amp; DIRECTION
+                  </p>
+                  <h3 className="font-serif text-2xl sm:text-3xl text-[#2A2A26] leading-snug">
+                    Timeless.
+                    <br />
+                    Minimal. Editorial.
+                  </h3>
+                  <p className="text-xs text-[#6B6A56] leading-relaxed max-w-sm">
+                    A visual journey through fashion, architecture, hospitality,
+                    food and moving image — crafted with natural light, earthy
+                    tonality and subtle film grain.
+                  </p>
+                  <div className="pt-2 flex items-center space-x-4 text-[10px] tracking-[0.2em] text-[#6B6A56]">
+                    <span className="inline-block w-10 h-[1px] bg-[#4A3B2F]" />
+                    <span>01 / 06</span>
+                  </div>
+                </div>
+
+                {/* Earthy Palette Swatches (#EDE8DF, #C9BBA7, #6B6A56, #2A2A26, #4A3B2F, #0E0E0E) */}
+                <div className="lg:col-span-7 grid grid-cols-3 sm:grid-cols-6 gap-3">
+                  {[
+                    {
+                      name: "Ivory Beige",
+                      hex: "#EDE8DF",
+                      role: "Main canvas",
+                    },
+                    {
+                      name: "Sand",
+                      hex: "#C9BBA7",
+                      role: "Cards & hover",
+                    },
+                    {
+                      name: "Olive Grey",
+                      hex: "#6B6A56",
+                      role: "Text & icons",
+                    },
+                    {
+                      name: "Charcoal",
+                      hex: "#2A2A26",
+                      role: "Headings",
+                    },
+                    {
+                      name: "Deep Brown",
+                      hex: "#4A3B2F",
+                      role: "Buttons & lines",
+                    },
+                    {
+                      name: "Black",
+                      hex: "#0E0E0E",
+                      role: "Contrast dark",
+                    },
+                  ].map((swatch) => (
+                    <div key={swatch.hex} className="space-y-1.5">
+                      <div
+                        className="aspect-square w-full border border-[#C9BBA7] shadow-sm"
+                        style={{ backgroundColor: swatch.hex }}
+                      />
+                      <p className="text-[10px] font-medium text-[#2A2A26]">
+                        {swatch.name}
+                      </p>
+                      <p className="text-[9px] tracking-wider text-[#6B6A56] uppercase">
+                        {swatch.hex}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </section>
@@ -576,18 +702,24 @@ export default function PortfolioApp() {
         {view === "photography" && (
           <div className="max-w-[1400px] mx-auto px-5 sm:px-10 pb-20">
             {/* Photography Hero Banner */}
-            <section className="relative w-full h-[280px] sm:h-[360px] lg:h-[400px] overflow-hidden mt-2 sm:mt-4">
+            <section className="relative w-full h-[280px] sm:h-[360px] lg:h-[400px] overflow-hidden mt-3 sm:mt-6 border border-[#C9BBA7]">
               <img
                 src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=2000&q=85"
                 alt="Photography Header"
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-center editorial-image-grade"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-pureblack/75 via-pureblack/45 to-transparent" />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(95deg, rgba(14,14,14,0.82) 0%, rgba(74,59,47,0.52) 55%, rgba(14,14,14,0.25) 100%)",
+                }}
+              />
               <div className="absolute inset-0 p-6 sm:p-12 lg:p-16 flex flex-col justify-end">
-                <h1 className="font-serif text-3xl sm:text-5xl text-ivory font-normal mb-3">
+                <h1 className="font-serif text-3xl sm:text-5xl text-[#EDE8DF] font-normal mb-3">
                   Photography
                 </h1>
-                <p className="text-[10px] sm:text-[11px] tracking-[0.24em] uppercase text-ivory/80">
+                <p className="text-[10px] sm:text-[11px] tracking-[0.24em] uppercase text-[#C9BBA7]">
                   FASHION &bull; HOSPITALITY &bull; ARCHITECTURE &bull; FOOD
                   &amp; STILL LIFE &bull; PRODUCT
                 </p>
@@ -595,7 +727,7 @@ export default function PortfolioApp() {
             </section>
 
             {/* Category Filter Bar */}
-            <div className="flex flex-wrap items-center gap-4 sm:gap-8 py-6 border-b border-sand/60 text-[10px] tracking-[0.22em] uppercase">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-8 py-6 border-b border-[#C9BBA7] text-[10px] tracking-[0.22em] uppercase">
               {[
                 { label: "ALL", value: "all" },
                 { label: "FASHION & PORTRAITURE", value: "fashion" },
@@ -606,10 +738,11 @@ export default function PortfolioApp() {
                 <button
                   key={tab.value}
                   onClick={() => setPhotoFilter(tab.value)}
-                  className={`py-1 transition-colors ${photoFilter === tab.value
-                      ? "text-charcoal font-medium border-b border-charcoal"
-                      : "text-olive hover:text-charcoal"
-                    }`}
+                  className={`py-1 transition-colors ${
+                    photoFilter === tab.value
+                      ? "text-[#2A2A26] font-medium border-b border-[#4A3B2F]"
+                      : "text-[#6B6A56] hover:text-[#2A2A26]"
+                  }`}
                 >
                   {tab.label}
                 </button>
@@ -623,7 +756,7 @@ export default function PortfolioApp() {
               ).map((section) => (
                 <section key={section.slug}>
                   <div className="flex items-center justify-between mb-5">
-                    <h2 className="text-[11px] tracking-[0.24em] uppercase text-charcoal font-medium">
+                    <h2 className="text-[11px] tracking-[0.24em] uppercase text-[#2A2A26] font-medium">
                       {section.title}
                     </h2>
                     <button
@@ -631,7 +764,7 @@ export default function PortfolioApp() {
                         const firstProj = section.images[0]?.projectId;
                         if (firstProj) navigateToProject(firstProj);
                       }}
-                      className="inline-flex items-center space-x-1.5 text-[10px] tracking-[0.18em] text-olive hover:text-charcoal transition-colors group"
+                      className="inline-flex items-center space-x-1.5 text-[10px] tracking-[0.18em] text-[#6B6A56] hover:text-[#4A3B2F] transition-colors group"
                     >
                       <span>View projects</span>
                       <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -643,15 +776,15 @@ export default function PortfolioApp() {
                       <div
                         key={idx}
                         onClick={() => navigateToProject(img.projectId)}
-                        className="group cursor-pointer relative aspect-[4/3] overflow-hidden bg-sand/30"
+                        className="group cursor-pointer relative aspect-[4/3] overflow-hidden bg-[#C9BBA7] border border-[#C9BBA7]"
                       >
                         <img
                           src={img.src}
                           alt={img.caption}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                          className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
                         />
-                        <div className="absolute inset-0 bg-pureblack/0 group-hover:bg-pureblack/30 transition-colors flex items-end p-4">
-                          <span className="text-[10px] tracking-[0.2em] uppercase text-ivory opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 bg-[#0E0E0E]/0 group-hover:bg-[#0E0E0E]/35 transition-colors flex items-end p-4">
+                          <span className="text-[10px] tracking-[0.2em] uppercase text-[#EDE8DF] opacity-0 group-hover:opacity-100 transition-opacity">
                             {img.caption} &rarr;
                           </span>
                         </div>
@@ -668,49 +801,55 @@ export default function PortfolioApp() {
         {view === "films" && (
           <div className="max-w-[1400px] mx-auto px-5 sm:px-10 pb-20">
             {/* Films Hero Banner */}
-            <section className="relative w-full h-[300px] sm:h-[380px] lg:h-[440px] overflow-hidden mt-2 sm:mt-4">
+            <section className="relative w-full h-[300px] sm:h-[380px] lg:h-[440px] overflow-hidden mt-3 sm:mt-6 border border-[#C9BBA7]">
               <img
                 src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=2000&q=85"
                 alt="Films Header"
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-center editorial-image-grade"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-pureblack/80 via-pureblack/45 to-pureblack/30" />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(95deg, rgba(14,14,14,0.85) 0%, rgba(74,59,47,0.55) 55%, rgba(14,14,14,0.35) 100%)",
+                }}
+              />
               <div className="absolute inset-0 p-6 sm:p-12 lg:p-16 flex flex-col justify-end">
-                <h1 className="font-serif text-3xl sm:text-5xl text-ivory font-normal mb-3">
+                <h1 className="font-serif text-3xl sm:text-5xl text-[#EDE8DF] font-normal mb-3">
                   Films
                 </h1>
-                <p className="text-[10px] sm:text-[11px] tracking-[0.24em] uppercase text-ivory/80">
+                <p className="text-[10px] sm:text-[11px] tracking-[0.24em] uppercase text-[#C9BBA7]">
                   FASHION FILMS &bull; ADVERTISING FILMS &bull; EDITORIAL
                   DOCUMENTARIES &bull; EXPERIMENTAL &amp; ART FILMS
                 </p>
               </div>
             </section>
 
-            {/* 4-Column Film Category Grid (Matches Desktop Films Mockup) */}
+            {/* 4-Column Film Category Grid */}
             <section className="pt-10 sm:pt-14">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {FILM_CATEGORIES.map((cat) => (
                   <div
                     key={cat.slug}
                     onClick={() => navigateToProject(cat.projectId)}
-                    className="group cursor-pointer"
+                    className="group cursor-pointer p-2.5 -m-2.5 hover:bg-[#C9BBA7]/35 transition-colors"
                   >
-                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-pureblack mb-3.5">
+                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#0E0E0E] border border-[#C9BBA7] mb-3.5">
                       <img
                         src={cat.image}
                         alt={cat.title}
-                        className="w-full h-full object-cover opacity-90 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700"
+                        className="w-full h-full object-cover opacity-90 editorial-image-grade group-hover:scale-105 group-hover:opacity-100"
                       />
-                      <div className="absolute inset-0 bg-pureblack/25 flex items-center justify-center group-hover:bg-pureblack/40 transition-colors">
-                        <div className="w-11 h-11 rounded-full border border-ivory/80 flex items-center justify-center bg-pureblack/30 backdrop-blur-[2px] group-hover:scale-110 transition-transform">
-                          <Play className="w-4 h-4 text-ivory fill-ivory ml-0.5" />
+                      <div className="absolute inset-0 bg-[#0E0E0E]/30 flex items-center justify-center group-hover:bg-[#0E0E0E]/45 transition-colors">
+                        <div className="w-11 h-11 rounded-full border border-[#EDE8DF]/80 flex items-center justify-center bg-[#0E0E0E]/40 backdrop-blur-[2px] group-hover:scale-110 transition-transform">
+                          <Play className="w-4 h-4 text-[#EDE8DF] fill-[#EDE8DF] ml-0.5" />
                         </div>
                       </div>
                     </div>
-                    <h3 className="text-[10px] tracking-[0.2em] uppercase text-charcoal font-medium">
+                    <h3 className="text-[10px] tracking-[0.2em] uppercase text-[#2A2A26] font-medium">
                       {cat.title}
                     </h3>
-                    <span className="inline-flex items-center space-x-1.5 text-[10px] text-olive mt-1 group-hover:text-charcoal transition-colors">
+                    <span className="inline-flex items-center space-x-1.5 text-[10px] text-[#6B6A56] mt-1 group-hover:text-[#4A3B2F] transition-colors">
                       <span>View projects</span>
                       <ArrowRight className="w-3 h-3" />
                     </span>
@@ -720,9 +859,9 @@ export default function PortfolioApp() {
             </section>
 
             {/* Selected Motion Reel List */}
-            <section className="pt-16 sm:pt-20 border-t border-sand/60 mt-14">
+            <section className="pt-16 sm:pt-20 border-t border-[#C9BBA7] mt-14">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                <h2 className="text-[11px] tracking-[0.24em] uppercase text-charcoal font-medium">
+                <h2 className="text-[11px] tracking-[0.24em] uppercase text-[#2A2A26] font-medium">
                   FEATURED MOTION ARCHIVE
                 </h2>
                 <div className="flex flex-wrap gap-5 text-[10px] tracking-[0.2em] uppercase">
@@ -738,8 +877,8 @@ export default function PortfolioApp() {
                       onClick={() => setFilmFilter(tab.value)}
                       className={
                         filmFilter === tab.value
-                          ? "text-charcoal font-medium border-b border-charcoal pb-0.5"
-                          : "text-olive hover:text-charcoal"
+                          ? "text-[#2A2A26] font-medium border-b border-[#4A3B2F] pb-0.5"
+                          : "text-[#6B6A56] hover:text-[#2A2A26]"
                       }
                     >
                       {tab.label}
@@ -757,35 +896,35 @@ export default function PortfolioApp() {
                   <div
                     key={film.id}
                     onClick={() => navigateToProject(film.id)}
-                    className="group cursor-pointer border border-sand/60 p-4 sm:p-6 bg-ivory/50 hover:bg-sand/20 transition-colors"
+                    className="group cursor-pointer border border-[#C9BBA7] p-4 sm:p-6 stone-plaster-texture hover:bg-[#C9BBA7]/40 transition-colors"
                   >
-                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-pureblack mb-4">
+                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#0E0E0E] mb-4">
                       <img
                         src={film.coverImage}
                         alt={film.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-pureblack/30 flex items-center justify-center">
-                        <div className="w-12 h-12 rounded-full border border-ivory/80 flex items-center justify-center bg-pureblack/40 group-hover:scale-110 transition-transform">
-                          <Play className="w-4 h-4 text-ivory fill-ivory ml-0.5" />
+                      <div className="absolute inset-0 bg-[#0E0E0E]/30 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full border border-[#EDE8DF]/80 flex items-center justify-center bg-[#0E0E0E]/45 group-hover:scale-110 transition-transform">
+                          <Play className="w-4 h-4 text-[#EDE8DF] fill-[#EDE8DF] ml-0.5" />
                         </div>
                       </div>
                       {film.duration && (
-                        <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-pureblack/70 text-ivory text-[10px] tracking-widest">
+                        <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-[#0E0E0E]/80 text-[#EDE8DF] text-[10px] tracking-widest">
                           {film.duration}
                         </span>
                       )}
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-xs tracking-[0.2em] uppercase text-charcoal font-medium">
+                        <h3 className="text-xs tracking-[0.2em] uppercase text-[#2A2A26] font-medium">
                           {film.title}
                         </h3>
-                        <p className="text-[10px] tracking-[0.18em] uppercase text-olive mt-1">
+                        <p className="text-[10px] tracking-[0.18em] uppercase text-[#6B6A56] mt-1">
                           {film.category} / {film.year}
                         </p>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-olive group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 text-[#6B6A56] group-hover:text-[#4A3B2F] group-hover:translate-x-1 transition-all" />
                     </div>
                   </div>
                 ))}
@@ -794,7 +933,7 @@ export default function PortfolioApp() {
           </div>
         )}
 
-        {/* ==================== 4. PROJECT DETAIL VIEW (e.g. "The Seasonal Table" & "In Between") ==================== */}
+        {/* ==================== 4. PROJECT DETAIL VIEW ("The Seasonal Table", "The Silent Form", etc.) ==================== */}
         {view === "project" && (
           <div className="max-w-[1400px] mx-auto px-5 sm:px-10 pt-6 pb-20">
             {/* Back Link */}
@@ -804,7 +943,7 @@ export default function PortfolioApp() {
                   currentProject.type === "film" ? "films" : "photography"
                 )
               }
-              className="inline-flex items-center space-x-2 text-[10px] tracking-[0.22em] uppercase text-olive hover:text-charcoal transition-colors mb-6"
+              className="inline-flex items-center space-x-2 text-[10px] tracking-[0.22em] uppercase text-[#6B6A56] hover:text-[#2A2A26] transition-colors mb-6"
             >
               <ArrowLeft className="w-3 h-3" />
               <span>
@@ -816,15 +955,15 @@ export default function PortfolioApp() {
 
             {/* Project Title & Subtitle */}
             <div className="mb-8">
-              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-charcoal font-normal">
+              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#2A2A26] font-normal">
                 {currentProject.title}
               </h1>
-              <p className="text-[10px] sm:text-[11px] tracking-[0.22em] uppercase text-olive mt-2">
+              <p className="text-[10px] sm:text-[11px] tracking-[0.22em] uppercase text-[#6B6A56] mt-2">
                 {currentProject.category} / {currentProject.year}
               </p>
             </div>
 
-            {/* Asymmetric Two-Column Project Layout (Matches "The Seasonal Table" mockup) */}
+            {/* Asymmetric Two-Column Project Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
               {/* Left 8 Columns: Main Feature Image/Film + Bottom 3-Up Grid */}
               <div className="lg:col-span-8 space-y-4">
@@ -836,21 +975,21 @@ export default function PortfolioApp() {
                       setLightboxImage(currentProject.coverImage);
                     }
                   }}
-                  className="relative aspect-[16/11] w-full overflow-hidden bg-pureblack cursor-pointer group"
+                  className="relative aspect-[16/11] w-full overflow-hidden bg-[#0E0E0E] border border-[#C9BBA7] cursor-pointer group"
                 >
                   <img
                     src={currentProject.coverImage}
                     alt={currentProject.title}
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700"
+                    className="w-full h-full object-cover editorial-image-grade group-hover:scale-[1.02]"
                   />
                   {currentProject.type === "film" ? (
-                    <div className="absolute inset-0 bg-pureblack/30 flex items-center justify-center group-hover:bg-pureblack/45 transition-colors">
-                      <div className="w-16 h-16 rounded-full border border-ivory flex items-center justify-center bg-pureblack/40 backdrop-blur-sm group-hover:scale-110 transition-transform">
-                        <Play className="w-6 h-6 text-ivory fill-ivory ml-1" />
+                    <div className="absolute inset-0 bg-[#0E0E0E]/30 flex items-center justify-center group-hover:bg-[#0E0E0E]/45 transition-colors">
+                      <div className="w-16 h-16 rounded-full border border-[#EDE8DF] flex items-center justify-center bg-[#0E0E0E]/45 backdrop-blur-sm group-hover:scale-110 transition-transform">
+                        <Play className="w-6 h-6 text-[#EDE8DF] fill-[#EDE8DF] ml-1" />
                       </div>
                     </div>
                   ) : (
-                    <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-pureblack/60 text-ivory p-2">
+                    <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-[#0E0E0E]/70 text-[#EDE8DF] p-2">
                       <Maximize2 className="w-4 h-4" />
                     </div>
                   )}
@@ -862,12 +1001,12 @@ export default function PortfolioApp() {
                     <div
                       key={idx}
                       onClick={() => setLightboxImage(imgUrl)}
-                      className="aspect-square overflow-hidden bg-sand/30 cursor-pointer group"
+                      className="aspect-square overflow-hidden bg-[#C9BBA7] border border-[#C9BBA7] cursor-pointer group"
                     >
                       <img
                         src={imgUrl}
                         alt={`${currentProject.title} still ${idx + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
                       />
                     </div>
                   ))}
@@ -877,53 +1016,53 @@ export default function PortfolioApp() {
               {/* Right 4 Columns: Editorial Notes, Role, Discipline & Side Gallery */}
               <div className="lg:col-span-4 flex flex-col justify-between space-y-8">
                 <div className="space-y-6">
-                  <p className="text-xs sm:text-sm text-charcoal/85 leading-relaxed font-light">
+                  <p className="text-xs sm:text-sm text-[#2A2A26] leading-relaxed font-light">
                     {currentProject.description}
                   </p>
 
-                  <div className="border-t border-sand/60 pt-4 space-y-4">
+                  <div className="border-t border-[#C9BBA7] pt-4 space-y-4">
                     <div>
-                      <p className="text-[9px] tracking-[0.22em] uppercase text-olive">
+                      <p className="text-[9px] tracking-[0.22em] uppercase text-[#6B6A56]">
                         ROLE
                       </p>
-                      <p className="text-xs text-charcoal mt-1">
+                      <p className="text-xs text-[#2A2A26] mt-1">
                         {currentProject.role}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-[9px] tracking-[0.22em] uppercase text-olive">
+                      <p className="text-[9px] tracking-[0.22em] uppercase text-[#6B6A56]">
                         DISCIPLINE
                       </p>
-                      <p className="text-xs text-charcoal mt-1">
+                      <p className="text-xs text-[#2A2A26] mt-1">
                         {currentProject.discipline}
                       </p>
                     </div>
 
-                    {/* Film specific credits (Matches Mobile "IN BETWEEN" Film detail screen) */}
+                    {/* Film specific credits */}
                     {currentProject.type === "film" && (
-                      <div className="pt-2 border-t border-sand/50 space-y-2 text-xs">
+                      <div className="pt-3 border-t border-[#C9BBA7] space-y-2 text-xs">
                         <div className="flex justify-between">
-                          <span className="text-olive">Director</span>
-                          <span className="text-charcoal">
+                          <span className="text-[#6B6A56]">Director</span>
+                          <span className="text-[#2A2A26]">
                             {currentProject.director || "Ajnas"}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-olive">Cinematography</span>
-                          <span className="text-charcoal">
+                          <span className="text-[#6B6A56]">Cinematography</span>
+                          <span className="text-[#2A2A26]">
                             {currentProject.cinematography || "Ajnas"}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-olive">Editor</span>
-                          <span className="text-charcoal">
+                          <span className="text-[#6B6A56]">Editor</span>
+                          <span className="text-[#2A2A26]">
                             {currentProject.editor || "Ajnas"}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-olive">Duration</span>
-                          <span className="text-charcoal">
+                          <span className="text-[#6B6A56]">Duration</span>
+                          <span className="text-[#2A2A26]">
                             {currentProject.duration || "02:58"}
                           </span>
                         </div>
@@ -933,7 +1072,7 @@ export default function PortfolioApp() {
 
                   {/* Right Column 2x2 Thumbnail Gallery */}
                   <div className="pt-2">
-                    <p className="text-[9px] tracking-[0.22em] uppercase text-olive mb-3">
+                    <p className="text-[9px] tracking-[0.22em] uppercase text-[#6B6A56] mb-3">
                       GALLERY
                     </p>
                     <div className="grid grid-cols-2 gap-3">
@@ -941,12 +1080,12 @@ export default function PortfolioApp() {
                         <div
                           key={i}
                           onClick={() => setLightboxImage(gImg)}
-                          className="aspect-[4/3] overflow-hidden bg-sand/30 cursor-pointer group"
+                          className="aspect-[4/3] overflow-hidden bg-[#C9BBA7] border border-[#C9BBA7] cursor-pointer group"
                         >
                           <img
                             src={gImg}
                             alt={`${currentProject.title} thumbnail ${i + 1}`}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
                           />
                         </div>
                       ))}
@@ -957,20 +1096,20 @@ export default function PortfolioApp() {
             </div>
 
             {/* Previous / Next Project Pagination Footer */}
-            <div className="mt-16 pt-6 border-t border-sand/70 flex items-center justify-between text-[10px] tracking-[0.22em] uppercase text-olive">
+            <div className="mt-16 pt-6 border-t border-[#C9BBA7] flex items-center justify-between text-[10px] tracking-[0.22em] uppercase text-[#6B6A56]">
               <button
                 onClick={() => navigateToProject(prevProject.id)}
-                className="inline-flex items-center space-x-2 hover:text-charcoal transition-colors group"
+                className="inline-flex items-center space-x-2 hover:text-[#2A2A26] transition-colors group"
               >
                 <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-                <span>PREVIOUS PROJECT ({prevProject.title})</span>
+                <span>PREVIOUS PROJECT</span>
               </button>
 
               <button
                 onClick={() => navigateToProject(nextProject.id)}
-                className="inline-flex items-center space-x-2 hover:text-charcoal transition-colors group"
+                className="inline-flex items-center space-x-2 hover:text-[#2A2A26] transition-colors group"
               >
-                <span>NEXT PROJECT ({nextProject.title})</span>
+                <span>NEXT PROJECT</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -983,14 +1122,14 @@ export default function PortfolioApp() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
               {/* Left Column Portrait + Availability Note */}
               <div className="lg:col-span-5 space-y-6">
-                <div className="aspect-[4/5] w-full overflow-hidden bg-sand/40">
+                <div className="aspect-[4/5] w-full overflow-hidden bg-[#C9BBA7] border border-[#C9BBA7]">
                   <img
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85"
                     alt="Ajnas — Photographer and Film Director"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover editorial-image-grade"
                   />
                 </div>
-                <p className="text-[11px] text-olive leading-relaxed">
+                <p className="text-[11px] text-[#6B6A56] leading-relaxed">
                   Available for selected commissions
                   <br />
                   and creative collaborations worldwide.
@@ -999,17 +1138,17 @@ export default function PortfolioApp() {
 
               {/* Right Column Editorial Bio & Disciplines */}
               <div className="lg:col-span-7 space-y-7">
-                <h1 className="font-serif text-3xl sm:text-4xl text-charcoal font-normal">
+                <h1 className="font-serif text-3xl sm:text-4xl text-[#2A2A26] font-normal">
                   About
                 </h1>
 
-                <p className="font-serif text-xl sm:text-2xl leading-[1.4] text-charcoal font-normal">
+                <p className="font-serif text-xl sm:text-2xl leading-[1.4] text-[#2A2A26] font-normal">
                   I am an independent image-maker and film director working
                   across fashion, still life, architecture, hospitality and
                   moving image.
                 </p>
 
-                <p className="text-xs sm:text-sm text-olive leading-relaxed max-w-lg">
+                <p className="text-xs sm:text-sm text-[#6B6A56] leading-relaxed max-w-lg">
                   My practice explores the relationship between form, atmosphere
                   and storytelling, bringing an editorial sensibility to both
                   still and moving images. Working closely with designers,
@@ -1017,11 +1156,11 @@ export default function PortfolioApp() {
                   Bangalore, Calicut and internationally.
                 </p>
 
-                <div className="pt-4 border-t border-sand/60">
-                  <h2 className="text-[10px] tracking-[0.24em] uppercase text-olive mb-4">
+                <div className="pt-5 border-t border-[#C9BBA7]">
+                  <h2 className="text-[10px] tracking-[0.24em] uppercase text-[#6B6A56] mb-4">
                     CREATIVE DISCIPLINES
                   </h2>
-                  <ul className="space-y-2.5 text-xs sm:text-sm text-charcoal/90 font-light">
+                  <ul className="space-y-2.5 text-xs sm:text-sm text-[#2A2A26] font-light">
                     <li>Fashion Editorial</li>
                     <li>Hospitality &amp; Architecture</li>
                     <li>Food &amp; Still Life</li>
@@ -1032,22 +1171,22 @@ export default function PortfolioApp() {
                   </ul>
                 </div>
 
-                {/* Signature detail from Brand Sheet */}
-                <div className="pt-6 flex items-center justify-between border-t border-sand/60">
+                {/* Signature & Deep Brown (#4A3B2F) Button from Brand Sheet */}
+                <div className="pt-6 flex flex-wrap items-center justify-between gap-6 border-t border-[#C9BBA7]">
                   <div>
-                    <p className="font-signature text-3xl text-charcoal italic">
+                    <p className="font-signature text-3xl text-[#2A2A26] italic">
                       Ajnas
                     </p>
-                    <p className="text-[9px] tracking-[0.24em] uppercase text-olive mt-1">
+                    <p className="text-[9px] tracking-[0.24em] uppercase text-[#6B6A56] mt-1">
                       PHOTOGRAPHER &amp; FILM DIRECTOR
                     </p>
                   </div>
 
                   <button
                     onClick={() => setView("contact")}
-                    className="px-6 py-3 bg-charcoal text-ivory text-[10px] tracking-[0.22em] uppercase hover:bg-deepbrown transition-colors inline-flex items-center space-x-2"
+                    className="px-6 py-3 bg-[#4A3B2F] text-[#EDE8DF] text-[10px] tracking-[0.22em] uppercase hover:bg-[#2A2A26] transition-colors inline-flex items-center space-x-2"
                   >
-                    <span>ENQUIRE / COLLABORATE</span>
+                    <span>VIEW SERVICES / ENQUIRE</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -1060,23 +1199,23 @@ export default function PortfolioApp() {
         {view === "contact" && (
           <div className="max-w-[960px] mx-auto px-5 sm:px-10 pt-8 sm:pt-14 pb-24">
             <div className="mb-10">
-              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-charcoal font-normal">
+              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#2A2A26] font-normal">
                 Let&apos;s work together.
               </h1>
-              <p className="text-xs sm:text-sm text-olive mt-2.5">
+              <p className="text-xs sm:text-sm text-[#6B6A56] mt-2.5">
                 For commissions, collaborations and project enquiries.
               </p>
             </div>
 
             {formSubmitted ? (
-              <div className="border border-sand p-8 sm:p-12 bg-sand/20 space-y-4">
-                <div className="flex items-center space-x-3 text-deepbrown">
+              <div className="border border-[#C9BBA7] p-8 sm:p-12 stone-plaster-texture space-y-4">
+                <div className="flex items-center space-x-3 text-[#4A3B2F]">
                   <CheckCircle2 className="w-6 h-6" />
-                  <h2 className="font-serif text-2xl text-charcoal">
+                  <h2 className="font-serif text-2xl text-[#2A2A26]">
                     Enquiry Received
                   </h2>
                 </div>
-                <p className="text-xs sm:text-sm text-olive leading-relaxed max-w-lg">
+                <p className="text-xs sm:text-sm text-[#6B6A56] leading-relaxed max-w-lg">
                   Thank you for reaching out, {formData.name || "there"}. Your
                   project brief has been received and I will get back to you
                   shortly.
@@ -1094,7 +1233,7 @@ export default function PortfolioApp() {
                       timeline: "",
                     });
                   }}
-                  className="text-[10px] tracking-[0.22em] uppercase text-charcoal border-b border-charcoal pb-1 pt-2"
+                  className="text-[10px] tracking-[0.22em] uppercase text-[#2A2A26] border-b border-[#4A3B2F] pb-1 pt-2"
                 >
                   SEND ANOTHER MESSAGE &rarr;
                 </button>
@@ -1103,7 +1242,7 @@ export default function PortfolioApp() {
               <form onSubmit={handleFormSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-[10px] tracking-[0.18em] uppercase text-olive mb-2">
+                    <label className="block text-[10px] tracking-[0.18em] uppercase text-[#6B6A56] mb-2">
                       Name *
                     </label>
                     <input
@@ -1113,11 +1252,11 @@ export default function PortfolioApp() {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full bg-ivory/70 border border-sand/80 px-3.5 py-2.5 text-xs text-charcoal focus:outline-none focus:border-charcoal transition-colors"
+                      className="w-full bg-[#EDE8DF] border border-[#C9BBA7] px-3.5 py-2.5 text-xs text-[#2A2A26] focus:outline-none focus:border-[#4A3B2F] transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] tracking-[0.18em] uppercase text-olive mb-2">
+                    <label className="block text-[10px] tracking-[0.18em] uppercase text-[#6B6A56] mb-2">
                       Email *
                     </label>
                     <input
@@ -1127,14 +1266,14 @@ export default function PortfolioApp() {
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
                       }
-                      className="w-full bg-ivory/70 border border-sand/80 px-3.5 py-2.5 text-xs text-charcoal focus:outline-none focus:border-charcoal transition-colors"
+                      className="w-full bg-[#EDE8DF] border border-[#C9BBA7] px-3.5 py-2.5 text-xs text-[#2A2A26] focus:outline-none focus:border-[#4A3B2F] transition-colors"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-[10px] tracking-[0.18em] uppercase text-olive mb-2">
+                    <label className="block text-[10px] tracking-[0.18em] uppercase text-[#6B6A56] mb-2">
                       Company / Publication
                     </label>
                     <input
@@ -1143,11 +1282,11 @@ export default function PortfolioApp() {
                       onChange={(e) =>
                         setFormData({ ...formData, company: e.target.value })
                       }
-                      className="w-full bg-ivory/70 border border-sand/80 px-3.5 py-2.5 text-xs text-charcoal focus:outline-none focus:border-charcoal transition-colors"
+                      className="w-full bg-[#EDE8DF] border border-[#C9BBA7] px-3.5 py-2.5 text-xs text-[#2A2A26] focus:outline-none focus:border-[#4A3B2F] transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] tracking-[0.18em] uppercase text-olive mb-2">
+                    <label className="block text-[10px] tracking-[0.18em] uppercase text-[#6B6A56] mb-2">
                       Project Type *
                     </label>
                     <select
@@ -1159,7 +1298,7 @@ export default function PortfolioApp() {
                           projectType: e.target.value,
                         })
                       }
-                      className="w-full bg-ivory/70 border border-sand/80 px-3.5 py-2.5 text-xs text-charcoal focus:outline-none focus:border-charcoal transition-colors"
+                      className="w-full bg-[#EDE8DF] border border-[#C9BBA7] px-3.5 py-2.5 text-xs text-[#2A2A26] focus:outline-none focus:border-[#4A3B2F] transition-colors"
                     >
                       <option value="">Select an option</option>
                       <option value="Fashion Editorial">
@@ -1181,7 +1320,7 @@ export default function PortfolioApp() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] tracking-[0.18em] uppercase text-olive mb-2">
+                  <label className="block text-[10px] tracking-[0.18em] uppercase text-[#6B6A56] mb-2">
                     Project Brief *
                   </label>
                   <textarea
@@ -1191,13 +1330,13 @@ export default function PortfolioApp() {
                     onChange={(e) =>
                       setFormData({ ...formData, brief: e.target.value })
                     }
-                    className="w-full bg-ivory/70 border border-sand/80 px-3.5 py-2.5 text-xs text-charcoal focus:outline-none focus:border-charcoal transition-colors resize-none"
+                    className="w-full bg-[#EDE8DF] border border-[#C9BBA7] px-3.5 py-2.5 text-xs text-[#2A2A26] focus:outline-none focus:border-[#4A3B2F] transition-colors resize-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-[10px] tracking-[0.18em] uppercase text-olive mb-2">
+                    <label className="block text-[10px] tracking-[0.18em] uppercase text-[#6B6A56] mb-2">
                       Budget Range (optional)
                     </label>
                     <select
@@ -1205,7 +1344,7 @@ export default function PortfolioApp() {
                       onChange={(e) =>
                         setFormData({ ...formData, budget: e.target.value })
                       }
-                      className="w-full bg-ivory/70 border border-sand/80 px-3.5 py-2.5 text-xs text-charcoal focus:outline-none focus:border-charcoal transition-colors"
+                      className="w-full bg-[#EDE8DF] border border-[#C9BBA7] px-3.5 py-2.5 text-xs text-[#2A2A26] focus:outline-none focus:border-[#4A3B2F] transition-colors"
                     >
                       <option value="">Select an option</option>
                       <option value="Under $2,500">Under $2,500</option>
@@ -1215,7 +1354,7 @@ export default function PortfolioApp() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] tracking-[0.18em] uppercase text-olive mb-2">
+                    <label className="block text-[10px] tracking-[0.18em] uppercase text-[#6B6A56] mb-2">
                       Timeline (optional)
                     </label>
                     <select
@@ -1223,7 +1362,7 @@ export default function PortfolioApp() {
                       onChange={(e) =>
                         setFormData({ ...formData, timeline: e.target.value })
                       }
-                      className="w-full bg-ivory/70 border border-sand/80 px-3.5 py-2.5 text-xs text-charcoal focus:outline-none focus:border-charcoal transition-colors"
+                      className="w-full bg-[#EDE8DF] border border-[#C9BBA7] px-3.5 py-2.5 text-xs text-[#2A2A26] focus:outline-none focus:border-[#4A3B2F] transition-colors"
                     >
                       <option value="">Select an option</option>
                       <option value="Immediate (Within 2 weeks)">
@@ -1238,9 +1377,10 @@ export default function PortfolioApp() {
                 </div>
 
                 <div className="pt-2">
+                  {/* Button uses #4A3B2F Deep Brown & #2A2A26 Charcoal per Colour Palette guidelines */}
                   <button
                     type="submit"
-                    className="px-7 py-3 bg-charcoal text-ivory text-[10px] tracking-[0.24em] uppercase hover:bg-deepbrown transition-colors inline-flex items-center space-x-2.5"
+                    className="px-7 py-3 bg-[#4A3B2F] text-[#EDE8DF] text-[10px] tracking-[0.24em] uppercase hover:bg-[#2A2A26] transition-colors inline-flex items-center space-x-2.5"
                   >
                     <span>SEND ENQUIRY</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -1249,12 +1389,12 @@ export default function PortfolioApp() {
               </form>
             )}
 
-            {/* Contact Bottom Info Bar (Matches Desktop & Mobile Contact Mockup) */}
-            <div className="mt-16 pt-8 border-t border-sand/60 flex flex-col sm:flex-row sm:items-end justify-between gap-6 text-xs text-olive">
+            {/* Contact Bottom Info Bar */}
+            <div className="mt-16 pt-8 border-t border-[#C9BBA7] flex flex-col sm:flex-row sm:items-end justify-between gap-6 text-xs text-[#6B6A56]">
               <div className="space-y-1">
-                <p className="text-charcoal font-medium">Based in India.</p>
+                <p className="text-[#2A2A26] font-medium">Based in India.</p>
                 <p>Available for international projects.</p>
-                <p className="text-[10px] tracking-[0.22em] uppercase pt-2 text-olive">
+                <p className="text-[10px] tracking-[0.22em] uppercase pt-2 text-[#6B6A56]">
                   BANGALORE / CALICUT
                 </p>
               </div>
@@ -1262,7 +1402,7 @@ export default function PortfolioApp() {
               <div className="space-y-1.5 sm:text-right">
                 <a
                   href="mailto:hello@ajnas.studio"
-                  className="block text-charcoal hover:underline"
+                  className="block text-[#2A2A26] hover:text-[#4A3B2F] transition-colors"
                 >
                   hello@ajnas.studio
                 </a>
@@ -1270,14 +1410,14 @@ export default function PortfolioApp() {
                   <a
                     href="#instagram"
                     onClick={(e) => e.preventDefault()}
-                    className="hover:text-charcoal transition-colors"
+                    className="hover:text-[#2A2A26] transition-colors"
                   >
                     Instagram &rarr;
                   </a>
                   <a
                     href="#vimeo"
                     onClick={(e) => e.preventDefault()}
-                    className="hover:text-charcoal transition-colors"
+                    className="hover:text-[#2A2A26] transition-colors"
                   >
                     Vimeo &rarr;
                   </a>
@@ -1289,59 +1429,59 @@ export default function PortfolioApp() {
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-sand/60 bg-ivory">
+      <footer className="border-t border-[#C9BBA7] bg-[#EDE8DF]">
         <div className="max-w-[1400px] mx-auto px-5 sm:px-10 py-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setView("home")}
-              className="font-serif text-lg tracking-[0.22em] uppercase text-charcoal"
+              className="font-serif text-lg tracking-[0.22em] uppercase text-[#2A2A26]"
             >
               AJNAS
             </button>
-            <span className="text-[9px] tracking-[0.22em] uppercase text-olive">
+            <span className="text-[9px] tracking-[0.22em] uppercase text-[#6B6A56]">
               PHOTOGRAPHER &amp; FILM DIRECTOR
             </span>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-6 text-[10px] tracking-[0.2em] uppercase text-olive">
+          <div className="flex flex-wrap justify-center gap-6 text-[10px] tracking-[0.2em] uppercase text-[#6B6A56]">
             <button
               onClick={() => setView("home")}
-              className="hover:text-charcoal transition-colors"
+              className="hover:text-[#2A2A26] transition-colors"
             >
               WORK
             </button>
             <button
               onClick={() => navigateToCategory("photography", "all")}
-              className="hover:text-charcoal transition-colors"
+              className="hover:text-[#2A2A26] transition-colors"
             >
               PHOTOGRAPHY
             </button>
             <button
               onClick={() => navigateToCategory("films", "all")}
-              className="hover:text-charcoal transition-colors"
+              className="hover:text-[#2A2A26] transition-colors"
             >
               FILMS
             </button>
             <button
               onClick={() => setView("about")}
-              className="hover:text-charcoal transition-colors"
+              className="hover:text-[#2A2A26] transition-colors"
             >
               ABOUT
             </button>
             <button
               onClick={() => setView("contact")}
-              className="hover:text-charcoal transition-colors"
+              className="hover:text-[#2A2A26] transition-colors"
             >
               CONTACT
             </button>
           </div>
 
-          <div className="flex items-center space-x-5 text-[10px] tracking-[0.18em] text-olive">
+          <div className="flex items-center space-x-5 text-[10px] tracking-[0.18em] text-[#6B6A56]">
             <a
               href="#instagram"
               onClick={(e) => e.preventDefault()}
               aria-label="Instagram"
-              className="hover:text-charcoal transition-colors"
+              className="hover:text-[#2A2A26] transition-colors"
             >
               <Instagram className="w-3.5 h-3.5" />
             </a>
@@ -1349,18 +1489,29 @@ export default function PortfolioApp() {
               href="#vimeo"
               onClick={(e) => e.preventDefault()}
               aria-label="Vimeo"
-              className="hover:text-charcoal transition-colors"
+              className="hover:text-[#2A2A26] transition-colors"
             >
               <Film className="w-3.5 h-3.5" />
             </a>
             <a
               href="mailto:hello@ajnas.studio"
               aria-label="Email"
-              className="hover:text-charcoal transition-colors"
+              className="hover:text-[#2A2A26] transition-colors"
             >
               <Mail className="w-3.5 h-3.5" />
             </a>
             <span>&copy; 2025 AJNAS</span>
+          </div>
+        </div>
+
+        {/* Bottom Textured Stone Strip from the Colour Palette & Mood Sheet */}
+        <div className="dark-stone-banner border-t border-[#4A3B2F] py-3.5 px-5 sm:px-10">
+          <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-[9px] tracking-[0.26em] uppercase text-[#C9BBA7]">
+            <span>AJNAS &mdash; PHOTOGRAPHER &amp; FILM DIRECTOR</span>
+            <span className="text-[#EDE8DF]/70">
+              FASHION / ARCHITECTURE / HOSPITALITY / FOOD / PRODUCT /
+              DOCUMENTARY
+            </span>
           </div>
         </div>
       </footer>
@@ -1369,18 +1520,18 @@ export default function PortfolioApp() {
       {lightboxImage && (
         <div
           onClick={() => setLightboxImage(null)}
-          className="fixed inset-0 z-50 bg-pureblack/95 flex items-center justify-center p-4 sm:p-10 cursor-zoom-out"
+          className="fixed inset-0 z-50 bg-[#0E0E0E]/95 flex items-center justify-center p-4 sm:p-10 cursor-zoom-out"
         >
           <button
             onClick={() => setLightboxImage(null)}
-            className="absolute top-6 right-6 text-ivory/70 hover:text-ivory p-2"
+            className="absolute top-6 right-6 text-[#C9BBA7] hover:text-[#EDE8DF] p-2"
           >
             <X className="w-6 h-6" />
           </button>
           <img
             src={lightboxImage}
             alt="Full resolution view"
-            className="max-h-[88vh] max-w-[92vw] object-contain shadow-2xl"
+            className="max-h-[88vh] max-w-[92vw] object-contain border border-[#4A3B2F]"
           />
         </div>
       )}
@@ -1389,42 +1540,43 @@ export default function PortfolioApp() {
       {activeVideoModal && (
         <div
           onClick={() => setActiveVideoModal(null)}
-          className="fixed inset-0 z-50 bg-pureblack/95 flex items-center justify-center p-4 sm:p-10"
+          className="fixed inset-0 z-50 bg-[#0E0E0E]/95 flex items-center justify-center p-4 sm:p-10"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-w-4xl w-full bg-pureblack border border-ivory/15 p-4 sm:p-6 space-y-4"
+            className="max-w-4xl w-full bg-[#0E0E0E] border border-[#4A3B2F] p-4 sm:p-6 space-y-4"
           >
-            <div className="flex items-center justify-between text-ivory">
+            <div className="flex items-center justify-between text-[#EDE8DF]">
               <div>
                 <h3 className="font-serif text-xl">{activeVideoModal.title}</h3>
-                <p className="text-[10px] tracking-[0.22em] uppercase text-sand">
-                  {activeVideoModal.category} &bull; {activeVideoModal.duration || "02:58"}
+                <p className="text-[10px] tracking-[0.22em] uppercase text-[#C9BBA7]">
+                  {activeVideoModal.category} &bull;{" "}
+                  {activeVideoModal.duration || "02:58"}
                 </p>
               </div>
               <button
                 onClick={() => setActiveVideoModal(null)}
-                className="text-ivory/70 hover:text-ivory p-1"
+                className="text-[#C9BBA7] hover:text-[#EDE8DF] p-1"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="relative aspect-video w-full bg-charcoal overflow-hidden flex items-center justify-center">
+            <div className="relative aspect-video w-full bg-[#2A2A26] overflow-hidden flex items-center justify-center">
               <img
                 src={activeVideoModal.coverImage}
                 alt={activeVideoModal.title}
-                className="w-full h-full object-cover opacity-50"
+                className="w-full h-full object-cover opacity-50 editorial-image-grade"
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-3">
-                <div className="w-14 h-14 rounded-full border border-ivory flex items-center justify-center bg-pureblack/60">
-                  <Play className="w-5 h-5 text-ivory fill-ivory ml-0.5" />
+                <div className="w-14 h-14 rounded-full border border-[#EDE8DF] flex items-center justify-center bg-[#0E0E0E]/60">
+                  <Play className="w-5 h-5 text-[#EDE8DF] fill-[#EDE8DF] ml-0.5" />
                 </div>
-                <p className="text-xs tracking-[0.2em] uppercase text-ivory">
+                <p className="text-xs tracking-[0.2em] uppercase text-[#EDE8DF]">
                   Screening Preview — {activeVideoModal.title}
                 </p>
-                <p className="text-xs text-ivory/70 max-w-md">
+                <p className="text-xs text-[#C9BBA7] max-w-md">
                   Replace with your Vimeo or MP4 embed URL in{" "}
-                  <code className="text-sand">src/data/portfolio.ts</code>.
+                  <code className="text-[#EDE8DF]">src/data/portfolio.ts</code>.
                 </p>
               </div>
             </div>
@@ -1434,4 +1586,3 @@ export default function PortfolioApp() {
     </div>
   );
 }
-

@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --bg-ivory: #EDE8DF;
-  --bg-sand: #C9BBA7;
-  --text-olive: #6B6A56;
-  --text-charcoal: #2A2A26;
-  --accent-brown: #4A3B2F;
-  --bg-black: #0E0E0E;
+  --ivory-beige: #EDE8DF;
+  --sand: #C9BBA7;
+  --olive-grey: #6B6A56;
+  --charcoal: #2A2A26;
+  --deep-brown: #4A3B2F;
+  --pure-black: #0E0E0E;
 }
 
 html {
@@ -23,15 +23,57 @@ body {
   font-feature-settings: "kern" 1, "liga" 1;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  position: relative;
 }
 
-/* Subtle film grain overlay for editorial atmosphere */
-.film-grain {
-  background-image: radial-gradient(rgba(42, 42, 38, 0.04) 1px, transparent 0);
-  background-size: 24px 24px;
+/* Tactile Warm Parchment / Plaster Texture & Subtle Film Grain */
+.editorial-paper-surface {
+  background-color: #EDE8DF;
+  background-image:
+    radial-gradient(at 15% 20%, rgba(201, 187, 167, 0.25) 0px, transparent 55%),
+    radial-gradient(at 85% 75%, rgba(201, 187, 167, 0.22) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(107, 106, 86, 0.05) 0px, transparent 70%);
 }
 
-/* Custom subtle scrollbar */
+/* Authentic SVG Fractal Noise Film Grain & Paper Fibers Overlay */
+.film-grain-overlay {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  opacity: 0.34;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='editorialGrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0.15'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23editorialGrain)' opacity='0.18'/%3E%3C/svg%3E");
+}
+
+/* Subtle Plaster / Stone Texture for Hero & Cards */
+.stone-plaster-texture {
+  background-image:
+    linear-gradient(135deg, rgba(237, 232, 223, 0.4) 0%, rgba(201, 187, 167, 0.28) 100%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='plaster'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' result='noise'/%3E%3CfeDiffuseLighting in='noise' lighting-color='%23EDE8DF' surfaceScale='1.4'%3E%3CfeDistantLight azimuth='45' elevation='60'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23plaster)' opacity='0.12'/%3E%3C/svg%3E");
+}
+
+/* Warm Cinematic LUT filter for photography to match the earthy, golden-brown grade in the design */
+.editorial-image-grade {
+  filter: sepia(0.16) contrast(1.04) brightness(0.95) saturate(0.88);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), filter 0.5s ease;
+}
+
+.group:hover .editorial-image-grade {
+  filter: sepia(0.1) contrast(1.06) brightness(0.98) saturate(0.94);
+}
+
+/* Textured dark stone footer banner (from the bottom of the design sheet) */
+.dark-stone-banner {
+  background-color: #2A2A26;
+  background-image:
+    linear-gradient(to right, rgba(14, 14, 14, 0.78), rgba(74, 59, 47, 0.65), rgba(14, 14, 14, 0.82)),
+    url("https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1800&q=80");
+  background-size: cover;
+  background-position: center;
+}
+
+/* Custom subtle scrollbar using #EDE8DF, #C9BBA7, and #6B6A56 */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -44,4 +86,3 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #6B6A56;
 }
-
