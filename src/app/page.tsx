@@ -309,12 +309,7 @@ export default function PortfolioApp() {
                 }}
               />
 
-              <div className="absolute inset-0 p-6 sm:p-12 lg:p-16 flex flex-col justify-end sm:justify-between">
-                <div className="hidden sm:flex items-center justify-between text-[10px] tracking-[0.24em] uppercase text-[#D8D5CD]">
-                  <span>STILL &amp; MOVING IMAGE</span>
-                  <span>01 / 06</span>
-                </div>
-
+              <div className="absolute inset-0 p-6 sm:p-12 lg:p-16 flex flex-col justify-end">
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8">
                   {/* Left Hero Copy */}
                   <div className="max-w-lg text-[#F4F2ED] space-y-4">
@@ -386,7 +381,7 @@ export default function PortfolioApp() {
                       onClick={() => navigateToCategory("films", "all")}
                       className="text-left px-2 py-0.5 -ml-2 hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
                     >
-                      MOVING IMAGE
+                      FILMS
                     </button>
                   </div>
                 </div>
@@ -429,7 +424,7 @@ export default function PortfolioApp() {
                 onClick={() => navigateToCategory("films", "all")}
                 className="px-2 py-1 hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
               >
-                MOVING IMAGE
+                FILMS
               </button>
             </div>
 
