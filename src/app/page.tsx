@@ -583,42 +583,16 @@ export default function PortfolioApp() {
               </div>
             </section>
 
-            {/* HOME ABOUT PREVIEW SECTION */}
-            <section className="pt-16 sm:pt-24">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center border-t border-[#C9BBA7] pt-14">
-                <div className="lg:col-span-5">
-                  <div className="aspect-[4/3] w-full overflow-hidden bg-[#C9BBA7] border border-[#C9BBA7]">
-                    <img
-                      src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=85"
-                      alt="Architectural concrete frame overlooking the sea"
-                      className="w-full h-full object-cover editorial-image-grade"
-                    />
-                  </div>
-                </div>
-                <div className="lg:col-span-7 space-y-5 max-w-xl">
-                  <p className="text-[10px] tracking-[0.24em] uppercase text-[#6B6A56]">
-                    ABOUT
-                  </p>
-                  <h2 className="font-serif text-2xl sm:text-3xl lg:text-[32px] leading-[1.3] text-[#2A2A26] font-normal">
-                    I am an independent image-maker and film director working
-                    across fashion, still life, architecture, hospitality and
-                    moving image.
-                  </h2>
-                  <p className="text-xs sm:text-sm text-[#6B6A56] leading-relaxed">
-                    My practice explores the relationship between form,
-                    atmosphere and storytelling, bringing an editorial
-                    sensibility to both still and moving images.
-                  </p>
-                  <div className="pt-2 flex items-center space-x-6">
-                    <button
-                      onClick={() => setView("about")}
-                      className="inline-flex items-center space-x-2 text-[10px] tracking-[0.22em] uppercase text-[#2A2A26] border-b border-[#4A3B2F] pb-1 hover:text-[#4A3B2F] transition-colors group"
-                    >
-                      <span>MORE ABOUT</span>
-                      <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  </div>
-                </div>
+            {/* MORE ABOUT LINK */}
+            <section className="pt-12 sm:pt-16">
+              <div className="border-t border-[#C9BBA7] pt-8 flex justify-end">
+                <button
+                  onClick={() => setView("about")}
+                  className="inline-flex items-center space-x-2 text-[10px] tracking-[0.22em] uppercase text-[#2A2A26] border-b border-[#4A3B2F] pb-1 hover:text-[#4A3B2F] transition-colors group"
+                >
+                  <span>MORE ABOUT</span>
+                  <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                </button>
               </div>
             </section>
           </div>
