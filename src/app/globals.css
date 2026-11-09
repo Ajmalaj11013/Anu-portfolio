@@ -26,24 +26,20 @@ body {
   position: relative;
 }
 
-/* Tactile Warm Parchment / Plaster Texture & Subtle Film Grain */
+/* Pure Ivory Beige (#EDE8DF) Main Surface */
 .editorial-paper-surface {
-  background-color: #EDE8DF;
-  background-image:
-    radial-gradient(at 15% 20%, rgba(201, 187, 167, 0.25) 0px, transparent 55%),
-    radial-gradient(at 85% 75%, rgba(201, 187, 167, 0.22) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(107, 106, 86, 0.05) 0px, transparent 70%);
+  background-color: #EDE8DF !important;
 }
 
-/* Authentic SVG Fractal Noise Film Grain & Paper Fibers Overlay */
+/* Subtle Film Grain Overlay that preserves the exact #EDE8DF Ivory Beige luminance */
 .film-grain-overlay {
   pointer-events: none;
   position: fixed;
   inset: 0;
   z-index: 9999;
-  opacity: 0.34;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='editorialGrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0.15'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23editorialGrain)' opacity='0.18'/%3E%3C/svg%3E");
+  opacity: 0.14;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='editorialGrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23editorialGrain)' opacity='0.15'/%3E%3C/svg%3E");
 }
 
 /* Subtle Plaster / Stone Texture for Hero & Cards */

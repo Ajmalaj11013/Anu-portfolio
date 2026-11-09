@@ -94,7 +94,10 @@ export default function PortfolioApp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#EDE8DF] text-[#2A2A26] editorial-paper-surface relative">
+    <div
+      style={{ backgroundColor: "#EDE8DF", color: "#2A2A26" }}
+      className="min-h-screen flex flex-col bg-[#EDE8DF] text-[#2A2A26] editorial-paper-surface relative"
+    >
       {/* Authentic Film Grain & Tactile Paper Fiber Overlay across the entire viewport */}
       <div className="film-grain-overlay" aria-hidden="true" />
 
