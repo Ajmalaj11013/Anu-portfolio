@@ -347,7 +347,15 @@ export default function PortfolioApp() {
                       onClick={() => navigateToCategory("photography", "fashion")}
                       className="text-left hover:text-[#EDE8DF] transition-colors"
                     >
-                      FASHION
+                      FASHION &amp; EDITORIAL
+                    </button>
+                    <button
+                      onClick={() =>
+                        navigateToCategory("photography", "hospitality")
+                      }
+                      className="text-left hover:text-[#EDE8DF] transition-colors"
+                    >
+                      PRODUCT
                     </button>
                     <button
                       onClick={() =>
@@ -358,24 +366,10 @@ export default function PortfolioApp() {
                       ARCHITECTURE
                     </button>
                     <button
-                      onClick={() =>
-                        navigateToCategory("photography", "hospitality")
-                      }
-                      className="text-left hover:text-[#EDE8DF] transition-colors"
-                    >
-                      HOSPITALITY
-                    </button>
-                    <button
                       onClick={() => navigateToCategory("photography", "food")}
                       className="text-left hover:text-[#EDE8DF] transition-colors"
                     >
-                      FOOD
-                    </button>
-                    <button
-                      onClick={() => navigateToCategory("photography", "food")}
-                      className="text-left hover:text-[#EDE8DF] transition-colors"
-                    >
-                      STILL LIFE
+                      ADVERTISING
                     </button>
                     <button
                       onClick={() =>
@@ -399,20 +393,25 @@ export default function PortfolioApp() {
             {/* Mobile Discipline Strip below hero */}
             <div className="md:hidden flex flex-wrap gap-x-5 gap-y-2 py-4 border-b border-[#C9BBA7] text-[10px] tracking-[0.2em] uppercase text-[#6B6A56]">
               <button onClick={() => navigateToCategory("photography", "fashion")}>
-                FASHION
+                FASHION &amp; EDITORIAL
+              </button>
+              <button
+                onClick={() => navigateToCategory("photography", "hospitality")}
+              >
+                PRODUCT
               </button>
               <button
                 onClick={() => navigateToCategory("photography", "architecture")}
               >
                 ARCHITECTURE
               </button>
-              <button
-                onClick={() => navigateToCategory("photography", "hospitality")}
-              >
-                HOSPITALITY
-              </button>
               <button onClick={() => navigateToCategory("photography", "food")}>
-                STILL LIFE
+                ADVERTISING
+              </button>
+              <button
+                onClick={() => navigateToCategory("photography", "documentary")}
+              >
+                DOCUMENTARY
               </button>
               <button onClick={() => navigateToCategory("films", "all")}>
                 MOVING IMAGE
@@ -429,10 +428,11 @@ export default function PortfolioApp() {
                   <div className="hidden lg:flex items-center space-x-5 text-[9px] tracking-[0.22em] uppercase text-[#6B6A56]">
                     {[
                       { label: "ALL", val: "all" },
-                      { label: "FASHION", val: "fashion" },
+                      { label: "FASHION & EDITORIAL", val: "fashion" },
+                      { label: "PRODUCT", val: "hospitality" },
                       { label: "ARCHITECTURE", val: "architecture" },
-                      { label: "HOSPITALITY", val: "hospitality" },
-                      { label: "FOOD", val: "food" },
+                      { label: "ADVERTISING", val: "food" },
+                      { label: "DOCUMENTARY", val: "film-documentary" },
                     ].map((cat) => (
                       <button
                         key={cat.val}
