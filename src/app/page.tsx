@@ -83,7 +83,7 @@ export default function PortfolioApp() {
   );
   const prevProject =
     PROJECTS[
-      (currentProjectIndex - 1 + PROJECTS.length) % PROJECTS.length
+    (currentProjectIndex - 1 + PROJECTS.length) % PROJECTS.length
     ];
   const nextProject =
     PROJECTS[(currentProjectIndex + 1) % PROJECTS.length];
@@ -125,53 +125,48 @@ export default function PortfolioApp() {
                     ?.scrollIntoView({ behavior: "smooth" });
                 }
               }}
-              className={`hover:text-[#2A2A26] transition-colors py-1 ${
-                view === "home"
+              className={`hover:text-[#2A2A26] transition-colors py-1 ${view === "home"
                   ? "text-[#2A2A26] font-medium border-b border-[#4A3B2F]"
                   : ""
-              }`}
+                }`}
             >
               WORK
             </button>
             <button
               onClick={() => navigateToCategory("photography", "all")}
-              className={`hover:text-[#2A2A26] transition-colors py-1 ${
-                view === "photography" ||
-                (view === "project" && currentProject.type === "photography")
+              className={`hover:text-[#2A2A26] transition-colors py-1 ${view === "photography" ||
+                  (view === "project" && currentProject.type === "photography")
                   ? "text-[#2A2A26] font-medium border-b border-[#4A3B2F]"
                   : ""
-              }`}
+                }`}
             >
               PHOTOGRAPHY
             </button>
             <button
               onClick={() => navigateToCategory("films", "all")}
-              className={`hover:text-[#2A2A26] transition-colors py-1 ${
-                view === "films" ||
-                (view === "project" && currentProject.type === "film")
+              className={`hover:text-[#2A2A26] transition-colors py-1 ${view === "films" ||
+                  (view === "project" && currentProject.type === "film")
                   ? "text-[#2A2A26] font-medium border-b border-[#4A3B2F]"
                   : ""
-              }`}
+                }`}
             >
               FILMS
             </button>
             <button
               onClick={() => setView("about")}
-              className={`hover:text-[#2A2A26] transition-colors py-1 ${
-                view === "about"
+              className={`hover:text-[#2A2A26] transition-colors py-1 ${view === "about"
                   ? "text-[#2A2A26] font-medium border-b border-[#4A3B2F]"
                   : ""
-              }`}
+                }`}
             >
               ABOUT
             </button>
             <button
               onClick={() => setView("contact")}
-              className={`hover:text-[#2A2A26] transition-colors py-1 ${
-                view === "contact"
+              className={`hover:text-[#2A2A26] transition-colors py-1 ${view === "contact"
                   ? "text-[#2A2A26] font-medium border-b border-[#4A3B2F]"
                   : ""
-              }`}
+                }`}
             >
               CONTACT
             </button>
@@ -431,11 +426,10 @@ export default function PortfolioApp() {
                       <button
                         key={cat.val}
                         onClick={() => setHomeCategoryFilter(cat.val)}
-                        className={`transition-colors ${
-                          homeCategoryFilter === cat.val
+                        className={`transition-colors ${homeCategoryFilter === cat.val
                             ? "text-[#2A2A26] font-medium underline underline-offset-4 decoration-[#4A3B2F]"
                             : "hover:text-[#2A2A26]"
-                        }`}
+                          }`}
                       >
                         {cat.label}
                       </button>
@@ -630,7 +624,7 @@ export default function PortfolioApp() {
             <div className="flex flex-wrap items-center gap-4 sm:gap-8 py-6 border-b border-[#C9BBA7] text-[10px] tracking-[0.22em] uppercase">
               {[
                 { label: "ALL", value: "all" },
-                { label: "FASHION & PORTRAITURE", value: "fashion" },
+                { label: "FASHION & EDITORIAL", value: "fashion" },
                 { label: "HOSPITALITY & SPACES", value: "hospitality" },
                 { label: "ARCHITECTURE", value: "architecture" },
                 { label: "FOOD & STILL LIFE", value: "food" },
@@ -638,11 +632,10 @@ export default function PortfolioApp() {
                 <button
                   key={tab.value}
                   onClick={() => setPhotoFilter(tab.value)}
-                  className={`py-1 transition-colors ${
-                    photoFilter === tab.value
+                  className={`py-1 transition-colors ${photoFilter === tab.value
                       ? "text-[#2A2A26] font-medium border-b border-[#4A3B2F]"
                       : "text-[#6B6A56] hover:text-[#2A2A26]"
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>

@@ -27,7 +27,7 @@ export const PROJECTS: Project[] = [
     type: "photography",
     year: "2024",
     role: "Photography & Art Direction",
-    discipline: "Fashion & Portraiture",
+    discipline: "Fashion & Editorial",
     description:
       "A study in form, movement and quiet strength. This editorial explores the relationship between the body, sculptural draped fabric and raw architectural space.",
     coverImage:
@@ -228,7 +228,7 @@ export const PROJECTS: Project[] = [
 
 export const PHOTOGRAPHY_SECTIONS = [
   {
-    title: "FASHION & PORTRAITURE",
+    title: "FASHION & EDITORIAL",
     slug: "fashion",
     images: [
       {
