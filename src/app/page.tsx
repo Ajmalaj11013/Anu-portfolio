@@ -1046,7 +1046,7 @@ export default function PortfolioApp() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
               {/* Left Column Portrait + Availability Note */}
               <div className="lg:col-span-5 space-y-6">
-                <div className="aspect-[4/5] w-full overflow-hidden bg-[#D8D5CD] p-2 border border-[#B7A28B]/40">
+                <div className="aspect-[4/5] w-full overflow-hidden bg-white p-2 border border-white">
                   <img
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85"
                     alt="Ajnas — Photographer and Film Director"
