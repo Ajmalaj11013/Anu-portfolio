@@ -70,7 +70,9 @@
       "discipline": "Fashion & Editorial",
       "description": "Click to edit this project description in Edit Mode.",
       "coverImage": "/api/media/1794341677078-project-cover-over-dose-4913-desktop.jpg",
-      "gallery": [],
+      "gallery": [
+        "/api/media/1794341731573-img_1860.jpg"
+      ],
       "featured": true,
       "director": "AJNAS",
       "cinematography": "AJNAS",
@@ -279,5 +281,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794341717732
+  "updatedAt": 1794341733378
 }
