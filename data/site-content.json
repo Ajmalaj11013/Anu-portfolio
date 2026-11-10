@@ -60,27 +60,6 @@
   },
   "projects": [
     {
-      "id": "the-silent-form",
-      "title": "The Silent Form",
-      "category": "FASHION EDITORIAL",
-      "categorySlug": "fashion",
-      "type": "photography",
-      "year": "2024",
-      "role": "Photography & Art Direction",
-      "discipline": "Fashion & Editorial",
-      "description": "A study in form, movement and quiet strength. This editorial explores the relationship between the body, sculptural draped fabric and raw architectural space.",
-      "coverImage": "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1400&q=85",
-      "gallery": [
-        "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=85",
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=85",
-        "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1000&q=85",
-        "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1000&q=85",
-        "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1000&q=85",
-        "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1000&q=85"
-      ],
-      "featured": true
-    },
-    {
       "id": "cafe-lumiere",
       "title": "Café Lumière",
       "category": "PRODUCT",
@@ -430,5 +409,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794341491116
+  "updatedAt": 1794341521880
 }
