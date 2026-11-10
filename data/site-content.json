@@ -224,27 +224,6 @@
         "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1000&q=85"
       ],
       "featured": false
-    },
-    {
-      "id": "weight-of-being",
-      "title": "The Weight of Being",
-      "category": "ADVERTISING & CAMPAIGN",
-      "categorySlug": "film-advertising",
-      "type": "film",
-      "year": "2024",
-      "role": "Film Director",
-      "discipline": "Advertising & Campaign Films",
-      "director": "Ajnas",
-      "cinematography": "Ajnas",
-      "editor": "Ajnas",
-      "duration": "01:45",
-      "description": "Campaign film crafted for an artisanal luxury label. Set against windswept highland plateaus at golden hour.",
-      "coverImage": "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1400&q=85",
-      "gallery": [
-        "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=85",
-        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=85"
-      ],
-      "featured": false
     }
   ],
   "photographySections": [
@@ -405,7 +384,7 @@
       "image": "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=85"
     }
   ],
-  "updatedAt": 1794333237185,
+  "updatedAt": 1794333238459,
   "imageSettings": {
     "hero": {
       "desktopSrc": "/api/media/1794313944938-hero-desktop.jpg",
