@@ -37,6 +37,71 @@ type ViewState =
   | "contact";
 
 const STORAGE_KEY = "ajnas_portfolio_site_content_v1";
+const IDB_NAME = "ajnas_portfolio_db";
+const IDB_STORE = "site_content";
+const IDB_KEY = "current";
+
+type StoredSiteContent = SiteContent & { updatedAt?: number };
+
+function openContentDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined" || !("indexedDB" in window)) {
+      reject(new Error("IndexedDB unavailable"));
+      return;
+    }
+    const req = window.indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveToIndexedDB(data: StoredSiteContent): Promise<void> {
+  try {
+    const db = await openContentDB();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, "readwrite");
+      tx.objectStore(IDB_STORE).put(data, IDB_KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch {
+    // Ignore IDB errors
+  }
+}
+
+async function loadFromIndexedDB(): Promise<StoredSiteContent | null> {
+  try {
+    const db = await openContentDB();
+    return await new Promise<StoredSiteContent | null>((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, "readonly");
+      const req = tx.objectStore(IDB_STORE).get(IDB_KEY);
+      req.onsuccess = () => resolve((req.result as StoredSiteContent) || null);
+      req.onerror = () => reject(req.error);
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function clearIndexedDB(): Promise<void> {
+  try {
+    const db = await openContentDB();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, "readwrite");
+      tx.objectStore(IDB_STORE).delete(IDB_KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch {
+    // Ignore
+  }
+}
 
 function isVideoAsset(url?: string): boolean {
   if (!url) return false;
@@ -157,55 +222,127 @@ export default function PortfolioApp() {
     timeline: "",
   });
 
-  // Load saved site content from API or localStorage on mount
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load saved site content from API, IndexedDB, or localStorage on mount
   useEffect(() => {
     async function loadContent() {
+      let browserSaved: StoredSiteContent | null = null;
+      let serverSaved: StoredSiteContent | null = null;
+
+      // 1. Load from IndexedDB (supports large images & videos)
       try {
-        const res = await fetch("/api/content", { cache: "no-store" });
-        if (res.ok) {
-          const data = (await res.json()) as SiteContent;
-          if (data && data.projects) {
-            setContent(data);
-            return;
-          }
+        const idbData = await loadFromIndexedDB();
+        if (idbData && Array.isArray(idbData.projects)) {
+          browserSaved = idbData;
         }
       } catch {
-        // Fallback to localStorage if API route isn't reachable
+        // Ignore IDB errors
       }
 
+      // 2. Check localStorage fallback
       try {
         const cached = localStorage.getItem(STORAGE_KEY);
         if (cached) {
-          setContent(JSON.parse(cached));
+          const parsed = JSON.parse(cached) as StoredSiteContent;
+          if (
+            parsed &&
+            Array.isArray(parsed.projects) &&
+            (!browserSaved ||
+              (parsed.updatedAt || 0) > (browserSaved.updatedAt || 0))
+          ) {
+            browserSaved = parsed;
+          }
         }
       } catch {
-        // Ignore storage read errors
+        // Ignore localStorage read errors
+      }
+
+      // 3. Check server file via API route
+      try {
+        const res = await fetch("/api/content", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          if (
+            data &&
+            data.hasSavedContent &&
+            data.content &&
+            Array.isArray(data.content.projects)
+          ) {
+            serverSaved = data.content as StoredSiteContent;
+          } else if (data && Array.isArray(data.projects)) {
+            // Backward compatibility if old route format
+            serverSaved = data as StoredSiteContent;
+          }
+        }
+      } catch {
+        // Offline or serverless fallback
+      }
+
+      // Choose whichever source has the newest edits
+      if (serverSaved && browserSaved) {
+        const serverTime = serverSaved.updatedAt || 0;
+        const browserTime = browserSaved.updatedAt || 0;
+        const newest = browserTime > serverTime ? browserSaved : serverSaved;
+        setContent(newest);
+        await saveToIndexedDB(newest);
+      } else if (browserSaved) {
+        setContent(browserSaved);
+      } else if (serverSaved) {
+        setContent(serverSaved);
+        await saveToIndexedDB(serverSaved);
       }
     }
     loadContent();
   }, []);
 
-  // Persist helper (saves to both API route and localStorage)
-  const persistContent = async (updated: SiteContent) => {
-    setContent(updated);
+  // Persist helper (saves immediately to IndexedDB + localStorage, and syncs to API route)
+  const persistContent = async (
+    updated: SiteContent,
+    immediateServerSync: boolean = false
+  ) => {
+    const payload: StoredSiteContent = {
+      ...updated,
+      updatedAt: Date.now(),
+    };
+
+    setContent(payload);
     setSaveStatus("saving");
+
+    // 1. Save to IndexedDB (handles large images & videos without 5MB limit)
+    saveToIndexedDB(payload);
+
+    // 2. Save to localStorage (fast synchronous backup when under 5MB)
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     } catch {
-      // Ignore quota errors
+      // Exceeded 5MB localStorage quota; IndexedDB already stores the full payload
     }
 
-    try {
-      await fetch("/api/content", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updated),
-      });
-    } catch {
-      // Saved in localStorage as fallback
+    // 3. Sync to server file (/api/content), debounced during rapid typing
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
     }
-    setSaveStatus("saved");
-    setTimeout(() => setSaveStatus("idle"), 2000);
+
+    const syncToServer = async () => {
+      try {
+        await fetch("/api/content", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } catch {
+        // Saved in IndexedDB / localStorage as fallback
+      }
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2000);
+    };
+
+    if (immediateServerSync) {
+      await syncToServer();
+    } else {
+      saveTimerRef.current = setTimeout(syncToServer, 300);
+    }
   };
 
   // Trigger file picker for uploading an image or video
@@ -375,7 +512,12 @@ export default function PortfolioApp() {
       {/* FLOATING STUDIO EDITOR BAR (Bottom Right) */}
       <div className="fixed bottom-5 right-5 z-50 flex flex-wrap items-center gap-2 bg-[#171715] text-[#F4F2ED] px-4 py-2.5 shadow-2xl border border-[#B7A28B]/50 rounded-sm">
         <button
-          onClick={() => setEditMode(!editMode)}
+          onClick={() => {
+            if (editMode) {
+              persistContent(content, true);
+            }
+            setEditMode(!editMode);
+          }}
           className={`inline-flex items-center space-x-2 text-[10px] tracking-[0.2em] uppercase px-3 py-1.5 transition-colors ${
             editMode
               ? "bg-[#B7A28B] text-[#171715] font-medium"
@@ -406,7 +548,7 @@ export default function PortfolioApp() {
             </button>
 
             <button
-              onClick={() => persistContent(content)}
+              onClick={() => persistContent(content, true)}
               className="inline-flex items-center space-x-1.5 text-[10px] tracking-[0.18em] uppercase px-3 py-1.5 bg-[#373632] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] transition-colors"
             >
               <Save className="w-3.5 h-3.5" />
@@ -420,14 +562,22 @@ export default function PortfolioApp() {
             </button>
 
             <button
-              onClick={() => {
+              onClick={async () => {
                 if (
                   window.confirm(
                     "Reset all website text, images, and projects back to the original defaults?"
                   )
                 ) {
                   localStorage.removeItem(STORAGE_KEY);
-                  persistContent(DEFAULT_SITE_CONTENT);
+                  await clearIndexedDB();
+                  try {
+                    await fetch("/api/content", { method: "DELETE" });
+                  } catch {
+                    // Ignore
+                  }
+                  setContent(DEFAULT_SITE_CONTENT);
+                  setSaveStatus("saved");
+                  setTimeout(() => setSaveStatus("idle"), 2000);
                 }
               }}
               title="Reset to default content"
