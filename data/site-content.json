@@ -60,29 +60,6 @@
   },
   "projects": [
     {
-      "id": "in-between",
-      "title": "A Moving Still / In Between",
-      "category": "FASHION FILM",
-      "categorySlug": "film-fashion",
-      "type": "film",
-      "year": "2024",
-      "role": "Director & Cinematographer",
-      "discipline": "Fashion Films",
-      "director": "Ajnas",
-      "cinematography": "Ajnas",
-      "editor": "Ajnas",
-      "duration": "02:58",
-      "description": "A visual journey through presence, absence and the spaces in between. Shot on 16mm grain emulator at dusk across old stone courtyards.",
-      "coverImage": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1400&q=85",
-      "gallery": [
-        "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=85",
-        "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1000&q=85",
-        "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1000&q=85",
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=85"
-      ],
-      "featured": true
-    },
-    {
       "id": "the-river-between",
       "title": "The River Between",
       "category": "DOCUMENTARY",
@@ -347,5 +324,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794341529778
+  "updatedAt": 1794341532720
 }
