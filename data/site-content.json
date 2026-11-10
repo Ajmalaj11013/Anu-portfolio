@@ -60,24 +60,6 @@
   },
   "projects": [
     {
-      "id": "vessels-of-earth",
-      "title": "Vessels of Earth",
-      "category": "ADVERTISING",
-      "categorySlug": "food",
-      "type": "photography",
-      "year": "2024",
-      "role": "Photographer",
-      "discipline": "Advertising",
-      "description": "Tactile botanical apothecary bottles, hand-thrown ceramics and raw linen captured under directional chiaroscuro lighting.",
-      "coverImage": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=1200&q=85",
-      "gallery": [
-        "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=1200&q=85",
-        "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1000&q=85",
-        "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1000&q=85"
-      ],
-      "featured": false
-    },
-    {
       "id": "weight-of-being",
       "title": "The Weight of Being",
       "category": "ADVERTISING & CAMPAIGN",
@@ -302,5 +284,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794341534812
+  "updatedAt": 1794341536529
 }
