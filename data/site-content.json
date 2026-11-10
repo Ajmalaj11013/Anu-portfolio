@@ -5,7 +5,7 @@
     "image": "/api/media/1794338741379-hero-desktop.jpg",
     "titleLine1": "Images with",
     "titleLine2": "a point of view.",
-    "subtitle": "PHOTOGRAPHER &FASHION  FILM DIRECTOR",
+    "subtitle": "PHOTOGRAPHER & FILM DIRECTOR",
     "description": "Fashion, spaces, objects and stories — explored through editorial photography and moving image.",
     "ctaText": "EXPLORE SELECTED WORK"
   },
@@ -430,5 +430,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794339141581
+  "updatedAt": 1794339142881
 }
