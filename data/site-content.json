@@ -2,7 +2,7 @@
   "brandName": "AJNAS",
   "brandSubtitle": "PHOTOGRAPHER & FILM DIRECTOR",
   "hero": {
-    "image": "/api/media/1794311243418-nelly_-11.jpg",
+    "image": "/api/media/1794311367827-landscap.jpg",
     "titleLine1": "Images with",
     "titleLine2": "a point of view.",
     "subtitle": "PHOTOGRAPHER & FILM DIRECTOR",
@@ -405,5 +405,5 @@
       "image": "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=85"
     }
   ],
-  "updatedAt": 1794311369023
+  "updatedAt": 1794311369074
 }
