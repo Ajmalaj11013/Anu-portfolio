@@ -39,7 +39,7 @@
       "Fashion Editorial",
       "Fashion Campaigns",
       "Product & Campaign Imagery",
-      "AR",
+      "",
       "Documentary",
       "Fashion Films",
       "Advertising Films",
@@ -412,5 +412,5 @@
       "desktopSrc": "/api/media/1794337028057-blurred-figure-before-a-concrete-moodboard--1-.jpg"
     }
   },
-  "updatedAt": 1794338127769
+  "updatedAt": 1794338129372
 }
