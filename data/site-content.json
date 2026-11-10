@@ -1,6 +1,6 @@
 {
   "brandName": "AJNAS",
-  "brandSubtitle": "PHOTOGRAPHER & FILM DIRECTOR",
+  "brandSubtitle": "PHOTOGRAPHER & ",
   "hero": {
     "image": "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=2000&q=85",
     "titleLine1": "Images with",
@@ -412,5 +412,5 @@
       "desktopSrc": "/api/media/1794337028057-blurred-figure-before-a-concrete-moodboard--1-.jpg"
     }
   },
-  "updatedAt": 1794338221282
+  "updatedAt": 1794338262248
 }
