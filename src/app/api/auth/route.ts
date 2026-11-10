@@ -59,3 +59,4 @@ export async function DELETE() {
   response.cookies.delete(ADMIN_COOKIE_NAME);
   return response;
 }
+

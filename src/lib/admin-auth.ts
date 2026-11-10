@@ -32,3 +32,4 @@ export function getGitHubConfig() {
   const branch = process.env.GITHUB_BRANCH || "main";
   return { token, repo, branch };
 }
+

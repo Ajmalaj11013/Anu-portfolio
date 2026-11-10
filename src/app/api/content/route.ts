@@ -1,108 +1,26 @@
 import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
-import path from "path";
-import { SiteContent } from "@/data/portfolio";
 import { getGitHubConfig, isAdminAuthenticated } from "@/lib/admin-auth";
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const DATA_FILE_PATH = path.join(DATA_DIR, "site-content.json");
-const GH_FILE_PATH = "data/site-content.json";
-
-type StoredContent = SiteContent & { updatedAt?: number };
+import {
+  DATA_DIR,
+  DATA_FILE_PATH,
+  GH_FILE_PATH,
+  StoredContent,
+  fetchFromGitHub,
+  getLatestServerSiteContent,
+} from "@/lib/site-content";
 
 // Simple in-memory write lock to prevent concurrent file corruption
 let writeQueue: Promise<void> = Promise.resolve();
 
-async function fetchFromGitHub(): Promise<{
-  content: StoredContent | null;
-  sha?: string;
-}> {
-  const { token, repo, branch } = getGitHubConfig();
-  const apiUrl = `https://api.github.com/repos/${repo}/contents/${GH_FILE_PATH}?ref=${branch}`;
-
-  try {
-    const headers: Record<string, string> = {
-      Accept: "application/vnd.github+json",
-    };
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    const res = await fetch(apiUrl, {
-      headers,
-      cache: "no-store",
-    });
-
-    if (res.ok) {
-      const meta = (await res.json()) as {
-        content?: string;
-        sha?: string;
-        encoding?: string;
-      };
-      if (meta.content && meta.encoding === "base64") {
-        const decoded = Buffer.from(meta.content, "base64").toString("utf-8");
-        const parsed = JSON.parse(decoded) as StoredContent;
-        if (parsed && Array.isArray(parsed.projects)) {
-          return { content: parsed, sha: meta.sha };
-        }
-      }
-    }
-  } catch {
-    // Fallback to raw URL if unauthenticated API rate-limited
-  }
-
-  try {
-    const rawUrl = `https://raw.githubusercontent.com/${repo}/${branch}/${GH_FILE_PATH}?t=${Date.now()}`;
-    const rawRes = await fetch(rawUrl, { cache: "no-store" });
-    if (rawRes.ok) {
-      const parsed = (await rawRes.json()) as StoredContent;
-      if (parsed && Array.isArray(parsed.projects)) {
-        return { content: parsed };
-      }
-    }
-  } catch {
-    // Ignore
-  }
-
-  return { content: null };
-}
-
 export async function GET() {
-  let localContent: StoredContent | null = null;
-  let ghContent: StoredContent | null = null;
+  const { hasSavedContent, content } = await getLatestServerSiteContent();
 
-  // 1. Check local file (if present)
-  try {
-    const fileContents = await fs.readFile(DATA_FILE_PATH, "utf-8");
-    const parsed = JSON.parse(fileContents) as StoredContent;
-    if (parsed && Array.isArray(parsed.projects)) {
-      localContent = parsed;
-    }
-  } catch {
-    // No local file
-  }
-
-  // 2. Check GitHub repository for latest global content
-  try {
-    const ghResult = await fetchFromGitHub();
-    ghContent = ghResult.content;
-  } catch {
-    // Ignore
-  }
-
-  // Pick whichever has the newer updatedAt timestamp
-  const best =
-    localContent && ghContent
-      ? (ghContent.updatedAt || 0) >= (localContent.updatedAt || 0)
-        ? ghContent
-        : localContent
-      : ghContent || localContent;
-
-  if (best) {
+  if (hasSavedContent) {
     return NextResponse.json({
       ok: true,
       hasSavedContent: true,
-      content: best,
+      content,
     });
   }
 
@@ -191,7 +109,10 @@ export async function POST(request: Request) {
 export async function DELETE() {
   const authed = await isAdminAuthenticated();
   if (!authed) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401 }
+    );
   }
 
   const { token, repo, branch } = getGitHubConfig();
