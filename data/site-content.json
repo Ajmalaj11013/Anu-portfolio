@@ -60,6 +60,26 @@
   },
   "projects": [
     {
+      "id": "form-0404",
+      "title": "form ",
+      "category": "FASHION EDITORIAL",
+      "categorySlug": "fashion",
+      "type": "photography",
+      "year": "2025",
+      "role": "Photography & Art Direction",
+      "discipline": "Fashion & Editorial",
+      "description": "Click to edit this project description in Edit Mode.",
+      "coverImage": "/api/media/1794312016545-post-1.jpg",
+      "gallery": [
+        "/api/media/1794312016545-post-1.jpg"
+      ],
+      "featured": true,
+      "director": "AJNAS",
+      "cinematography": "AJNAS",
+      "editor": "AJNAS",
+      "duration": "02:30"
+    },
+    {
       "id": "the-silent-form",
       "title": "The Silent Form",
       "category": "FASHION EDITORIAL",
@@ -405,5 +425,5 @@
       "image": "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=85"
     }
   ],
-  "updatedAt": 1794311922862
+  "updatedAt": 1794312030405
 }
