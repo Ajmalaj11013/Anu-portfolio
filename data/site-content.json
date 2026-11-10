@@ -26,7 +26,7 @@
   "filmsPage": {
     "title": "Films",
     "subtitle": "FASHION FILMS • ADVERTISING FILMS • EDITORIAL DOCUMENTARIES • EXPERIMENTAL & ART FILMS",
-    "bannerImage": "/api/media/1794342251943-1-image-final--file--.jpg"
+    "bannerImage": "/api/media/1794342389982-films-banner-desktop.jpg"
   },
   "aboutPage": {
     "title": "About",
@@ -304,10 +304,23 @@
       "desktopSrc": "/api/media/1794342114394-img_1853.jpg"
     },
     "films-banner": {
+      "desktopSrc": "/api/media/1794342389982-films-banner-desktop.jpg",
+      "mobileSrc": "/api/media/1794342392546-films-banner-mobile.jpg",
       "sourceSrc": "/api/media/1794342251943-1-image-final--file--.jpg",
       "mobileSourceSrc": "/api/media/1794342251943-1-image-final--file--.jpg",
-      "desktopSrc": "/api/media/1794342251943-1-image-final--file--.jpg"
+      "desktopWidth": 1600,
+      "desktopHeight": 1000,
+      "mobileWidth": 900,
+      "mobileHeight": 600,
+      "desktopZoom": 104,
+      "desktopPanX": 0,
+      "desktopPanY": 0,
+      "mobileZoom": 96,
+      "mobilePanX": 1,
+      "mobilePanY": -3,
+      "desktopFit": "contain",
+      "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794342253860
+  "updatedAt": 1794342393924
 }
