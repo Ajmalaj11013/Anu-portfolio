@@ -26,6 +26,8 @@ import {
   RotateCcw,
   Video,
   Check,
+  Lock,
+  Link2,
 } from "lucide-react";
 
 type ViewState =
@@ -103,12 +105,97 @@ async function clearIndexedDB(): Promise<void> {
   }
 }
 
-function isVideoAsset(url?: string): boolean {
-  if (!url) return false;
-  return (
-    /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url) ||
-    url.startsWith("data:video/")
+function parseVideoEmbed(
+  url?: string
+): { kind: "iframe" | "native"; src: string } | null {
+  if (!url) return null;
+  const trimmed = url.trim();
+
+  // YouTube
+  const ytMatch = trimmed.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i
   );
+  if (ytMatch && ytMatch[1]) {
+    return {
+      kind: "iframe",
+      src: `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0`,
+    };
+  }
+
+  // Vimeo
+  const vimeoMatch = trimmed.match(
+    /(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/i
+  );
+  if (vimeoMatch && vimeoMatch[1]) {
+    return {
+      kind: "iframe",
+      src: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`,
+    };
+  }
+
+  // Native video asset
+  if (
+    /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(trimmed) ||
+    trimmed.startsWith("data:video/")
+  ) {
+    return { kind: "native", src: trimmed };
+  }
+
+  return null;
+}
+
+function isVideoAsset(url?: string): boolean {
+  return Boolean(parseVideoEmbed(url));
+}
+
+async function compressImageFile(file: File): Promise<File> {
+  if (!file.type.startsWith("image/") || file.type === "image/gif") {
+    return file;
+  }
+  return new Promise((resolve) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const maxDim = 2200;
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(file);
+        return;
+      }
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (blob && blob.size < file.size) {
+            const safeName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+            resolve(new File([blob], safeName, { type: "image/jpeg" }));
+          } else {
+            resolve(file);
+          }
+        },
+        "image/jpeg",
+        0.86
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(file);
+    };
+    img.src = objectUrl;
+  });
 }
 
 /**
@@ -159,9 +246,16 @@ function EditableText({
 export default function PortfolioApp() {
   const [content, setContent] = useState<SiteContent>(DEFAULT_SITE_CONTENT);
   const [editMode, setEditMode] = useState<boolean>(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
-    "idle"
-  );
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState<boolean>(false);
+  const [showAdminLoginModal, setShowAdminLoginModal] =
+    useState<boolean>(false);
+  const [adminPasswordInput, setAdminPasswordInput] = useState<string>("");
+  const [adminAuthError, setAdminAuthError] = useState<string | null>(null);
+  const [hasGitHubToken, setHasGitHubToken] = useState<boolean>(false);
+
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "saving" | "saved" | "local-only"
+  >("idle");
   const [uploadingLabel, setUploadingLabel] = useState<string | null>(null);
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
 
@@ -224,13 +318,125 @@ export default function PortfolioApp() {
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Check Admin Session & Keyboard/URL Unlock Triggers
+  useEffect(() => {
+    async function checkAuthAndParams() {
+      let authed = false;
+      try {
+        const res = await fetch("/api/auth", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          authed = Boolean(data.authenticated);
+          setIsAdminUnlocked(authed);
+          setHasGitHubToken(Boolean(data.hasGitHubToken));
+        }
+      } catch {
+        // Ignore
+      }
+
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has("admin") || params.has("edit")) {
+          if (authed) {
+            setEditMode(true);
+          } else {
+            setShowAdminLoginModal(true);
+          }
+        }
+      }
+    }
+    checkAuthAndParams();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "e") {
+        e.preventDefault();
+        setIsAdminUnlocked((alreadyAuthed) => {
+          if (alreadyAuthed) {
+            setEditMode((prev) => !prev);
+          } else {
+            setShowAdminLoginModal(true);
+          }
+          return alreadyAuthed;
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminAuthError(null);
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: adminPasswordInput }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setIsAdminUnlocked(true);
+        setHasGitHubToken(Boolean(data.hasGitHubToken));
+        setEditMode(true);
+        setShowAdminLoginModal(false);
+        setAdminPasswordInput("");
+      } else {
+        setAdminAuthError(data.error || "Incorrect admin password.");
+      }
+    } catch {
+      setAdminAuthError("Could not verify password. Please try again.");
+    }
+  };
+
+  const handleAdminLogout = async () => {
+    await persistContent(content, true);
+    try {
+      await fetch("/api/auth", { method: "DELETE" });
+    } catch {
+      // Ignore
+    }
+    setEditMode(false);
+    setIsAdminUnlocked(false);
+  };
+
+  const promptVideoUrl = (onSet: (url: string) => void, currentUrl?: string) => {
+    const input = window.prompt(
+      "Paste a Vimeo URL, YouTube URL, or direct MP4/WebM video link:",
+      currentUrl || ""
+    );
+    if (input !== null && input.trim()) {
+      onSet(input.trim());
+    }
+  };
+
   // Load saved site content from API, IndexedDB, or localStorage on mount
   useEffect(() => {
     async function loadContent() {
       let browserSaved: StoredSiteContent | null = null;
       let serverSaved: StoredSiteContent | null = null;
 
-      // 1. Load from IndexedDB (supports large images & videos)
+      // 1. Check server / GitHub file via API route first (global source of truth for all devices)
+      try {
+        const res = await fetch("/api/content", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          if (
+            data &&
+            data.hasSavedContent &&
+            data.content &&
+            Array.isArray(data.content.projects)
+          ) {
+            serverSaved = data.content as StoredSiteContent;
+          } else if (data && Array.isArray(data.projects)) {
+            serverSaved = data as StoredSiteContent;
+          }
+        }
+      } catch {
+        // Offline or serverless fallback
+      }
+
+      // 2. Load from IndexedDB (supports large images & videos)
       try {
         const idbData = await loadFromIndexedDB();
         if (idbData && Array.isArray(idbData.projects)) {
@@ -240,7 +446,7 @@ export default function PortfolioApp() {
         // Ignore IDB errors
       }
 
-      // 2. Check localStorage fallback
+      // 3. Check localStorage fallback
       try {
         const cached = localStorage.getItem(STORAGE_KEY);
         if (cached) {
@@ -258,27 +464,6 @@ export default function PortfolioApp() {
         // Ignore localStorage read errors
       }
 
-      // 3. Check server file via API route
-      try {
-        const res = await fetch("/api/content", { cache: "no-store" });
-        if (res.ok) {
-          const data = await res.json();
-          if (
-            data &&
-            data.hasSavedContent &&
-            data.content &&
-            Array.isArray(data.content.projects)
-          ) {
-            serverSaved = data.content as StoredSiteContent;
-          } else if (data && Array.isArray(data.projects)) {
-            // Backward compatibility if old route format
-            serverSaved = data as StoredSiteContent;
-          }
-        }
-      } catch {
-        // Offline or serverless fallback
-      }
-
       // Choose whichever source has the newest edits
       if (serverSaved && browserSaved) {
         const serverTime = serverSaved.updatedAt || 0;
@@ -286,17 +471,17 @@ export default function PortfolioApp() {
         const newest = browserTime > serverTime ? browserSaved : serverSaved;
         setContent(newest);
         await saveToIndexedDB(newest);
-      } else if (browserSaved) {
-        setContent(browserSaved);
       } else if (serverSaved) {
         setContent(serverSaved);
         await saveToIndexedDB(serverSaved);
+      } else if (browserSaved) {
+        setContent(browserSaved);
       }
     }
     loadContent();
   }, []);
 
-  // Persist helper (saves immediately to IndexedDB + localStorage, and syncs to API route)
+  // Persist helper (saves immediately to IndexedDB + localStorage, and syncs to API/GitHub)
   const persistContent = async (
     updated: SiteContent,
     immediateServerSync: boolean = false
@@ -319,23 +504,32 @@ export default function PortfolioApp() {
       // Exceeded 5MB localStorage quota; IndexedDB already stores the full payload
     }
 
-    // 3. Sync to server file (/api/content), debounced during rapid typing
+    // 3. Sync to server/GitHub file (/api/content), debounced during rapid typing
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current);
     }
 
     const syncToServer = async () => {
       try {
-        await fetch("/api/content", {
+        const res = await fetch("/api/content", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.savedToGitHub || data.savedToLocal) {
+            setSaveStatus("saved");
+          } else {
+            setSaveStatus("local-only");
+          }
+        } else {
+          setSaveStatus("local-only");
+        }
       } catch {
-        // Saved in IndexedDB / localStorage as fallback
+        setSaveStatus("local-only");
       }
-      setSaveStatus("saved");
-      setTimeout(() => setSaveStatus("idle"), 2000);
+      setTimeout(() => setSaveStatus("idle"), 2500);
     };
 
     if (immediateServerSync) {
@@ -357,11 +551,14 @@ export default function PortfolioApp() {
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !pendingUploadCallback.current) return;
+    const rawFile = e.target.files?.[0];
+    if (!rawFile || !pendingUploadCallback.current) return;
 
     const callback = pendingUploadCallback.current;
-    setUploadingLabel(file.name);
+    setUploadingLabel(rawFile.name);
+
+    // Compress large images client-side so they upload fast and never exceed serverless limits
+    const file = await compressImageFile(rawFile);
 
     try {
       const form = new FormData();
@@ -383,7 +580,7 @@ export default function PortfolioApp() {
       // Fallback to DataURL if offline/static
     }
 
-    // Fallback: convert to base64 DataURL
+    // Fallback: convert compressed image/video to base64 DataURL (which also syncs inside site-content.json!)
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result === "string") {
@@ -509,99 +706,120 @@ export default function PortfolioApp() {
       {/* Subtle Film Grain Overlay */}
       <div className="film-grain-overlay" aria-hidden="true" />
 
-      {/* FLOATING STUDIO EDITOR BAR (Bottom Right) */}
-      <div className="fixed bottom-5 right-5 z-50 flex flex-wrap items-center gap-2 bg-[#171715] text-[#F4F2ED] px-4 py-2.5 shadow-2xl border border-[#B7A28B]/50 rounded-sm">
-        <button
-          onClick={() => {
-            if (editMode) {
-              persistContent(content, true);
-            }
-            setEditMode(!editMode);
-          }}
-          className={`inline-flex items-center space-x-2 text-[10px] tracking-[0.2em] uppercase px-3 py-1.5 transition-colors ${
-            editMode
-              ? "bg-[#B7A28B] text-[#171715] font-medium"
-              : "bg-[#373632] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
-          }`}
-        >
-          {editMode ? (
+      {/* FLOATING STUDIO EDITOR BAR (Hidden from normal visitors; shown only when Admin is unlocked) */}
+      {isAdminUnlocked && (
+        <div className="fixed bottom-5 right-5 z-50 flex flex-wrap items-center gap-2 bg-[#171715] text-[#F4F2ED] px-4 py-2.5 shadow-2xl border border-[#B7A28B]/50 rounded-sm">
+          <button
+            onClick={() => {
+              if (editMode) {
+                persistContent(content, true);
+              }
+              setEditMode(!editMode);
+            }}
+            className={`inline-flex items-center space-x-2 text-[10px] tracking-[0.2em] uppercase px-3 py-1.5 transition-colors ${
+              editMode
+                ? "bg-[#B7A28B] text-[#171715] font-medium"
+                : "bg-[#373632] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+            }`}
+          >
+            {editMode ? (
+              <>
+                <Check className="w-3.5 h-3.5" />
+                <span>DONE EDITING</span>
+              </>
+            ) : (
+              <>
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>EDIT WEBSITE</span>
+              </>
+            )}
+          </button>
+
+          {editMode && (
             <>
-              <Check className="w-3.5 h-3.5" />
-              <span>DONE EDITING</span>
-            </>
-          ) : (
-            <>
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>EDIT WEBSITE</span>
+              <button
+                onClick={() => setShowAddProjectModal(true)}
+                className="inline-flex items-center space-x-1.5 text-[10px] tracking-[0.18em] uppercase px-3 py-1.5 bg-[#373632] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>NEW PROJECT</span>
+              </button>
+
+              <button
+                onClick={() => persistContent(content, true)}
+                className="inline-flex items-center space-x-1.5 text-[10px] tracking-[0.18em] uppercase px-3 py-1.5 bg-[#373632] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] transition-colors"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>
+                  {saveStatus === "saving"
+                    ? "SAVING..."
+                    : saveStatus === "saved"
+                    ? "SAVED TO CLOUD"
+                    : saveStatus === "local-only"
+                    ? "SAVED IN BROWSER"
+                    : "SAVE"}
+                </span>
+              </button>
+
+              <button
+                onClick={async () => {
+                  if (
+                    window.confirm(
+                      "Reset all website text, images, and projects back to the original defaults?"
+                    )
+                  ) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    await clearIndexedDB();
+                    try {
+                      await fetch("/api/content", { method: "DELETE" });
+                    } catch {
+                      // Ignore
+                    }
+                    setContent(DEFAULT_SITE_CONTENT);
+                    setSaveStatus("saved");
+                    setTimeout(() => setSaveStatus("idle"), 2000);
+                  }
+                }}
+                title="Reset to default content"
+                className="inline-flex items-center space-x-1 text-[10px] tracking-[0.18em] uppercase px-2.5 py-1.5 text-[#D8D5CD] hover:text-[#F4F2ED] transition-colors"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">RESET</span>
+              </button>
             </>
           )}
-        </button>
 
-        {editMode && (
-          <>
-            <button
-              onClick={() => setShowAddProjectModal(true)}
-              className="inline-flex items-center space-x-1.5 text-[10px] tracking-[0.18em] uppercase px-3 py-1.5 bg-[#373632] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>NEW PROJECT</span>
-            </button>
+          <button
+            onClick={handleAdminLogout}
+            title="Lock editor and hide toolbar"
+            className="inline-flex items-center space-x-1 text-[10px] tracking-[0.18em] uppercase px-2.5 py-1.5 text-[#8C8980] hover:text-[#F4F2ED] transition-colors border-l border-[#B7A28B]/30 pl-3"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">LOCK</span>
+          </button>
 
-            <button
-              onClick={() => persistContent(content, true)}
-              className="inline-flex items-center space-x-1.5 text-[10px] tracking-[0.18em] uppercase px-3 py-1.5 bg-[#373632] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] transition-colors"
-            >
-              <Save className="w-3.5 h-3.5" />
-              <span>
-                {saveStatus === "saving"
-                  ? "SAVING..."
-                  : saveStatus === "saved"
-                  ? "SAVED"
-                  : "SAVE"}
-              </span>
-            </button>
-
-            <button
-              onClick={async () => {
-                if (
-                  window.confirm(
-                    "Reset all website text, images, and projects back to the original defaults?"
-                  )
-                ) {
-                  localStorage.removeItem(STORAGE_KEY);
-                  await clearIndexedDB();
-                  try {
-                    await fetch("/api/content", { method: "DELETE" });
-                  } catch {
-                    // Ignore
-                  }
-                  setContent(DEFAULT_SITE_CONTENT);
-                  setSaveStatus("saved");
-                  setTimeout(() => setSaveStatus("idle"), 2000);
-                }
-              }}
-              title="Reset to default content"
-              className="inline-flex items-center space-x-1 text-[10px] tracking-[0.18em] uppercase px-2.5 py-1.5 text-[#D8D5CD] hover:text-[#F4F2ED] transition-colors"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">RESET</span>
-            </button>
-          </>
-        )}
-
-        {uploadingLabel && (
-          <span className="text-[10px] tracking-wider text-[#B7A28B] pl-2">
-            Uploading {uploadingLabel}...
-          </span>
-        )}
-      </div>
+          {uploadingLabel && (
+            <span className="text-[10px] tracking-wider text-[#B7A28B] pl-2">
+              Uploading {uploadingLabel}...
+            </span>
+          )}
+        </div>
+      )}
 
       {/* EDIT MODE HELPER BANNER */}
       {editMode && (
         <div className="bg-[#171715] text-[#F4F2ED] text-[10px] tracking-[0.2em] uppercase py-2 px-5 text-center border-b border-[#B7A28B]/40">
           EDIT MODE ACTIVE — Click any text to edit in-place, or use the{" "}
-          <span className="text-[#B7A28B]">Upload / Remove / + Add</span>{" "}
-          buttons on any image, video, or section. Changes save automatically.
+          <span className="text-[#B7A28B]">
+            Upload / Video Link / Remove / + Add
+          </span>{" "}
+          buttons on any section.
+          {!hasGitHubToken && saveStatus === "local-only" && (
+            <span className="block text-[9px] text-[#B7A28B] mt-1">
+              Note: Add GITHUB_TOKEN in your hosting environment variables to
+              sync edits across all computers &amp; phones.
+            </span>
+          )}
         </div>
       )}
 
@@ -830,7 +1048,7 @@ export default function PortfolioApp() {
 
               {/* Edit Hero Media Controls */}
               {editMode && (
-                <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+                <div className="absolute top-4 right-4 z-20 flex flex-wrap items-center gap-2">
                   <button
                     onClick={() =>
                       triggerFileUpload((url, isVid) => {
@@ -855,6 +1073,22 @@ export default function PortfolioApp() {
                   >
                     <Upload className="w-3.5 h-3.5" />
                     <span>UPLOAD HERO IMAGE / VIDEO</span>
+                  </button>
+                  <button
+                    onClick={() =>
+                      promptVideoUrl(
+                        (url) =>
+                          persistContent({
+                            ...content,
+                            hero: { ...content.hero, videoUrl: url },
+                          }),
+                        content.hero.videoUrl
+                      )
+                    }
+                    className="inline-flex items-center space-x-1.5 bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-[0.18em] uppercase px-3 py-2 border border-[#B7A28B] hover:bg-[#B7A28B] hover:text-[#171715] transition-colors"
+                  >
+                    <Link2 className="w-3.5 h-3.5" />
+                    <span>VIDEO URL</span>
                   </button>
                   {content.hero.videoUrl && (
                     <button
@@ -1933,7 +2167,7 @@ export default function PortfolioApp() {
                             </span>
                           )}
                           {editMode && (
-                            <div className="absolute top-2 right-2 z-20 flex items-center gap-1.5">
+                            <div className="absolute top-2 right-2 z-20 flex flex-wrap items-center gap-1.5">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1959,7 +2193,28 @@ export default function PortfolioApp() {
                                 className="px-2.5 py-1 bg-[#171715]/90 text-[#F4F2ED] text-[9px] tracking-wider uppercase border border-[#B7A28B] inline-flex items-center space-x-1"
                               >
                                 <Video className="w-3 h-3" />
-                                <span>UPLOAD VIDEO / COVER</span>
+                                <span>UPLOAD COVER / CLIP</span>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  promptVideoUrl((url) => {
+                                    const next = content.projects.map((p) =>
+                                      p.id === film.id
+                                        ? { ...p, videoUrl: url }
+                                        : p
+                                    );
+                                    persistContent({
+                                      ...content,
+                                      projects: next,
+                                    });
+                                  }, film.videoUrl);
+                                }}
+                                title="Paste Vimeo, YouTube, or MP4 video URL"
+                                className="px-2.5 py-1 bg-[#171715]/90 text-[#F4F2ED] text-[9px] tracking-wider uppercase border border-[#B7A28B] inline-flex items-center space-x-1"
+                              >
+                                <Link2 className="w-3 h-3" />
+                                <span>VIDEO URL</span>
                               </button>
                               <button
                                 onClick={(e) => handleDeleteProject(film.id, e)}
@@ -2094,20 +2349,37 @@ export default function PortfolioApp() {
                   }}
                   className="relative aspect-[16/11] w-full overflow-hidden cursor-pointer group"
                 >
-                  {isVideoAsset(currentProject.videoUrl) ? (
-                    <video
-                      src={currentProject.videoUrl}
-                      controls
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <img
-                      src={currentProject.coverImage}
-                      alt={currentProject.title}
-                      className="w-full h-full object-cover editorial-image-grade group-hover:scale-[1.02]"
-                    />
-                  )}
+                  {(() => {
+                    const parsedVid = parseVideoEmbed(currentProject.videoUrl);
+                    if (parsedVid?.kind === "iframe") {
+                      return (
+                        <iframe
+                          src={parsedVid.src}
+                          title={currentProject.title}
+                          allow="autoplay; fullscreen; picture-in-picture"
+                          allowFullScreen
+                          className="w-full h-full border-0"
+                        />
+                      );
+                    }
+                    if (parsedVid?.kind === "native") {
+                      return (
+                        <video
+                          src={parsedVid.src}
+                          controls
+                          playsInline
+                          className="w-full h-full object-cover"
+                        />
+                      );
+                    }
+                    return (
+                      <img
+                        src={currentProject.coverImage}
+                        alt={currentProject.title}
+                        className="w-full h-full object-cover editorial-image-grade group-hover:scale-[1.02]"
+                      />
+                    );
+                  })()}
                   {!isVideoAsset(currentProject.videoUrl) &&
                     (currentProject.type === "film" ? (
                       <div className="absolute inset-0 bg-[#171715]/30 flex items-center justify-center group-hover:bg-[#171715]/45 transition-colors pointer-events-none">
@@ -2122,7 +2394,7 @@ export default function PortfolioApp() {
                     ))}
 
                   {editMode && (
-                    <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+                    <div className="absolute top-3 right-3 z-20 flex flex-wrap items-center gap-2">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -2142,6 +2414,32 @@ export default function PortfolioApp() {
                         <Upload className="w-3.5 h-3.5" />
                         <span>UPLOAD MAIN IMAGE / VIDEO</span>
                       </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          promptVideoUrl((url) => {
+                            updateCurrentProject({
+                              videoUrl: url,
+                              type: "film",
+                            });
+                          }, currentProject.videoUrl);
+                        }}
+                        className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                      >
+                        <Link2 className="w-3.5 h-3.5" />
+                        <span>VIDEO URL (VIMEO / YT)</span>
+                      </button>
+                      {currentProject.videoUrl && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateCurrentProject({ videoUrl: undefined });
+                          }}
+                          className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-2.5 py-2 border border-[#B7A28B] hover:bg-red-800"
+                        >
+                          REMOVE VIDEO
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -2989,7 +3287,19 @@ export default function PortfolioApp() {
             >
               <Mail className="w-3.5 h-3.5" />
             </a>
-            <span>&copy; 2025 {content.brandName}</span>
+            <span
+              onDoubleClick={() => {
+                if (isAdminUnlocked) {
+                  setEditMode((prev) => !prev);
+                } else {
+                  setShowAdminLoginModal(true);
+                }
+              }}
+              title="Double-click for Studio Admin"
+              className="select-none cursor-default"
+            >
+              &copy; 2025 {content.brandName}
+            </span>
           </div>
         </div>
 
@@ -3006,6 +3316,76 @@ export default function PortfolioApp() {
           </div>
         </div>
       </footer>
+
+      {/* STUDIO ADMIN PASSWORD LOGIN MODAL */}
+      {showAdminLoginModal && (
+        <div
+          onClick={() => setShowAdminLoginModal(false)}
+          className="fixed inset-0 z-50 bg-[#171715]/90 flex items-center justify-center p-4 sm:p-6"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-sm w-full bg-[#F4F2ED] text-[#373632] border border-[#B7A28B] p-6 sm:p-8 space-y-5 shadow-2xl"
+          >
+            <div className="flex items-center justify-between border-b border-[#B7A28B]/40 pb-3">
+              <div className="flex items-center space-x-2">
+                <Lock className="w-4 h-4 text-[#373632]" />
+                <h3 className="font-serif text-xl text-[#373632]">
+                  Studio Admin Access
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowAdminLoginModal(false)}
+                className="text-[#8C8980] hover:text-[#171715]"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAdminLogin} className="space-y-4 text-xs">
+              <p className="text-[#8C8980] leading-relaxed">
+                Enter your studio admin password to unlock inline website
+                editing and media uploads.
+              </p>
+
+              <div>
+                <label className="block text-[10px] tracking-[0.18em] uppercase text-[#8C8980] mb-1.5">
+                  Admin Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  autoFocus
+                  value={adminPasswordInput}
+                  onChange={(e) => setAdminPasswordInput(e.target.value)}
+                  placeholder="Enter password..."
+                  className="w-full bg-[#D8D5CD]/45 border border-[#B7A28B]/60 px-3 py-2.5 text-[#373632] focus:outline-none focus:border-[#171715]"
+                />
+              </div>
+
+              {adminAuthError && (
+                <p className="text-[11px] text-red-700">{adminAuthError}</p>
+              )}
+
+              <div className="pt-2 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAdminLoginModal(false)}
+                  className="px-4 py-2 text-[10px] tracking-widest uppercase text-[#8C8980]"
+                >
+                  CANCEL
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-[#171715] text-[#F4F2ED] hover:bg-[#373632] text-[10px] tracking-widest uppercase"
+                >
+                  UNLOCK EDITOR
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ADD NEW PROJECT MODAL */}
       {showAddProjectModal && (
@@ -3151,9 +3531,9 @@ export default function PortfolioApp() {
 
               <div className="space-y-2">
                 <label className="block text-[10px] tracking-[0.18em] uppercase text-[#8C8980]">
-                  Cover Image or Video File
+                  Cover Image or Video (Upload or Vimeo/YouTube Link)
                 </label>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <button
                     type="button"
                     onClick={() =>
@@ -3175,7 +3555,23 @@ export default function PortfolioApp() {
                     className="px-4 py-2 bg-[#171715] text-[#F4F2ED] text-[10px] tracking-widest uppercase inline-flex items-center space-x-1.5"
                   >
                     <Upload className="w-3.5 h-3.5" />
-                    <span>UPLOAD IMAGE / VIDEO</span>
+                    <span>UPLOAD IMAGE / CLIP</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      promptVideoUrl((url) => {
+                        setNewProjectForm({
+                          ...newProjectForm,
+                          videoUrl: url,
+                          type: "film",
+                        });
+                      }, newProjectForm.videoUrl)
+                    }
+                    className="px-4 py-2 bg-[#373632] text-[#F4F2ED] text-[10px] tracking-widest uppercase inline-flex items-center space-x-1.5"
+                  >
+                    <Link2 className="w-3.5 h-3.5" />
+                    <span>PASTE VIMEO / YOUTUBE URL</span>
                   </button>
                   {newProjectForm.videoUrl && (
                     <span className="text-[10px] text-[#373632] underline">
@@ -3251,51 +3647,92 @@ export default function PortfolioApp() {
               </button>
             </div>
             <div className="relative aspect-video w-full bg-[#373632] overflow-hidden flex items-center justify-center">
-              {isVideoAsset(activeVideoModal.videoUrl) ? (
-                <video
-                  src={activeVideoModal.videoUrl}
-                  controls
-                  autoPlay
-                  playsInline
-                  className="w-full h-full object-contain bg-black"
-                />
-              ) : (
-                <>
-                  <img
-                    src={activeVideoModal.coverImage}
-                    alt={activeVideoModal.title}
-                    className="w-full h-full object-cover opacity-50"
-                  />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-3">
-                    <div className="w-14 h-14 rounded-full border border-[#F4F2ED] flex items-center justify-center bg-[#171715]/60">
-                      <Play className="w-5 h-5 text-[#F4F2ED] fill-[#F4F2ED] ml-0.5" />
+              {(() => {
+                const parsedVid = parseVideoEmbed(activeVideoModal.videoUrl);
+                if (parsedVid?.kind === "iframe") {
+                  return (
+                    <iframe
+                      src={parsedVid.src}
+                      title={activeVideoModal.title}
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full border-0 bg-black"
+                    />
+                  );
+                }
+                if (parsedVid?.kind === "native") {
+                  return (
+                    <video
+                      src={parsedVid.src}
+                      controls
+                      autoPlay
+                      playsInline
+                      className="w-full h-full object-contain bg-black"
+                    />
+                  );
+                }
+                return (
+                  <>
+                    <img
+                      src={activeVideoModal.coverImage}
+                      alt={activeVideoModal.title}
+                      className="w-full h-full object-cover opacity-50"
+                    />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-3">
+                      <div className="w-14 h-14 rounded-full border border-[#F4F2ED] flex items-center justify-center bg-[#171715]/60">
+                        <Play className="w-5 h-5 text-[#F4F2ED] fill-[#F4F2ED] ml-0.5" />
+                      </div>
+                      <p className="text-xs tracking-[0.2em] uppercase text-[#F4F2ED]">
+                        Screening Preview — {activeVideoModal.title}
+                      </p>
+                      {isAdminUnlocked && (
+                        <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                          <button
+                            onClick={() =>
+                              triggerFileUpload((url) => {
+                                const next = content.projects.map((p) =>
+                                  p.id === activeVideoModal.id
+                                    ? { ...p, videoUrl: url }
+                                    : p
+                                );
+                                persistContent({ ...content, projects: next });
+                                setActiveVideoModal({
+                                  ...activeVideoModal,
+                                  videoUrl: url,
+                                });
+                              })
+                            }
+                            className="px-4 py-2 bg-[#B7A28B] text-[#171715] text-[10px] tracking-widest uppercase font-medium inline-flex items-center space-x-1.5"
+                          >
+                            <Upload className="w-3.5 h-3.5" />
+                            <span>UPLOAD VIDEO CLIP</span>
+                          </button>
+                          <button
+                            onClick={() =>
+                              promptVideoUrl((url) => {
+                                const next = content.projects.map((p) =>
+                                  p.id === activeVideoModal.id
+                                    ? { ...p, videoUrl: url }
+                                    : p
+                                );
+                                persistContent({ ...content, projects: next });
+                                setActiveVideoModal({
+                                  ...activeVideoModal,
+                                  videoUrl: url,
+                                });
+                              }, activeVideoModal.videoUrl)
+                            }
+                            className="px-4 py-2 bg-[#171715] text-[#F4F2ED] border border-[#B7A28B] text-[10px] tracking-widest uppercase font-medium inline-flex items-center space-x-1.5"
+                          >
+                            <Link2 className="w-3.5 h-3.5" />
+                            <span>PASTE VIMEO / YOUTUBE URL</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <p className="text-xs tracking-[0.2em] uppercase text-[#F4F2ED]">
-                      Screening Preview — {activeVideoModal.title}
-                    </p>
-                    <button
-                      onClick={() =>
-                        triggerFileUpload((url) => {
-                          const next = content.projects.map((p) =>
-                            p.id === activeVideoModal.id
-                              ? { ...p, videoUrl: url }
-                              : p
-                          );
-                          persistContent({ ...content, projects: next });
-                          setActiveVideoModal({
-                            ...activeVideoModal,
-                            videoUrl: url,
-                          });
-                        })
-                      }
-                      className="px-4 py-2 bg-[#B7A28B] text-[#171715] text-[10px] tracking-widest uppercase font-medium inline-flex items-center space-x-1.5"
-                    >
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>UPLOAD VIDEO FILE (MP4/MOV)</span>
-                    </button>
-                  </div>
-                </>
-              )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
