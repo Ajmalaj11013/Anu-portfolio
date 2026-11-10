@@ -5,7 +5,7 @@
     "image": "/api/media/1794340586099-hero-desktop.jpg",
     "titleLine1": "Images with",
     "titleLine2": "a point of view.",
-    "subtitle": "PHOTOGRAPHER & FASFILM DIRECTOR",
+    "subtitle": "PHOTOGRAPHER & FASHFILM DIRECTOR",
     "description": "Fashion, form and feeling — captured through a distinct visual perspective.",
     "ctaText": "VIEW THE WORK"
   },
@@ -430,5 +430,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794341085387
+  "updatedAt": 1794341087067
 }
