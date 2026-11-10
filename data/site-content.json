@@ -69,7 +69,7 @@
       "role": "Photography & Art Direction",
       "discipline": "Fashion & Editorial",
       "description": "A study in form, movement and quiet strength. This editorial explores the relationship between the body, sculptural draped fabric and raw architectural space.",
-      "coverImage": "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1400&q=85",
+      "coverImage": "/api/media/1794311918057-_dsc0389.jpg",
       "gallery": [
         "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=85",
         "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=85",
@@ -405,5 +405,5 @@
       "image": "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=85"
     }
   ],
-  "updatedAt": 1794311919445
+  "updatedAt": 1794311919634
 }
