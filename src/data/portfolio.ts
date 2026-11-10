@@ -49,9 +49,29 @@ export interface FilmCategoryItem {
   image: string;
 }
 
+export interface ResponsiveImageConfig {
+  desktopSrc?: string;
+  mobileSrc?: string;
+  sourceSrc?: string;
+  mobileSourceSrc?: string;
+  desktopWidth?: number;
+  desktopHeight?: number;
+  mobileWidth?: number;
+  mobileHeight?: number;
+  desktopZoom?: number;
+  desktopPanX?: number;
+  desktopPanY?: number;
+  mobileZoom?: number;
+  mobilePanX?: number;
+  mobilePanY?: number;
+  desktopFit?: "cover" | "contain";
+  mobileFit?: "cover" | "contain";
+}
+
 export interface SiteContent {
   brandName: string;
   brandSubtitle: string;
+  imageSettings?: Record<string, ResponsiveImageConfig>;
   hero: {
     image: string;
     videoUrl?: string;

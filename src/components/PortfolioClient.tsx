@@ -6,6 +6,7 @@ import {
   SiteContent,
   Project,
   CategorySlug,
+  ResponsiveImageConfig,
 } from "@/data/portfolio";
 import {
   ArrowRight,
@@ -28,6 +29,9 @@ import {
   Check,
   Lock,
   Link2,
+  Crop,
+  Monitor,
+  Smartphone,
 } from "lucide-react";
 
 type ViewState =
@@ -198,6 +202,120 @@ async function compressImageFile(file: File): Promise<File> {
   });
 }
 
+function drawResizedToCanvas(
+  canvas: HTMLCanvasElement,
+  img: HTMLImageElement,
+  outWidth: number,
+  outHeight: number,
+  zoom: number,
+  panX: number,
+  panY: number,
+  fit: "cover" | "contain"
+) {
+  canvas.width = outWidth;
+  canvas.height = outHeight;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  ctx.fillStyle = fit === "contain" ? "#F4F2ED" : "#171715";
+  ctx.fillRect(0, 0, outWidth, outHeight);
+
+  const imgW = img.naturalWidth || img.width || 1;
+  const imgH = img.naturalHeight || img.height || 1;
+  const baseScale =
+    fit === "contain"
+      ? Math.min(outWidth / imgW, outHeight / imgH)
+      : Math.max(outWidth / imgW, outHeight / imgH);
+
+  const scale = baseScale * (zoom / 100);
+  const drawW = imgW * scale;
+  const drawH = imgH * scale;
+
+  const dx = (outWidth - drawW) / 2 + (panX / 100) * outWidth * 0.65;
+  const dy = (outHeight - drawH) / 2 + (panY / 100) * outHeight * 0.65;
+
+  ctx.drawImage(img, dx, dy, drawW, drawH);
+}
+
+async function renderResizedFile(
+  srcUrl: string,
+  outWidth: number,
+  outHeight: number,
+  zoom: number,
+  panX: number,
+  panY: number,
+  fit: "cover" | "contain",
+  fileName: string
+): Promise<{ file: File; dataUrl: string }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      drawResizedToCanvas(
+        canvas,
+        img,
+        outWidth,
+        outHeight,
+        zoom,
+        panX,
+        panY,
+        fit
+      );
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve({
+              file: new File([blob], fileName, { type: "image/jpeg" }),
+              dataUrl,
+            });
+          } else {
+            reject(new Error("Canvas toBlob failed"));
+          }
+        },
+        "image/jpeg",
+        0.88
+      );
+    };
+    img.onerror = () => reject(new Error("Could not load source image"));
+    img.src = srcUrl;
+  });
+}
+
+/**
+ * Renders the stored Mobile resized image on mobile screens (<=767px)
+ * and the stored Desktop resized image on desktop screens (>=768px).
+ */
+function ResponsivePic({
+  slotKey,
+  src,
+  alt,
+  className = "",
+  imageSettings,
+}: {
+  slotKey: string;
+  src: string;
+  alt: string;
+  className?: string;
+  imageSettings?: Record<string, ResponsiveImageConfig>;
+}) {
+  const cfg = imageSettings?.[slotKey];
+  const desktopUrl = src;
+  const mobileUrl = cfg?.mobileSrc;
+
+  if (mobileUrl) {
+    return (
+      <picture className="contents">
+        <source media="(max-width: 767px)" srcSet={mobileUrl} />
+        <img src={desktopUrl} alt={alt} className={className} />
+      </picture>
+    );
+  }
+
+  return <img src={desktopUrl} alt={alt} className={className} />;
+}
+
 /**
  * Inline Editable Text Component
  */
@@ -285,6 +403,39 @@ export default function PortfolioClient({
   const pendingUploadCallback = useRef<
     ((url: string, isVideo: boolean) => void) | null
   >(null);
+
+  // Desktop & Mobile Image Resizer Studio state
+  const [resizerModal, setResizerModal] = useState<{
+    slotKey: string;
+    label: string;
+    activeTab: "desktop" | "mobile" | "both";
+    sourceSrc: string;
+    mobileSourceSrc: string;
+    desktopWidth: number;
+    desktopHeight: number;
+    mobileWidth: number;
+    mobileHeight: number;
+    desktopZoom: number;
+    desktopPanX: number;
+    desktopPanY: number;
+    mobileZoom: number;
+    mobilePanX: number;
+    mobilePanY: number;
+    desktopFit: "cover" | "contain";
+    mobileFit: "cover" | "contain";
+    isSaving: boolean;
+    onApplyDesktop: (base: SiteContent, desktopUrl: string) => SiteContent;
+  } | null>(null);
+
+  const desktopCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const mobileCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const dragStateRef = useRef<{
+    target: "desktop" | "mobile";
+    startX: number;
+    startY: number;
+    initialPanX: number;
+    initialPanY: number;
+  } | null>(null);
 
   // New project form state
   const [newProjectForm, setNewProjectForm] = useState<{
@@ -607,6 +758,235 @@ export default function PortfolioClient({
       setUploadingLabel(null);
     };
     reader.readAsDataURL(file);
+  };
+
+  // Helper to reset a slot's mobile override when a brand-new source image is uploaded
+  const withFreshImageSlot = (
+    base: SiteContent,
+    slotKey: string,
+    newUrl: string
+  ): SiteContent => {
+    const nextSettings = { ...(base.imageSettings || {}) };
+    nextSettings[slotKey] = {
+      sourceSrc: newUrl,
+      mobileSourceSrc: newUrl,
+      desktopSrc: newUrl,
+      mobileSrc: undefined,
+    };
+    return {
+      ...base,
+      imageSettings: nextSettings,
+    };
+  };
+
+  // Open the Desktop & Mobile Image Resizer Studio for any image slot
+  const openImageResizer = ({
+    slotKey,
+    label,
+    currentSrc,
+    defaultDesktopWidth = 1600,
+    defaultDesktopHeight = 1000,
+    defaultMobileWidth = 900,
+    defaultMobileHeight = 1150,
+    onApplyDesktop,
+  }: {
+    slotKey: string;
+    label: string;
+    currentSrc: string;
+    defaultDesktopWidth?: number;
+    defaultDesktopHeight?: number;
+    defaultMobileWidth?: number;
+    defaultMobileHeight?: number;
+    onApplyDesktop: (base: SiteContent, desktopUrl: string) => SiteContent;
+  }) => {
+    const existing = content.imageSettings?.[slotKey];
+    const source = existing?.sourceSrc || currentSrc;
+    const mobileSource = existing?.mobileSourceSrc || source;
+
+    setResizerModal({
+      slotKey,
+      label,
+      activeTab: "both",
+      sourceSrc: source,
+      mobileSourceSrc: mobileSource,
+      desktopWidth: existing?.desktopWidth || defaultDesktopWidth,
+      desktopHeight: existing?.desktopHeight || defaultDesktopHeight,
+      mobileWidth: existing?.mobileWidth || defaultMobileWidth,
+      mobileHeight: existing?.mobileHeight || defaultMobileHeight,
+      desktopZoom: existing?.desktopZoom || 100,
+      desktopPanX: existing?.desktopPanX || 0,
+      desktopPanY: existing?.desktopPanY || 0,
+      mobileZoom: existing?.mobileZoom || 100,
+      mobilePanX: existing?.mobilePanX || 0,
+      mobilePanY: existing?.mobilePanY || 0,
+      desktopFit: existing?.desktopFit || "cover",
+      mobileFit: existing?.mobileFit || "cover",
+      isSaving: false,
+      onApplyDesktop,
+    });
+  };
+
+  // Live render Desktop & Mobile preview canvases whenever resizer settings change
+  useEffect(() => {
+    if (!resizerModal) return;
+
+    if (
+      (resizerModal.activeTab === "desktop" ||
+        resizerModal.activeTab === "both") &&
+      desktopCanvasRef.current
+    ) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        if (desktopCanvasRef.current) {
+          drawResizedToCanvas(
+            desktopCanvasRef.current,
+            img,
+            resizerModal.desktopWidth,
+            resizerModal.desktopHeight,
+            resizerModal.desktopZoom,
+            resizerModal.desktopPanX,
+            resizerModal.desktopPanY,
+            resizerModal.desktopFit
+          );
+        }
+      };
+      img.src = resizerModal.sourceSrc;
+    }
+
+    if (
+      (resizerModal.activeTab === "mobile" ||
+        resizerModal.activeTab === "both") &&
+      mobileCanvasRef.current
+    ) {
+      const mImg = new Image();
+      mImg.crossOrigin = "anonymous";
+      mImg.onload = () => {
+        if (mobileCanvasRef.current) {
+          drawResizedToCanvas(
+            mobileCanvasRef.current,
+            mImg,
+            resizerModal.mobileWidth,
+            resizerModal.mobileHeight,
+            resizerModal.mobileZoom,
+            resizerModal.mobilePanX,
+            resizerModal.mobilePanY,
+            resizerModal.mobileFit
+          );
+        }
+      };
+      mImg.src = resizerModal.mobileSourceSrc;
+    }
+  }, [resizerModal]);
+
+  const uploadSingleGeneratedFile = async (
+    file: File,
+    fallbackDataUrl: string
+  ): Promise<string> => {
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: form,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && data.url) {
+          return data.url as string;
+        }
+      }
+    } catch {
+      // Fallback to DataURL
+    }
+    return fallbackDataUrl;
+  };
+
+  const handleSaveResizedImages = async () => {
+    if (!resizerModal || resizerModal.isSaving) return;
+
+    setResizerModal({ ...resizerModal, isSaving: true });
+    setUploadingLabel(`${resizerModal.label} (Desktop & Mobile)`);
+
+    try {
+      const safeSlot = resizerModal.slotKey.replace(/[^a-zA-Z0-9_-]/g, "-");
+
+      // 1. Render & upload separate Desktop image file
+      const desktopRendered = await renderResizedFile(
+        resizerModal.sourceSrc,
+        resizerModal.desktopWidth,
+        resizerModal.desktopHeight,
+        resizerModal.desktopZoom,
+        resizerModal.desktopPanX,
+        resizerModal.desktopPanY,
+        resizerModal.desktopFit,
+        `${safeSlot}-desktop.jpg`
+      );
+      const savedDesktopUrl = await uploadSingleGeneratedFile(
+        desktopRendered.file,
+        desktopRendered.dataUrl
+      );
+
+      // 2. Render & upload separate Mobile image file
+      const mobileRendered = await renderResizedFile(
+        resizerModal.mobileSourceSrc,
+        resizerModal.mobileWidth,
+        resizerModal.mobileHeight,
+        resizerModal.mobileZoom,
+        resizerModal.mobilePanX,
+        resizerModal.mobilePanY,
+        resizerModal.mobileFit,
+        `${safeSlot}-mobile.jpg`
+      );
+      const savedMobileUrl = await uploadSingleGeneratedFile(
+        mobileRendered.file,
+        mobileRendered.dataUrl
+      );
+
+      // 3. Apply Desktop URL to the slot and store Mobile URL + settings in content.imageSettings[slotKey]
+      const updatedWithDesktop = resizerModal.onApplyDesktop(
+        content,
+        savedDesktopUrl
+      );
+      const nextSettings: Record<string, ResponsiveImageConfig> = {
+        ...(updatedWithDesktop.imageSettings || {}),
+        [resizerModal.slotKey]: {
+          desktopSrc: savedDesktopUrl,
+          mobileSrc: savedMobileUrl,
+          sourceSrc: resizerModal.sourceSrc,
+          mobileSourceSrc: resizerModal.mobileSourceSrc,
+          desktopWidth: resizerModal.desktopWidth,
+          desktopHeight: resizerModal.desktopHeight,
+          mobileWidth: resizerModal.mobileWidth,
+          mobileHeight: resizerModal.mobileHeight,
+          desktopZoom: resizerModal.desktopZoom,
+          desktopPanX: resizerModal.desktopPanX,
+          desktopPanY: resizerModal.desktopPanY,
+          mobileZoom: resizerModal.mobileZoom,
+          mobilePanX: resizerModal.mobilePanX,
+          mobilePanY: resizerModal.mobilePanY,
+          desktopFit: resizerModal.desktopFit,
+          mobileFit: resizerModal.mobileFit,
+        },
+      };
+
+      await persistContent(
+        {
+          ...updatedWithDesktop,
+          imageSettings: nextSettings,
+        },
+        true
+      );
+
+      setUploadingLabel(null);
+      setResizerModal(null);
+    } catch {
+      setUploadingLabel(null);
+      setResizerModal({ ...resizerModal, isSaving: false });
+      window.alert(
+        "Could not resize this image directly. If it is an external image, please upload the image file from your computer first."
+      );
+    }
   };
 
   useEffect(() => {
@@ -1049,10 +1429,12 @@ export default function PortfolioClient({
                     className="w-full h-full object-cover object-center"
                   />
                 ) : (
-                  <img
+                  <ResponsivePic
+                    slotKey="hero"
                     src={content.hero.image}
                     alt="Editorial hero portrait"
                     className="w-full h-full object-cover object-center"
+                    imageSettings={content.imageSettings}
                   />
                 ))}
 
@@ -1077,14 +1459,20 @@ export default function PortfolioClient({
                             hero: { ...content.hero, videoUrl: url },
                           });
                         } else {
-                          persistContent({
-                            ...content,
-                            hero: {
-                              ...content.hero,
-                              image: url,
-                              videoUrl: undefined,
-                            },
-                          });
+                          persistContent(
+                            withFreshImageSlot(
+                              {
+                                ...content,
+                                hero: {
+                                  ...content.hero,
+                                  image: url,
+                                  videoUrl: undefined,
+                                },
+                              },
+                              "hero",
+                              url
+                            )
+                          );
                         }
                       })
                     }
@@ -1093,6 +1481,32 @@ export default function PortfolioClient({
                     <Upload className="w-3.5 h-3.5" />
                     <span>UPLOAD HERO IMAGE / VIDEO</span>
                   </button>
+                  {!isVideoAsset(content.hero.videoUrl) && (
+                    <button
+                      onClick={() =>
+                        openImageResizer({
+                          slotKey: "hero",
+                          label: "Hero Cover Image",
+                          currentSrc: content.hero.image,
+                          defaultDesktopWidth: 1920,
+                          defaultDesktopHeight: 1080,
+                          defaultMobileWidth: 900,
+                          defaultMobileHeight: 1200,
+                          onApplyDesktop: (base, desktopUrl) => ({
+                            ...base,
+                            hero: {
+                              ...base.hero,
+                              image: desktopUrl,
+                            },
+                          }),
+                        })
+                      }
+                      className="inline-flex items-center space-x-1.5 bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-[0.18em] uppercase px-3 py-2 border border-[#B7A28B] hover:bg-[#B7A28B] hover:text-[#171715] transition-colors"
+                    >
+                      <Crop className="w-3.5 h-3.5" />
+                      <span>RESIZE (DESKTOP / MOBILE)</span>
+                    </button>
+                  )}
                   <button
                     onClick={() =>
                       promptVideoUrl(
@@ -1370,10 +1784,12 @@ export default function PortfolioClient({
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <img
+                          <ResponsivePic
+                            slotKey={`project-cover-${item.id}`}
                             src={item.coverImage}
                             alt={item.title}
                             className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
+                            imageSettings={content.imageSettings}
                           />
                         )}
                         {item.type === "film" && (
@@ -1402,10 +1818,15 @@ export default function PortfolioClient({
                                         }
                                       : p
                                   );
-                                  persistContent({
-                                    ...content,
-                                    projects: next,
-                                  });
+                                  persistContent(
+                                    isVid
+                                      ? { ...content, projects: next }
+                                      : withFreshImageSlot(
+                                          { ...content, projects: next },
+                                          `project-cover-${item.id}`,
+                                          url
+                                        )
+                                  );
                                 });
                               }}
                               title="Upload new cover image or video"
@@ -1413,6 +1834,34 @@ export default function PortfolioClient({
                             >
                               <Upload className="w-3 h-3" />
                             </button>
+                            {!isVideoAsset(item.videoUrl) && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openImageResizer({
+                                    slotKey: `project-cover-${item.id}`,
+                                    label: `${item.title} — Cover`,
+                                    currentSrc: item.coverImage,
+                                    defaultDesktopWidth: 900,
+                                    defaultDesktopHeight: 1200,
+                                    defaultMobileWidth: 800,
+                                    defaultMobileHeight: 1000,
+                                    onApplyDesktop: (base, desktopUrl) => ({
+                                      ...base,
+                                      projects: base.projects.map((p) =>
+                                        p.id === item.id
+                                          ? { ...p, coverImage: desktopUrl }
+                                          : p
+                                      ),
+                                    }),
+                                  });
+                                }}
+                                title="Resize image for Desktop & Mobile"
+                                className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                              >
+                                <Crop className="w-3 h-3" />
+                              </button>
+                            )}
                             <button
                               onClick={(e) => handleDeleteProject(item.id, e)}
                               title="Remove project"
@@ -1529,30 +1978,65 @@ export default function PortfolioClient({
                   }}
                   className="relative aspect-[16/9] w-full overflow-hidden cursor-pointer group border border-[#B7A28B]/30"
                 >
-                  <img
+                  <ResponsivePic
+                    slotKey="home-photography-card"
                     src={content.homeCards.photographyImage}
                     alt="Photography showcase"
                     className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
+                    imageSettings={content.imageSettings}
                   />
                   {editMode && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        triggerFileUpload((url) =>
-                          persistContent({
-                            ...content,
-                            homeCards: {
-                              ...content.homeCards,
-                              photographyImage: url,
-                            },
-                          })
-                        );
-                      }}
-                      className="absolute top-3 right-3 bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-1.5 border border-[#B7A28B] inline-flex items-center space-x-1.5"
-                    >
-                      <Upload className="w-3 h-3" />
-                      <span>CHANGE IMAGE</span>
-                    </button>
+                    <div className="absolute top-3 right-3 z-20 flex flex-wrap items-center gap-1.5">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          triggerFileUpload((url) =>
+                            persistContent(
+                              withFreshImageSlot(
+                                {
+                                  ...content,
+                                  homeCards: {
+                                    ...content.homeCards,
+                                    photographyImage: url,
+                                  },
+                                },
+                                "home-photography-card",
+                                url
+                              )
+                            )
+                          );
+                        }}
+                        className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-1.5 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                      >
+                        <Upload className="w-3 h-3" />
+                        <span>CHANGE IMAGE</span>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openImageResizer({
+                            slotKey: "home-photography-card",
+                            label: "Home Photography Card",
+                            currentSrc: content.homeCards.photographyImage,
+                            defaultDesktopWidth: 1280,
+                            defaultDesktopHeight: 720,
+                            defaultMobileWidth: 900,
+                            defaultMobileHeight: 600,
+                            onApplyDesktop: (base, desktopUrl) => ({
+                              ...base,
+                              homeCards: {
+                                ...base.homeCards,
+                                photographyImage: desktopUrl,
+                              },
+                            }),
+                          });
+                        }}
+                        className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-1.5 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                      >
+                        <Crop className="w-3 h-3" />
+                        <span>RESIZE</span>
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -1609,10 +2093,12 @@ export default function PortfolioClient({
                     }}
                     className="sm:col-span-8 relative aspect-[16/9] w-full overflow-hidden cursor-pointer group border border-[#B7A28B]/30"
                   >
-                    <img
+                    <ResponsivePic
+                      slotKey="home-films-card"
                       src={content.homeCards.filmsImage}
                       alt="Films showcase"
                       className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
+                      imageSettings={content.imageSettings}
                     />
                     <div className="absolute inset-0 bg-[#171715]/30 flex items-center justify-center group-hover:bg-[#171715]/45 transition-colors pointer-events-none">
                       <div className="w-11 h-11 rounded-full border border-[#F4F2ED]/85 flex items-center justify-center bg-[#171715]/45">
@@ -1620,24 +2106,57 @@ export default function PortfolioClient({
                       </div>
                     </div>
                     {editMode && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          triggerFileUpload((url) =>
-                            persistContent({
-                              ...content,
-                              homeCards: {
-                                ...content.homeCards,
-                                filmsImage: url,
-                              },
-                            })
-                          );
-                        }}
-                        className="absolute top-3 right-3 z-20 bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-1.5 border border-[#B7A28B] inline-flex items-center space-x-1.5"
-                      >
-                        <Upload className="w-3 h-3" />
-                        <span>CHANGE</span>
-                      </button>
+                      <div className="absolute top-3 right-3 z-20 flex flex-wrap items-center gap-1.5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            triggerFileUpload((url) =>
+                              persistContent(
+                                withFreshImageSlot(
+                                  {
+                                    ...content,
+                                    homeCards: {
+                                      ...content.homeCards,
+                                      filmsImage: url,
+                                    },
+                                  },
+                                  "home-films-card",
+                                  url
+                                )
+                              )
+                            );
+                          }}
+                          className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-1.5 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                        >
+                          <Upload className="w-3 h-3" />
+                          <span>CHANGE</span>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openImageResizer({
+                              slotKey: "home-films-card",
+                              label: "Home Films Card",
+                              currentSrc: content.homeCards.filmsImage,
+                              defaultDesktopWidth: 1280,
+                              defaultDesktopHeight: 720,
+                              defaultMobileWidth: 900,
+                              defaultMobileHeight: 600,
+                              onApplyDesktop: (base, desktopUrl) => ({
+                                ...base,
+                                homeCards: {
+                                  ...base.homeCards,
+                                  filmsImage: desktopUrl,
+                                },
+                              }),
+                            });
+                          }}
+                          className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-1.5 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                        >
+                          <Crop className="w-3 h-3" />
+                          <span>RESIZE</span>
+                        </button>
+                      </div>
                     )}
                   </div>
                   <div className="sm:col-span-4 space-y-2 border-l border-[#B7A28B]/40 pl-4">
@@ -1688,10 +2207,12 @@ export default function PortfolioClient({
           <div className="max-w-[1400px] mx-auto px-5 sm:px-10 pb-20 bg-[#F4F2ED]">
             {/* Photography Hero Banner */}
             <section className="relative w-full h-[280px] sm:h-[360px] lg:h-[400px] overflow-hidden mt-3 sm:mt-6 isolate">
-              <img
+              <ResponsivePic
+                slotKey="photography-banner"
                 src={content.photographyPage.bannerImage}
                 alt="Photography Header"
                 className="w-full h-full object-cover object-center"
+                imageSettings={content.imageSettings}
               />
               <div
                 className="absolute inset-0 pointer-events-none"
@@ -1701,23 +2222,55 @@ export default function PortfolioClient({
                 }}
               />
               {editMode && (
-                <button
-                  onClick={() =>
-                    triggerFileUpload((url) =>
-                      persistContent({
-                        ...content,
-                        photographyPage: {
-                          ...content.photographyPage,
-                          bannerImage: url,
-                        },
+                <div className="absolute top-4 right-4 z-20 flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() =>
+                      triggerFileUpload((url) =>
+                        persistContent(
+                          withFreshImageSlot(
+                            {
+                              ...content,
+                              photographyPage: {
+                                ...content.photographyPage,
+                                bannerImage: url,
+                              },
+                            },
+                            "photography-banner",
+                            url
+                          )
+                        )
+                      )
+                    }
+                    className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>CHANGE BANNER IMAGE</span>
+                  </button>
+                  <button
+                    onClick={() =>
+                      openImageResizer({
+                        slotKey: "photography-banner",
+                        label: "Photography Page Banner",
+                        currentSrc: content.photographyPage.bannerImage,
+                        defaultDesktopWidth: 1920,
+                        defaultDesktopHeight: 700,
+                        defaultMobileWidth: 900,
+                        defaultMobileHeight: 600,
+                        onApplyDesktop: (base, desktopUrl) => ({
+                          ...base,
+                          photographyPage: {
+                            ...base.photographyPage,
+                            bannerImage: desktopUrl,
+                          },
+                        }),
                       })
-                    )
-                  }
-                  className="absolute top-4 right-4 z-20 bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5"
-                >
-                  <Upload className="w-3.5 h-3.5" />
-                  <span>CHANGE BANNER IMAGE</span>
-                </button>
+                    }
+                    className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                  >
+                    <Crop className="w-3.5 h-3.5" />
+                    <span>RESIZE BANNER</span>
+                  </button>
+                </div>
               )}
               <div className="absolute inset-0 p-6 sm:p-12 lg:p-16 flex flex-col justify-end">
                 <h1 className="font-serif text-3xl sm:text-5xl text-[#F4F2ED] font-normal mb-3">
@@ -1862,10 +2415,12 @@ export default function PortfolioClient({
                           }}
                           className="group cursor-pointer relative aspect-[4/3] overflow-hidden"
                         >
-                          <img
+                          <ResponsivePic
+                            slotKey={`photo-sec-${section.slug}-${idx}`}
                             src={img.src}
                             alt={img.caption}
                             className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
+                            imageSettings={content.imageSettings}
                           />
                           <div className="absolute inset-0 bg-[#171715]/0 group-hover:bg-[#171715]/45 transition-colors flex items-end p-4">
                             <span className="text-[10px] tracking-[0.2em] uppercase text-[#F4F2ED] opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1896,7 +2451,7 @@ export default function PortfolioClient({
                             </span>
                           </div>
 
-                          {/* Upload / Replace or Remove Image in Photography Section */}
+                          {/* Upload / Replace, Resize, or Remove Image in Photography Section */}
                           {editMode && (
                             <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
                               <button
@@ -1916,16 +2471,56 @@ export default function PortfolioClient({
                                             }
                                           : s
                                       );
-                                    persistContent({
-                                      ...content,
-                                      photographySections: nextSecs,
-                                    });
+                                    persistContent(
+                                      withFreshImageSlot(
+                                        {
+                                          ...content,
+                                          photographySections: nextSecs,
+                                        },
+                                        `photo-sec-${section.slug}-${idx}`,
+                                        url
+                                      )
+                                    );
                                   });
                                 }}
                                 title="Replace image"
                                 className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
                               >
                                 <Upload className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openImageResizer({
+                                    slotKey: `photo-sec-${section.slug}-${idx}`,
+                                    label: `${section.title} — Image ${idx + 1}`,
+                                    currentSrc: img.src,
+                                    defaultDesktopWidth: 1200,
+                                    defaultDesktopHeight: 900,
+                                    defaultMobileWidth: 900,
+                                    defaultMobileHeight: 900,
+                                    onApplyDesktop: (base, desktopUrl) => ({
+                                      ...base,
+                                      photographySections:
+                                        base.photographySections.map((s) =>
+                                          s.slug === section.slug
+                                            ? {
+                                                ...s,
+                                                images: s.images.map((im, i) =>
+                                                  i === idx
+                                                    ? { ...im, src: desktopUrl }
+                                                    : im
+                                                ),
+                                              }
+                                            : s
+                                        ),
+                                    }),
+                                  });
+                                }}
+                                title="Resize image for Desktop & Mobile"
+                                className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                              >
+                                <Crop className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={(e) => {
@@ -1968,10 +2563,12 @@ export default function PortfolioClient({
             <div className="max-w-[1400px] mx-auto px-5 sm:px-10 pt-4 pb-20">
               {/* Films Hero Banner */}
               <section className="relative w-full h-[300px] sm:h-[380px] lg:h-[440px] overflow-hidden mt-2 sm:mt-4 border border-[#B7A28B]/30 isolate">
-                <img
+                <ResponsivePic
+                  slotKey="films-banner"
                   src={content.filmsPage.bannerImage}
                   alt="Films Header"
                   className="w-full h-full object-cover object-center"
+                  imageSettings={content.imageSettings}
                 />
                 <div
                   className="absolute inset-0 pointer-events-none"
@@ -1981,23 +2578,55 @@ export default function PortfolioClient({
                   }}
                 />
                 {editMode && (
-                  <button
-                    onClick={() =>
-                      triggerFileUpload((url) =>
-                        persistContent({
-                          ...content,
-                          filmsPage: {
-                            ...content.filmsPage,
-                            bannerImage: url,
-                          },
+                  <div className="absolute top-4 right-4 z-20 flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() =>
+                        triggerFileUpload((url) =>
+                          persistContent(
+                            withFreshImageSlot(
+                              {
+                                ...content,
+                                filmsPage: {
+                                  ...content.filmsPage,
+                                  bannerImage: url,
+                                },
+                              },
+                              "films-banner",
+                              url
+                            )
+                          )
+                        )
+                      }
+                      className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>CHANGE BANNER</span>
+                    </button>
+                    <button
+                      onClick={() =>
+                        openImageResizer({
+                          slotKey: "films-banner",
+                          label: "Films Page Banner",
+                          currentSrc: content.filmsPage.bannerImage,
+                          defaultDesktopWidth: 1920,
+                          defaultDesktopHeight: 750,
+                          defaultMobileWidth: 900,
+                          defaultMobileHeight: 600,
+                          onApplyDesktop: (base, desktopUrl) => ({
+                            ...base,
+                            filmsPage: {
+                              ...base.filmsPage,
+                              bannerImage: desktopUrl,
+                            },
+                          }),
                         })
-                      )
-                    }
-                    className="absolute top-4 right-4 z-20 bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5"
-                  >
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>CHANGE BANNER</span>
-                  </button>
+                      }
+                      className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                    >
+                      <Crop className="w-3.5 h-3.5" />
+                      <span>RESIZE BANNER</span>
+                    </button>
+                  </div>
                 )}
                 <div className="absolute inset-0 p-6 sm:p-12 lg:p-16 flex flex-col justify-end">
                   <h1 className="font-serif text-3xl sm:text-5xl text-[#F4F2ED] font-normal mb-3">
@@ -2039,10 +2668,12 @@ export default function PortfolioClient({
                       className="group cursor-pointer p-3 -m-3 hover:bg-[#373632]/40 transition-colors relative"
                     >
                       <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#171715] border border-[#B7A28B]/30 mb-3.5">
-                        <img
+                        <ResponsivePic
+                          slotKey={`film-cat-${cat.slug}`}
                           src={cat.image}
                           alt={cat.title}
                           className="w-full h-full object-cover opacity-90 editorial-image-grade group-hover:scale-105 group-hover:opacity-100"
+                          imageSettings={content.imageSettings}
                         />
                         <div className="absolute inset-0 bg-[#171715]/30 flex items-center justify-center group-hover:bg-[#171715]/45 transition-colors pointer-events-none">
                           <div className="w-11 h-11 rounded-full border border-[#F4F2ED]/80 flex items-center justify-center bg-[#171715]/45 backdrop-blur-[2px] group-hover:scale-110 transition-transform">
@@ -2050,24 +2681,60 @@ export default function PortfolioClient({
                           </div>
                         </div>
                         {editMode && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              triggerFileUpload((url) => {
-                                const nextCats = content.filmCategories.map(
-                                  (c, i) =>
-                                    i === cIdx ? { ...c, image: url } : c
-                                );
-                                persistContent({
-                                  ...content,
-                                  filmCategories: nextCats,
+                          <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                triggerFileUpload((url) => {
+                                  const nextCats = content.filmCategories.map(
+                                    (c, i) =>
+                                      i === cIdx ? { ...c, image: url } : c
+                                  );
+                                  persistContent(
+                                    withFreshImageSlot(
+                                      {
+                                        ...content,
+                                        filmCategories: nextCats,
+                                      },
+                                      `film-cat-${cat.slug}`,
+                                      url
+                                    )
+                                  );
                                 });
-                              });
-                            }}
-                            className="absolute top-2 right-2 z-20 p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
-                          >
-                            <Upload className="w-3.5 h-3.5" />
-                          </button>
+                              }}
+                              title="Upload category thumbnail"
+                              className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                            >
+                              <Upload className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openImageResizer({
+                                  slotKey: `film-cat-${cat.slug}`,
+                                  label: `${cat.title} — Category Card`,
+                                  currentSrc: cat.image,
+                                  defaultDesktopWidth: 1280,
+                                  defaultDesktopHeight: 800,
+                                  defaultMobileWidth: 900,
+                                  defaultMobileHeight: 600,
+                                  onApplyDesktop: (base, desktopUrl) => ({
+                                    ...base,
+                                    filmCategories: base.filmCategories.map(
+                                      (c, i) =>
+                                        i === cIdx
+                                          ? { ...c, image: desktopUrl }
+                                          : c
+                                    ),
+                                  }),
+                                });
+                              }}
+                              title="Resize for Desktop & Mobile"
+                              className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                            >
+                              <Crop className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         )}
                       </div>
                       <h3 className="text-[10px] tracking-[0.2em] uppercase text-[#F4F2ED] font-medium">
@@ -2169,10 +2836,12 @@ export default function PortfolioClient({
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <img
+                            <ResponsivePic
+                              slotKey={`project-cover-${film.id}`}
                               src={film.coverImage}
                               alt={film.title}
                               className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
+                              imageSettings={content.imageSettings}
                             />
                           )}
                           <div className="absolute inset-0 bg-[#171715]/30 flex items-center justify-center pointer-events-none">
@@ -2202,18 +2871,52 @@ export default function PortfolioClient({
                                           }
                                         : p
                                     );
-                                    persistContent({
-                                      ...content,
-                                      projects: next,
-                                    });
+                                    persistContent(
+                                      isVid
+                                        ? { ...content, projects: next }
+                                        : withFreshImageSlot(
+                                            { ...content, projects: next },
+                                            `project-cover-${film.id}`,
+                                            url
+                                          )
+                                    );
                                   });
                                 }}
                                 title="Upload video or cover image"
-                                className="px-2.5 py-1 bg-[#171715]/90 text-[#F4F2ED] text-[9px] tracking-wider uppercase border border-[#B7A28B] inline-flex items-center space-x-1"
+                                className="px-2.5 py-1 bg-[#171715]/90 text-[#F4F2ED] text-[9px] tracking-wider uppercase border border-[#B7A28B] inline-flex items-center space-x-1 hover:bg-[#B7A28B] hover:text-[#171715]"
                               >
                                 <Video className="w-3 h-3" />
                                 <span>UPLOAD COVER / CLIP</span>
                               </button>
+                              {!isVideoAsset(film.videoUrl) && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openImageResizer({
+                                      slotKey: `project-cover-${film.id}`,
+                                      label: `${film.title} — Film Cover`,
+                                      currentSrc: film.coverImage,
+                                      defaultDesktopWidth: 1280,
+                                      defaultDesktopHeight: 720,
+                                      defaultMobileWidth: 900,
+                                      defaultMobileHeight: 600,
+                                      onApplyDesktop: (base, desktopUrl) => ({
+                                        ...base,
+                                        projects: base.projects.map((p) =>
+                                          p.id === film.id
+                                            ? { ...p, coverImage: desktopUrl }
+                                            : p
+                                        ),
+                                      }),
+                                    });
+                                  }}
+                                  title="Resize cover image for Desktop & Mobile"
+                                  className="px-2.5 py-1 bg-[#171715]/90 text-[#F4F2ED] text-[9px] tracking-wider uppercase border border-[#B7A28B] inline-flex items-center space-x-1 hover:bg-[#B7A28B] hover:text-[#171715]"
+                                >
+                                  <Crop className="w-3 h-3" />
+                                  <span>RESIZE</span>
+                                </button>
+                              )}
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -2230,7 +2933,7 @@ export default function PortfolioClient({
                                   }, film.videoUrl);
                                 }}
                                 title="Paste Vimeo, YouTube, or MP4 video URL"
-                                className="px-2.5 py-1 bg-[#171715]/90 text-[#F4F2ED] text-[9px] tracking-wider uppercase border border-[#B7A28B] inline-flex items-center space-x-1"
+                                className="px-2.5 py-1 bg-[#171715]/90 text-[#F4F2ED] text-[9px] tracking-wider uppercase border border-[#B7A28B] inline-flex items-center space-x-1 hover:bg-[#B7A28B] hover:text-[#171715]"
                               >
                                 <Link2 className="w-3 h-3" />
                                 <span>VIDEO URL</span>
@@ -2392,10 +3095,12 @@ export default function PortfolioClient({
                       );
                     }
                     return (
-                      <img
+                      <ResponsivePic
+                        slotKey={`project-cover-${currentProject.id}`}
                         src={currentProject.coverImage}
                         alt={currentProject.title}
                         className="w-full h-full object-cover editorial-image-grade group-hover:scale-[1.02]"
+                        imageSettings={content.imageSettings}
                       />
                     );
                   })()}
@@ -2424,7 +3129,18 @@ export default function PortfolioClient({
                                 type: "film",
                               });
                             } else {
-                              updateCurrentProject({ coverImage: url });
+                              const nextProjects = content.projects.map((p) =>
+                                p.id === currentProject.id
+                                  ? { ...p, coverImage: url }
+                                  : p
+                              );
+                              persistContent(
+                                withFreshImageSlot(
+                                  { ...content, projects: nextProjects },
+                                  `project-cover-${currentProject.id}`,
+                                  url
+                                )
+                              );
                             }
                           });
                         }}
@@ -2433,6 +3149,34 @@ export default function PortfolioClient({
                         <Upload className="w-3.5 h-3.5" />
                         <span>UPLOAD MAIN IMAGE / VIDEO</span>
                       </button>
+                      {!isVideoAsset(currentProject.videoUrl) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openImageResizer({
+                              slotKey: `project-cover-${currentProject.id}`,
+                              label: `${currentProject.title} — Main Image`,
+                              currentSrc: currentProject.coverImage,
+                              defaultDesktopWidth: 1600,
+                              defaultDesktopHeight: 1100,
+                              defaultMobileWidth: 900,
+                              defaultMobileHeight: 1100,
+                              onApplyDesktop: (base, desktopUrl) => ({
+                                ...base,
+                                projects: base.projects.map((p) =>
+                                  p.id === currentProject.id
+                                    ? { ...p, coverImage: desktopUrl }
+                                    : p
+                                ),
+                              }),
+                            });
+                          }}
+                          className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                        >
+                          <Crop className="w-3.5 h-3.5" />
+                          <span>RESIZE (DESKTOP / MOBILE)</span>
+                        </button>
+                      )}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -2467,6 +3211,7 @@ export default function PortfolioClient({
                 <div className="grid grid-cols-3 gap-3 sm:gap-4">
                   {currentProject.gallery.slice(1, 4).map((imgUrl, idx) => {
                     const actualIdx = idx + 1;
+                    const slotKey = `project-gallery-${currentProject.id}-${actualIdx}`;
                     return (
                       <div
                         key={actualIdx}
@@ -2475,10 +3220,12 @@ export default function PortfolioClient({
                         }}
                         className="relative aspect-square overflow-hidden cursor-pointer group"
                       >
-                        <img
+                        <ResponsivePic
+                          slotKey={slotKey}
                           src={imgUrl}
                           alt={`${currentProject.title} still ${actualIdx}`}
                           className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
+                          imageSettings={content.imageSettings}
                         />
                         {editMode && (
                           <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
@@ -2489,13 +3236,56 @@ export default function PortfolioClient({
                                   const nextGal = currentProject.gallery.map(
                                     (g, i) => (i === actualIdx ? url : g)
                                   );
-                                  updateCurrentProject({ gallery: nextGal });
+                                  const nextProjects = content.projects.map(
+                                    (p) =>
+                                      p.id === currentProject.id
+                                        ? { ...p, gallery: nextGal }
+                                        : p
+                                  );
+                                  persistContent(
+                                    withFreshImageSlot(
+                                      { ...content, projects: nextProjects },
+                                      slotKey,
+                                      url
+                                    )
+                                  );
                                 });
                               }}
                               title="Replace image"
-                              className="p-1.5 bg-[#171715]/90 text-[#F4F2ED]"
+                              className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
                             >
                               <Upload className="w-3 h-3" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openImageResizer({
+                                  slotKey,
+                                  label: `${currentProject.title} — Still ${actualIdx}`,
+                                  currentSrc: imgUrl,
+                                  defaultDesktopWidth: 1200,
+                                  defaultDesktopHeight: 1200,
+                                  defaultMobileWidth: 900,
+                                  defaultMobileHeight: 900,
+                                  onApplyDesktop: (base, desktopUrl) => ({
+                                    ...base,
+                                    projects: base.projects.map((p) =>
+                                      p.id === currentProject.id
+                                        ? {
+                                            ...p,
+                                            gallery: p.gallery.map((g, i) =>
+                                              i === actualIdx ? desktopUrl : g
+                                            ),
+                                          }
+                                        : p
+                                    ),
+                                  }),
+                                });
+                              }}
+                              title="Resize for Desktop & Mobile"
+                              className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                            >
+                              <Crop className="w-3 h-3" />
                             </button>
                             <button
                               onClick={(e) => {
@@ -2639,53 +3429,107 @@ export default function PortfolioClient({
                       )}
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      {currentProject.gallery.map((gImg, i) => (
-                        <div
-                          key={i}
-                          onClick={() => {
-                            if (!editMode) setLightboxImage(gImg);
-                          }}
-                          className="relative aspect-[4/3] overflow-hidden cursor-pointer group"
-                        >
-                          <img
-                            src={gImg}
-                            alt={`${currentProject.title} thumbnail ${i + 1}`}
-                            className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
-                          />
-                          {editMode && (
-                            <div className="absolute top-1.5 right-1.5 z-20 flex items-center gap-1">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  triggerFileUpload((url) => {
-                                    const nextGal = currentProject.gallery.map(
-                                      (g, idx) => (idx === i ? url : g)
-                                    );
+                      {currentProject.gallery.map((gImg, i) => {
+                        const slotKey = `project-gallery-${currentProject.id}-${i}`;
+                        return (
+                          <div
+                            key={i}
+                            onClick={() => {
+                              if (!editMode) setLightboxImage(gImg);
+                            }}
+                            className="relative aspect-[4/3] overflow-hidden cursor-pointer group"
+                          >
+                            <ResponsivePic
+                              slotKey={slotKey}
+                              src={gImg}
+                              alt={`${currentProject.title} thumbnail ${i + 1}`}
+                              className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
+                              imageSettings={content.imageSettings}
+                            />
+                            {editMode && (
+                              <div className="absolute top-1.5 right-1.5 z-20 flex items-center gap-1">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    triggerFileUpload((url) => {
+                                      const nextGal =
+                                        currentProject.gallery.map((g, idx) =>
+                                          idx === i ? url : g
+                                        );
+                                      const nextProjects =
+                                        content.projects.map((p) =>
+                                          p.id === currentProject.id
+                                            ? { ...p, gallery: nextGal }
+                                            : p
+                                        );
+                                      persistContent(
+                                        withFreshImageSlot(
+                                          {
+                                            ...content,
+                                            projects: nextProjects,
+                                          },
+                                          slotKey,
+                                          url
+                                        )
+                                      );
+                                    });
+                                  }}
+                                  title="Replace photo"
+                                  className="p-1 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                                >
+                                  <Upload className="w-3 h-3" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openImageResizer({
+                                      slotKey,
+                                      label: `${currentProject.title} — Gallery ${i + 1}`,
+                                      currentSrc: gImg,
+                                      defaultDesktopWidth: 1200,
+                                      defaultDesktopHeight: 900,
+                                      defaultMobileWidth: 900,
+                                      defaultMobileHeight: 750,
+                                      onApplyDesktop: (base, desktopUrl) => ({
+                                        ...base,
+                                        projects: base.projects.map((p) =>
+                                          p.id === currentProject.id
+                                            ? {
+                                                ...p,
+                                                gallery: p.gallery.map(
+                                                  (g, idx) =>
+                                                    idx === i ? desktopUrl : g
+                                                ),
+                                              }
+                                            : p
+                                        ),
+                                      }),
+                                    });
+                                  }}
+                                  title="Resize for Desktop & Mobile"
+                                  className="p-1 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                                >
+                                  <Crop className="w-3 h-3" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const nextGal =
+                                      currentProject.gallery.filter(
+                                        (_, idx) => idx !== i
+                                      );
                                     updateCurrentProject({ gallery: nextGal });
-                                  });
-                                }}
-                                title="Replace photo"
-                                className="p-1 bg-[#171715]/90 text-[#F4F2ED]"
-                              >
-                                <Upload className="w-3 h-3" />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const nextGal = currentProject.gallery.filter(
-                                    (_, idx) => idx !== i
-                                  );
-                                  updateCurrentProject({ gallery: nextGal });
-                                }}
-                                title="Remove photo"
-                                className="p-1 bg-[#171715]/90 text-[#F4F2ED] hover:bg-red-700"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                                  }}
+                                  title="Remove photo"
+                                  className="p-1 bg-[#171715]/90 text-[#F4F2ED] hover:bg-red-700"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -2720,29 +3564,63 @@ export default function PortfolioClient({
               {/* Left Column Portrait + Availability Note */}
               <div className="lg:col-span-5 space-y-6">
                 <div className="relative aspect-[4/5] w-full overflow-hidden bg-white p-2 border border-white">
-                  <img
+                  <ResponsivePic
+                    slotKey="about-portrait"
                     src={content.aboutPage.portraitImage}
                     alt="Ajnas — Photographer and Film Director"
                     className="w-full h-full object-cover editorial-image-grade"
+                    imageSettings={content.imageSettings}
                   />
                   {editMode && (
-                    <button
-                      onClick={() =>
-                        triggerFileUpload((url) =>
-                          persistContent({
-                            ...content,
-                            aboutPage: {
-                              ...content.aboutPage,
-                              portraitImage: url,
-                            },
+                    <div className="absolute top-4 right-4 z-20 flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() =>
+                          triggerFileUpload((url) =>
+                            persistContent(
+                              withFreshImageSlot(
+                                {
+                                  ...content,
+                                  aboutPage: {
+                                    ...content.aboutPage,
+                                    portraitImage: url,
+                                  },
+                                },
+                                "about-portrait",
+                                url
+                              )
+                            )
+                          )
+                        }
+                        className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>CHANGE PORTRAIT</span>
+                      </button>
+                      <button
+                        onClick={() =>
+                          openImageResizer({
+                            slotKey: "about-portrait",
+                            label: "About Page Portrait",
+                            currentSrc: content.aboutPage.portraitImage,
+                            defaultDesktopWidth: 1000,
+                            defaultDesktopHeight: 1250,
+                            defaultMobileWidth: 800,
+                            defaultMobileHeight: 1000,
+                            onApplyDesktop: (base, desktopUrl) => ({
+                              ...base,
+                              aboutPage: {
+                                ...base.aboutPage,
+                                portraitImage: desktopUrl,
+                              },
+                            }),
                           })
-                        )
-                      }
-                      className="absolute top-4 right-4 z-20 bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5"
-                    >
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>CHANGE PORTRAIT</span>
-                    </button>
+                        }
+                        className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                      >
+                        <Crop className="w-3.5 h-3.5" />
+                        <span>RESIZE</span>
+                      </button>
+                    </div>
                   )}
                 </div>
                 <div className="text-[11px] text-[#8C8980] leading-relaxed">
@@ -3752,6 +4630,704 @@ export default function PortfolioClient({
                   </>
                 );
               })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DESKTOP & MOBILE IMAGE RESIZER STUDIO MODAL */}
+      {resizerModal && (
+        <div
+          onClick={() => {
+            if (!resizerModal.isSaving) setResizerModal(null);
+          }}
+          onMouseMove={(e) => {
+            if (!dragStateRef.current) return;
+            const d = dragStateRef.current;
+            const dx = ((e.clientX - d.startX) / 240) * 100;
+            const dy = ((e.clientY - d.startY) / 240) * 100;
+            const clamp = (v: number) => Math.max(-100, Math.min(100, Math.round(v)));
+            if (d.target === "desktop") {
+              setResizerModal((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      desktopPanX: clamp(d.initialPanX + dx),
+                      desktopPanY: clamp(d.initialPanY + dy),
+                    }
+                  : null
+              );
+            } else {
+              setResizerModal((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      mobilePanX: clamp(d.initialPanX + dx),
+                      mobilePanY: clamp(d.initialPanY + dy),
+                    }
+                  : null
+              );
+            }
+          }}
+          onMouseUp={() => {
+            dragStateRef.current = null;
+          }}
+          className="fixed inset-0 z-50 bg-[#171715]/95 flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-5xl w-full bg-[#F4F2ED] text-[#373632] border border-[#B7A28B] p-4 sm:p-7 space-y-5 max-h-[94vh] overflow-y-auto shadow-2xl"
+          >
+            {/* Header */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#B7A28B]/40 pb-4">
+              <div>
+                <div className="flex items-center space-x-2">
+                  <Crop className="w-4 h-4 text-[#373632]" />
+                  <h3 className="font-serif text-xl sm:text-2xl text-[#373632]">
+                    Resize &amp; Crop — {resizerModal.label}
+                  </h3>
+                </div>
+                <p className="text-[11px] text-[#8C8980] mt-0.5">
+                  Customize Desktop and Mobile dimensions, zoom, and framing
+                  independently. Generates and stores two separate image files
+                  automatically.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="inline-flex border border-[#B7A28B]/60 bg-[#D8D5CD]/50 p-0.5 text-[10px] tracking-[0.16em] uppercase">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setResizerModal({ ...resizerModal, activeTab: "both" })
+                    }
+                    className={`px-3 py-1.5 transition-colors ${
+                      resizerModal.activeTab === "both"
+                        ? "bg-[#171715] text-[#F4F2ED]"
+                        : "text-[#373632] hover:bg-[#171715]/10"
+                    }`}
+                  >
+                    BOTH (SIDE BY SIDE)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setResizerModal({ ...resizerModal, activeTab: "desktop" })
+                    }
+                    className={`px-3 py-1.5 inline-flex items-center space-x-1 transition-colors ${
+                      resizerModal.activeTab === "desktop"
+                        ? "bg-[#171715] text-[#F4F2ED]"
+                        : "text-[#373632] hover:bg-[#171715]/10"
+                    }`}
+                  >
+                    <Monitor className="w-3 h-3" />
+                    <span>DESKTOP</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setResizerModal({ ...resizerModal, activeTab: "mobile" })
+                    }
+                    className={`px-3 py-1.5 inline-flex items-center space-x-1 transition-colors ${
+                      resizerModal.activeTab === "mobile"
+                        ? "bg-[#171715] text-[#F4F2ED]"
+                        : "text-[#373632] hover:bg-[#171715]/10"
+                    }`}
+                  >
+                    <Smartphone className="w-3 h-3" />
+                    <span>MOBILE</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!resizerModal.isSaving) setResizerModal(null);
+                  }}
+                  className="p-1.5 text-[#8C8980] hover:text-[#171715]"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Editor Grid */}
+            <div
+              className={`grid grid-cols-1 ${
+                resizerModal.activeTab === "both" ? "lg:grid-cols-2" : ""
+              } gap-6`}
+            >
+              {/* ==================== DESKTOP PANEL ==================== */}
+              {(resizerModal.activeTab === "both" ||
+                resizerModal.activeTab === "desktop") && (
+                <div className="border border-[#B7A28B]/50 bg-[#D8D5CD]/35 p-4 space-y-4 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Monitor className="w-4 h-4 text-[#373632]" />
+                        <span className="text-[11px] tracking-[0.2em] uppercase font-medium text-[#373632]">
+                          DESKTOP IMAGE ({resizerModal.desktopWidth} &times;{" "}
+                          {resizerModal.desktopHeight} px)
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          triggerFileUpload((url) =>
+                            setResizerModal((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    sourceSrc: url,
+                                  }
+                                : null
+                            )
+                          )
+                        }
+                        className="text-[9px] tracking-[0.16em] uppercase px-2.5 py-1 bg-[#171715] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] inline-flex items-center space-x-1"
+                      >
+                        <Upload className="w-2.5 h-2.5" />
+                        <span>UPLOAD DESKTOP SOURCE</span>
+                      </button>
+                    </div>
+
+                    {/* Interactive Desktop Canvas Preview */}
+                    <div className="relative w-full h-[230px] sm:h-[260px] bg-[#171715] border border-[#B7A28B]/40 flex items-center justify-center overflow-hidden p-2 select-none">
+                      <canvas
+                        ref={desktopCanvasRef}
+                        onMouseDown={(e) => {
+                          dragStateRef.current = {
+                            target: "desktop",
+                            startX: e.clientX,
+                            startY: e.clientY,
+                            initialPanX: resizerModal.desktopPanX,
+                            initialPanY: resizerModal.desktopPanY,
+                          };
+                        }}
+                        className="max-w-full max-h-full object-contain cursor-grab active:cursor-grabbing shadow-md"
+                      />
+                      <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-[#171715]/80 text-[#F4F2ED] text-[9px] tracking-widest uppercase pointer-events-none">
+                        Drag image to reposition
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Desktop Controls */}
+                  <div className="space-y-3 pt-2 border-t border-[#B7A28B]/30 text-xs">
+                    {/* Width / Height + Presets */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
+                      <div>
+                        <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
+                          Width (px)
+                        </label>
+                        <input
+                          type="number"
+                          min={200}
+                          max={3840}
+                          step={10}
+                          value={resizerModal.desktopWidth}
+                          onChange={(e) =>
+                            setResizerModal({
+                              ...resizerModal,
+                              desktopWidth:
+                                Math.max(
+                                  200,
+                                  Math.min(3840, Number(e.target.value) || 1200)
+                                ),
+                            })
+                          }
+                          className="w-full bg-[#F4F2ED] border border-[#B7A28B]/60 px-2.5 py-1.5 text-xs text-[#373632]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
+                          Height (px)
+                        </label>
+                        <input
+                          type="number"
+                          min={200}
+                          max={3840}
+                          step={10}
+                          value={resizerModal.desktopHeight}
+                          onChange={(e) =>
+                            setResizerModal({
+                              ...resizerModal,
+                              desktopHeight:
+                                Math.max(
+                                  200,
+                                  Math.min(3840, Number(e.target.value) || 800)
+                                ),
+                            })
+                          }
+                          className="w-full bg-[#F4F2ED] border border-[#B7A28B]/60 px-2.5 py-1.5 text-xs text-[#373632]"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
+                          Mode
+                        </label>
+                        <div className="grid grid-cols-2 border border-[#B7A28B]/60 bg-[#F4F2ED]">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setResizerModal({
+                                ...resizerModal,
+                                desktopFit: "cover",
+                              })
+                            }
+                            className={`py-1.5 text-[9px] tracking-widest uppercase ${
+                              resizerModal.desktopFit === "cover"
+                                ? "bg-[#171715] text-[#F4F2ED]"
+                                : "text-[#373632]"
+                            }`}
+                          >
+                            FILL (CROP)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setResizerModal({
+                                ...resizerModal,
+                                desktopFit: "contain",
+                              })
+                            }
+                            className={`py-1.5 text-[9px] tracking-widest uppercase ${
+                              resizerModal.desktopFit === "contain"
+                                ? "bg-[#171715] text-[#F4F2ED]"
+                                : "text-[#373632]"
+                            }`}
+                          >
+                            FIT (FULL)
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Aspect Ratio Quick Presets */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-[9px] tracking-widest uppercase text-[#8C8980] mr-1">
+                        Presets:
+                      </span>
+                      {[
+                        { label: "16:9 Wide", w: 1920, h: 1080 },
+                        { label: "16:10 Editorial", w: 1600, h: 1000 },
+                        { label: "4:3 Classic", w: 1400, h: 1050 },
+                        { label: "3:4 Portrait", w: 1050, h: 1400 },
+                        { label: "1:1 Square", w: 1200, h: 1200 },
+                      ].map((p) => (
+                        <button
+                          key={p.label}
+                          type="button"
+                          onClick={() =>
+                            setResizerModal({
+                              ...resizerModal,
+                              desktopWidth: p.w,
+                              desktopHeight: p.h,
+                            })
+                          }
+                          className="px-2 py-0.5 text-[9px] tracking-wider uppercase border border-[#B7A28B]/60 bg-[#F4F2ED] hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Zoom & Pan Sliders */}
+                    <div className="space-y-2">
+                      <div>
+                        <div className="flex justify-between text-[10px] text-[#373632]">
+                          <span className="uppercase tracking-wider">
+                            Desktop Zoom
+                          </span>
+                          <span>{resizerModal.desktopZoom}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={25}
+                          max={300}
+                          value={resizerModal.desktopZoom}
+                          onChange={(e) =>
+                            setResizerModal({
+                              ...resizerModal,
+                              desktopZoom: Number(e.target.value),
+                            })
+                          }
+                          className="w-full accent-[#171715]"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex justify-between text-[10px] text-[#373632]">
+                            <span className="uppercase tracking-wider">
+                              Horizontal (X)
+                            </span>
+                            <span>{resizerModal.desktopPanX}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={-100}
+                            max={100}
+                            value={resizerModal.desktopPanX}
+                            onChange={(e) =>
+                              setResizerModal({
+                                ...resizerModal,
+                                desktopPanX: Number(e.target.value),
+                              })
+                            }
+                            className="w-full accent-[#171715]"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-[10px] text-[#373632]">
+                            <span className="uppercase tracking-wider">
+                              Vertical (Y)
+                            </span>
+                            <span>{resizerModal.desktopPanY}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={-100}
+                            max={100}
+                            value={resizerModal.desktopPanY}
+                            onChange={(e) =>
+                              setResizerModal({
+                                ...resizerModal,
+                                desktopPanY: Number(e.target.value),
+                              })
+                            }
+                            className="w-full accent-[#171715]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setResizerModal({
+                            ...resizerModal,
+                            desktopZoom: 100,
+                            desktopPanX: 0,
+                            desktopPanY: 0,
+                            desktopFit: "cover",
+                          })
+                        }
+                        className="text-[9px] tracking-widest uppercase underline text-[#8C8980] hover:text-[#171715]"
+                      >
+                        Reset Desktop Framing
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ==================== MOBILE PANEL ==================== */}
+              {(resizerModal.activeTab === "both" ||
+                resizerModal.activeTab === "mobile") && (
+                <div className="border border-[#B7A28B]/50 bg-[#D8D5CD]/35 p-4 space-y-4 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Smartphone className="w-4 h-4 text-[#373632]" />
+                        <span className="text-[11px] tracking-[0.2em] uppercase font-medium text-[#373632]">
+                          MOBILE IMAGE ({resizerModal.mobileWidth} &times;{" "}
+                          {resizerModal.mobileHeight} px)
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          triggerFileUpload((url) =>
+                            setResizerModal((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    mobileSourceSrc: url,
+                                  }
+                                : null
+                            )
+                          )
+                        }
+                        className="text-[9px] tracking-[0.16em] uppercase px-2.5 py-1 bg-[#171715] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] inline-flex items-center space-x-1"
+                      >
+                        <Upload className="w-2.5 h-2.5" />
+                        <span>UPLOAD SEPARATE MOBILE PHOTO</span>
+                      </button>
+                    </div>
+
+                    {/* Interactive Mobile Canvas Preview */}
+                    <div className="relative w-full h-[230px] sm:h-[260px] bg-[#171715] border border-[#B7A28B]/40 flex items-center justify-center overflow-hidden p-2 select-none">
+                      <canvas
+                        ref={mobileCanvasRef}
+                        onMouseDown={(e) => {
+                          dragStateRef.current = {
+                            target: "mobile",
+                            startX: e.clientX,
+                            startY: e.clientY,
+                            initialPanX: resizerModal.mobilePanX,
+                            initialPanY: resizerModal.mobilePanY,
+                          };
+                        }}
+                        className="max-w-full max-h-full object-contain cursor-grab active:cursor-grabbing shadow-md"
+                      />
+                      <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-[#171715]/80 text-[#F4F2ED] text-[9px] tracking-widest uppercase pointer-events-none">
+                        Drag image to reposition
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Mobile Controls */}
+                  <div className="space-y-3 pt-2 border-t border-[#B7A28B]/30 text-xs">
+                    {/* Width / Height + Mode */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
+                      <div>
+                        <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
+                          Width (px)
+                        </label>
+                        <input
+                          type="number"
+                          min={200}
+                          max={2400}
+                          step={10}
+                          value={resizerModal.mobileWidth}
+                          onChange={(e) =>
+                            setResizerModal({
+                              ...resizerModal,
+                              mobileWidth:
+                                Math.max(
+                                  200,
+                                  Math.min(2400, Number(e.target.value) || 900)
+                                ),
+                            })
+                          }
+                          className="w-full bg-[#F4F2ED] border border-[#B7A28B]/60 px-2.5 py-1.5 text-xs text-[#373632]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
+                          Height (px)
+                        </label>
+                        <input
+                          type="number"
+                          min={200}
+                          max={2400}
+                          step={10}
+                          value={resizerModal.mobileHeight}
+                          onChange={(e) =>
+                            setResizerModal({
+                              ...resizerModal,
+                              mobileHeight:
+                                Math.max(
+                                  200,
+                                  Math.min(2400, Number(e.target.value) || 1200)
+                                ),
+                            })
+                          }
+                          className="w-full bg-[#F4F2ED] border border-[#B7A28B]/60 px-2.5 py-1.5 text-xs text-[#373632]"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
+                          Mode
+                        </label>
+                        <div className="grid grid-cols-2 border border-[#B7A28B]/60 bg-[#F4F2ED]">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setResizerModal({
+                                ...resizerModal,
+                                mobileFit: "cover",
+                              })
+                            }
+                            className={`py-1.5 text-[9px] tracking-widest uppercase ${
+                              resizerModal.mobileFit === "cover"
+                                ? "bg-[#171715] text-[#F4F2ED]"
+                                : "text-[#373632]"
+                            }`}
+                          >
+                            FILL (CROP)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setResizerModal({
+                                ...resizerModal,
+                                mobileFit: "contain",
+                              })
+                            }
+                            className={`py-1.5 text-[9px] tracking-widest uppercase ${
+                              resizerModal.mobileFit === "contain"
+                                ? "bg-[#171715] text-[#F4F2ED]"
+                                : "text-[#373632]"
+                            }`}
+                          >
+                            FIT (FULL)
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Aspect Ratio Quick Presets */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-[9px] tracking-widest uppercase text-[#8C8980] mr-1">
+                        Presets:
+                      </span>
+                      {[
+                        { label: "3:4 Vertical", w: 900, h: 1200 },
+                        { label: "4:5 Portrait", w: 800, h: 1000 },
+                        { label: "9:16 Tall", w: 900, h: 1600 },
+                        { label: "1:1 Square", w: 900, h: 900 },
+                        { label: "4:3 Landscape", w: 960, h: 720 },
+                      ].map((p) => (
+                        <button
+                          key={p.label}
+                          type="button"
+                          onClick={() =>
+                            setResizerModal({
+                              ...resizerModal,
+                              mobileWidth: p.w,
+                              mobileHeight: p.h,
+                            })
+                          }
+                          className="px-2 py-0.5 text-[9px] tracking-wider uppercase border border-[#B7A28B]/60 bg-[#F4F2ED] hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Zoom & Pan Sliders */}
+                    <div className="space-y-2">
+                      <div>
+                        <div className="flex justify-between text-[10px] text-[#373632]">
+                          <span className="uppercase tracking-wider">
+                            Mobile Zoom
+                          </span>
+                          <span>{resizerModal.mobileZoom}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={25}
+                          max={300}
+                          value={resizerModal.mobileZoom}
+                          onChange={(e) =>
+                            setResizerModal({
+                              ...resizerModal,
+                              mobileZoom: Number(e.target.value),
+                            })
+                          }
+                          className="w-full accent-[#171715]"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex justify-between text-[10px] text-[#373632]">
+                            <span className="uppercase tracking-wider">
+                              Horizontal (X)
+                            </span>
+                            <span>{resizerModal.mobilePanX}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={-100}
+                            max={100}
+                            value={resizerModal.mobilePanX}
+                            onChange={(e) =>
+                              setResizerModal({
+                                ...resizerModal,
+                                mobilePanX: Number(e.target.value),
+                              })
+                            }
+                            className="w-full accent-[#171715]"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-[10px] text-[#373632]">
+                            <span className="uppercase tracking-wider">
+                              Vertical (Y)
+                            </span>
+                            <span>{resizerModal.mobilePanY}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={-100}
+                            max={100}
+                            value={resizerModal.mobilePanY}
+                            onChange={(e) =>
+                              setResizerModal({
+                                ...resizerModal,
+                                mobilePanY: Number(e.target.value),
+                              })
+                            }
+                            className="w-full accent-[#171715]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setResizerModal({
+                            ...resizerModal,
+                            mobileZoom: 100,
+                            mobilePanX: 0,
+                            mobilePanY: 0,
+                            mobileFit: "cover",
+                          })
+                        }
+                        className="text-[9px] tracking-widest uppercase underline text-[#8C8980] hover:text-[#171715]"
+                      >
+                        Reset Mobile Framing
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Actions */}
+            <div className="pt-4 border-t border-[#B7A28B]/40 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-[10px] tracking-[0.15em] uppercase text-[#8C8980]">
+                Saves 2 separate optimized files:{" "}
+                <span className="text-[#373632] font-medium">
+                  *-desktop.jpg ({resizerModal.desktopWidth}&times;
+                  {resizerModal.desktopHeight})
+                </span>{" "}
+                &amp;{" "}
+                <span className="text-[#373632] font-medium">
+                  *-mobile.jpg ({resizerModal.mobileWidth}&times;
+                  {resizerModal.mobileHeight})
+                </span>
+              </p>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                <button
+                  type="button"
+                  disabled={resizerModal.isSaving}
+                  onClick={() => setResizerModal(null)}
+                  className="px-4 py-2.5 text-[10px] tracking-[0.2em] uppercase text-[#8C8980] hover:text-[#171715]"
+                >
+                  CANCEL
+                </button>
+                <button
+                  type="button"
+                  disabled={resizerModal.isSaving}
+                  onClick={handleSaveResizedImages}
+                  className="px-6 py-2.5 bg-[#171715] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] transition-colors text-[10px] tracking-[0.2em] uppercase font-medium inline-flex items-center space-x-2 disabled:opacity-50"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>
+                    {resizerModal.isSaving
+                      ? "SAVING DESKTOP & MOBILE IMAGES..."
+                      : "SAVE DESKTOP & MOBILE IMAGES"}
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
