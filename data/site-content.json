@@ -54,7 +54,7 @@
     "locationTitle": "Based in India.",
     "locationSub": "Available for international projects.",
     "cities": "BANGALORE / CALICUT",
-    "email": "hello@ajnas.studio",
+    "email": "",
     "instagramUrl": "#instagram",
     "vimeoUrl": "#vimeo"
   },
@@ -430,5 +430,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794341143047
+  "updatedAt": 1794341242710
 }
