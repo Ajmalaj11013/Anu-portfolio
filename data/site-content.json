@@ -33,7 +33,7 @@
     "portraitImage": "/api/media/1794337028057-blurred-figure-before-a-concrete-moodboard--1-.jpg",
     "availabilityNote": "Available for selected commissions and creative collaborations worldwide.",
     "leadBio": "I am an independent fashion photographer and fashion film creator from God's Own Country, India, working across fashion, campaigns and moving image.",
-    "bodyBio": "My practice explores the relationship between form, atmosphere and storytelling, bringing an editorial sensibility to both still and moving images. Working closely with designers, architects, hospitality brands and publications across Bangalore, Calicut and internationally.",
+    "bodyBio": "",
     "disciplinesTitle": "CREATIVE DISCIPLINES",
     "disciplines": [
       "Fashion Editorial",
@@ -412,5 +412,5 @@
       "desktopSrc": "/api/media/1794337028057-blurred-figure-before-a-concrete-moodboard--1-.jpg"
     }
   },
-  "updatedAt": 1794337924612
+  "updatedAt": 1794337937187
 }
