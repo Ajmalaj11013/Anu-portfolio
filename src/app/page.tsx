@@ -623,7 +623,7 @@ export default function PortfolioApp() {
         {view === "photography" && (
           <div className="max-w-[1400px] mx-auto px-5 sm:px-10 pb-20 bg-[#F4F2ED]">
             {/* Photography Hero Banner */}
-            <section className="relative w-full h-[280px] sm:h-[360px] lg:h-[400px] overflow-hidden mt-3 sm:mt-6 border border-[#B7A28B]/40 isolate">
+            <section className="relative w-full h-[280px] sm:h-[360px] lg:h-[400px] overflow-hidden mt-3 sm:mt-6 isolate">
               <img
                 src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=2000&q=85"
                 alt="Photography Header"
@@ -698,14 +698,14 @@ export default function PortfolioApp() {
                       <div
                         key={idx}
                         onClick={() => navigateToProject(img.projectId)}
-                        className="group cursor-pointer relative aspect-[4/3] overflow-hidden bg-[#D8D5CD] p-1.5 border border-[#B7A28B]/30 hover:bg-[#171715] transition-colors"
+                        className="group cursor-pointer relative aspect-[4/3] overflow-hidden"
                       >
                         <img
                           src={img.src}
                           alt={img.caption}
                           className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
                         />
-                        <div className="absolute inset-1.5 bg-[#171715]/0 group-hover:bg-[#171715]/45 transition-colors flex items-end p-4">
+                        <div className="absolute inset-0 bg-[#171715]/0 group-hover:bg-[#171715]/45 transition-colors flex items-end p-4">
                           <span className="text-[10px] tracking-[0.2em] uppercase text-[#F4F2ED] opacity-0 group-hover:opacity-100 transition-opacity">
                             {img.caption} &rarr;
                           </span>
@@ -899,7 +899,7 @@ export default function PortfolioApp() {
                       setLightboxImage(currentProject.coverImage);
                     }
                   }}
-                  className="relative aspect-[16/11] w-full overflow-hidden bg-[#D8D5CD] border border-[#B7A28B]/40 cursor-pointer group"
+                  className="relative aspect-[16/11] w-full overflow-hidden cursor-pointer group"
                 >
                   <img
                     src={currentProject.coverImage}
@@ -925,7 +925,7 @@ export default function PortfolioApp() {
                     <div
                       key={idx}
                       onClick={() => setLightboxImage(imgUrl)}
-                      className="aspect-square overflow-hidden bg-[#D8D5CD] p-1 border border-[#B7A28B]/30 hover:bg-[#171715] transition-colors cursor-pointer group"
+                      className="aspect-square overflow-hidden cursor-pointer group"
                     >
                       <img
                         src={imgUrl}
@@ -1004,7 +1004,7 @@ export default function PortfolioApp() {
                         <div
                           key={i}
                           onClick={() => setLightboxImage(gImg)}
-                          className="aspect-[4/3] overflow-hidden bg-[#D8D5CD] p-1 border border-[#B7A28B]/30 hover:bg-[#171715] transition-colors cursor-pointer group"
+                          className="aspect-[4/3] overflow-hidden cursor-pointer group"
                         >
                           <img
                             src={gImg}
@@ -1452,7 +1452,7 @@ export default function PortfolioApp() {
           <img
             src={lightboxImage}
             alt="Full resolution view"
-            className="max-h-[88vh] max-w-[92vw] object-contain border border-[#B7A28B]/40"
+            className="max-h-[88vh] max-w-[92vw] object-contain"
           />
         </div>
       )}
