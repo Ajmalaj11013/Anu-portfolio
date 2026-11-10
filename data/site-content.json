@@ -26,7 +26,7 @@
   "filmsPage": {
     "title": "Films",
     "subtitle": "FASHION FILMS • ADVERTISING FILMS • EDITORIAL DOCUMENTARIES • EXPERIMENTAL & ART FILMS",
-    "bannerImage": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=2000&q=85"
+    "bannerImage": "/api/media/1794342251943-1-image-final--file--.jpg"
   },
   "aboutPage": {
     "title": "About",
@@ -302,7 +302,12 @@
       "sourceSrc": "/api/media/1794342114394-img_1853.jpg",
       "mobileSourceSrc": "/api/media/1794342114394-img_1853.jpg",
       "desktopSrc": "/api/media/1794342114394-img_1853.jpg"
+    },
+    "films-banner": {
+      "sourceSrc": "/api/media/1794342251943-1-image-final--file--.jpg",
+      "mobileSourceSrc": "/api/media/1794342251943-1-image-final--file--.jpg",
+      "desktopSrc": "/api/media/1794342251943-1-image-final--file--.jpg"
     }
   },
-  "updatedAt": 1794342128382
+  "updatedAt": 1794342253860
 }
