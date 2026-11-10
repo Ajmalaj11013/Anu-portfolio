@@ -38,7 +38,7 @@
     "disciplines": [
       "Fashion Editorial",
       "Fashion Campaigns",
-      "Architecture & Spaces",
+      "",
       "Advertising",
       "Documentary",
       "Fashion Films",
@@ -412,5 +412,5 @@
       "desktopSrc": "/api/media/1794337028057-blurred-figure-before-a-concrete-moodboard--1-.jpg"
     }
   },
-  "updatedAt": 1794338092574
+  "updatedAt": 1794338095681
 }
