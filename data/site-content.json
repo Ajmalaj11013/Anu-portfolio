@@ -37,7 +37,7 @@
     "disciplinesTitle": "CREATIVE DISCIPLINES",
     "disciplines": [
       "Fashion Editorial",
-      "",
+      "Fashion Campaigns",
       "Architecture & Spaces",
       "Advertising",
       "Documentary",
@@ -412,5 +412,5 @@
       "desktopSrc": "/api/media/1794337028057-blurred-figure-before-a-concrete-moodboard--1-.jpg"
     }
   },
-  "updatedAt": 1794338091696
+  "updatedAt": 1794338092574
 }
