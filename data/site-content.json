@@ -58,7 +58,28 @@
     "instagramUrl": "#instagram",
     "vimeoUrl": "#vimeo"
   },
-  "projects": [],
+  "projects": [
+    {
+      "id": "over-ddose-9869",
+      "title": "OVER DDOSE ",
+      "category": "ARCHITECTURE",
+      "categorySlug": "architecture",
+      "type": "photography",
+      "year": "2025",
+      "role": "Photography &Direction",
+      "discipline": "Fashion & Editorial",
+      "description": "Click to edit this project description in Edit Mode.",
+      "coverImage": "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=85",
+      "gallery": [
+        "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=85"
+      ],
+      "featured": true,
+      "director": "AJNAS",
+      "cinematography": "AJNAS",
+      "editor": "AJNAS",
+      "duration": "02:30"
+    }
+  ],
   "photographySections": [
     {
       "title": "FASHION & EDITORIAL",
@@ -260,5 +281,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794341947003
+  "updatedAt": 1794341989869
 }
