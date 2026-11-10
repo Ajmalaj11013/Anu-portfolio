@@ -60,6 +60,26 @@
   },
   "projects": [
     {
+      "id": "still-form-1648",
+      "title": "STILL FORM ",
+      "category": "FASHION EDITORIAL",
+      "categorySlug": "fashion",
+      "type": "photography",
+      "year": "2025",
+      "role": "Photography & Direction",
+      "discipline": "Fashion & Editorial",
+      "description": "Click to edit this project description in Edit Mode.",
+      "coverImage": "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=85",
+      "gallery": [
+        "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=85"
+      ],
+      "featured": true,
+      "director": "AJNAS",
+      "cinematography": "AJNAS",
+      "editor": "AJNAS",
+      "duration": "02:30"
+    },
+    {
       "id": "over-ddose-9869",
       "title": "OVER DDOSE ",
       "category": "ARCHITECTURE",
@@ -322,5 +342,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794342441607
+  "updatedAt": 1794342461648
 }
