@@ -6,7 +6,7 @@
     "titleLine1": "Images with",
     "titleLine2": "a point of view.",
     "subtitle": "PHOTOGRAPHER & FILM DIRECTOR",
-    "description": "Fashion, spaces, objects and stories — explored through editorial photography and moving image.",
+    "description": "",
     "ctaText": "EXPLORE SELECTED WORK"
   },
   "homeCards": {
@@ -430,5 +430,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794339142881
+  "updatedAt": 1794339260786
 }
