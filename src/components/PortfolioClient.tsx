@@ -1566,7 +1566,7 @@ export default function PortfolioClient({
                         }
                       />
                     </h1>
-                    <div className="text-[10px] sm:text-[11px] tracking-[0.26em] uppercase text-[#B7A28B] font-medium pt-1">
+                    <div className="text-[10px] sm:text-[11px] tracking-[0.26em] uppercase text-[#171715] font-medium pt-1">
                       <EditableText
                         value={content.hero.subtitle}
                         editMode={editMode}
@@ -1600,7 +1600,7 @@ export default function PortfolioClient({
                               ?.scrollIntoView({ behavior: "smooth" });
                           }
                         }}
-                        className="inline-flex items-center space-x-3 text-[10px] tracking-[0.24em] uppercase text-[#F4F2ED] border-b border-[#B7A28B] pb-1.5 px-2 py-1 -ml-2 hover:bg-[#171715] hover:text-[#F4F2ED] transition-all group"
+                        className="inline-flex items-center space-x-3 text-[10px] tracking-[0.24em] uppercase text-[#171715] border-b border-[#171715] pb-1.5 px-2 py-1 -ml-2 hover:bg-[#171715] hover:text-[#F4F2ED] transition-all group"
                       >
                         <EditableText
                           value={content.hero.ctaText}
@@ -1612,16 +1612,16 @@ export default function PortfolioClient({
                             })
                           }
                         />
-                        <ArrowRight className="w-3.5 h-3.5 text-[#B7A28B] group-hover:text-[#F4F2ED] group-hover:translate-x-1 transition-all" />
+                        <ArrowRight className="w-3.5 h-3.5 text-[#171715] group-hover:text-[#F4F2ED] group-hover:translate-x-1 transition-all" />
                       </button>
                     </div>
                   </div>
 
                   {/* Right Hero Discipline List (Desktop) */}
-                  <div className="hidden md:flex flex-col space-y-2 text-[10px] tracking-[0.24em] uppercase text-[#D8D5CD] border-l border-[#B7A28B] pl-6 py-1">
+                  <div className="hidden md:flex flex-col space-y-2 text-[10px] tracking-[0.24em] uppercase text-[#171715] border-l border-[#171715] pl-6 py-1 font-medium">
                     <button
                       onClick={() => navigateToCategory("photography", "fashion")}
-                      className="text-left px-2 py-0.5 -ml-2 hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
+                      className="text-left px-2 py-0.5 -ml-2 text-[#171715] hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
                     >
                       FASHION &amp; EDITORIAL
                     </button>
@@ -1629,7 +1629,7 @@ export default function PortfolioClient({
                       onClick={() =>
                         navigateToCategory("photography", "hospitality")
                       }
-                      className="text-left px-2 py-0.5 -ml-2 hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
+                      className="text-left px-2 py-0.5 -ml-2 text-[#171715] hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
                     >
                       PRODUCT
                     </button>
@@ -1637,13 +1637,13 @@ export default function PortfolioClient({
                       onClick={() =>
                         navigateToCategory("photography", "architecture")
                       }
-                      className="text-left px-2 py-0.5 -ml-2 hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
+                      className="text-left px-2 py-0.5 -ml-2 text-[#171715] hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
                     >
                       ARCHITECTURE
                     </button>
                     <button
                       onClick={() => navigateToCategory("photography", "food")}
-                      className="text-left px-2 py-0.5 -ml-2 hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
+                      className="text-left px-2 py-0.5 -ml-2 text-[#171715] hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
                     >
                       ADVERTISING
                     </button>
@@ -1651,13 +1651,13 @@ export default function PortfolioClient({
                       onClick={() =>
                         navigateToCategory("photography", "documentary")
                       }
-                      className="text-left px-2 py-0.5 -ml-2 hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
+                      className="text-left px-2 py-0.5 -ml-2 text-[#171715] hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
                     >
                       DOCUMENTARY
                     </button>
                     <button
                       onClick={() => navigateToCategory("films", "all")}
-                      className="text-left px-2 py-0.5 -ml-2 hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
+                      className="text-left px-2 py-0.5 -ml-2 text-[#171715] hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
                     >
                       FILMS
                     </button>
@@ -1667,7 +1667,7 @@ export default function PortfolioClient({
             </section>
 
             {/* Mobile Discipline Strip below hero */}
-            <div className="md:hidden flex flex-wrap gap-x-3 gap-y-2 py-4 border-b border-[#B7A28B]/40 text-[10px] tracking-[0.2em] uppercase text-[#8C8980]">
+            <div className="md:hidden flex flex-wrap gap-x-3 gap-y-2 py-4 border-b border-[#B7A28B]/40 text-[10px] tracking-[0.2em] uppercase text-[#171715]">
               <button
                 onClick={() => navigateToCategory("photography", "fashion")}
                 className="px-2 py-1 hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
