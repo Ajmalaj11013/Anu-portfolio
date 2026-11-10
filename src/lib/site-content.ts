@@ -106,3 +106,4 @@ export async function getLatestServerSiteContent(): Promise<{
     content: DEFAULT_SITE_CONTENT,
   };
 }
+
