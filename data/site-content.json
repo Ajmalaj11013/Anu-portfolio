@@ -60,26 +60,6 @@
   },
   "projects": [
     {
-      "id": "cafe-lumiere",
-      "title": "Café Lumière",
-      "category": "PRODUCT",
-      "categorySlug": "hospitality",
-      "type": "photography",
-      "year": "2024",
-      "role": "Product & Atmosphere Photography",
-      "discipline": "Product",
-      "description": "Capturing the warm afternoon stillness of a brutalist-inspired sanctuary. Natural light filters through botanical textures, limewash walls and handcrafted timber objects.",
-      "coverImage": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1400&q=85",
-      "gallery": [
-        "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=85",
-        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1000&q=85",
-        "https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1000&q=85",
-        "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1000&q=85",
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=85"
-      ],
-      "featured": true
-    },
-    {
       "id": "landscapes-of-living",
       "title": "Landscapes of Living",
       "category": "ARCHITECTURE",
@@ -409,5 +389,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794341521880
+  "updatedAt": 1794341525254
 }
