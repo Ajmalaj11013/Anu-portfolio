@@ -50,7 +50,7 @@
   },
   "contactPage": {
     "title": "Let's work together.",
-    "subtitle": "",
+    "subtitle": "Available for selected commissions, creative collaborations and new projects.",
     "locationTitle": "Based in India.",
     "locationSub": "Available for international projects.",
     "cities": "BANGALORE / CALICUT",
@@ -430,5 +430,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794341400868
+  "updatedAt": 1794341401653
 }
