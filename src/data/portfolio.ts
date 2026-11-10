@@ -1,8 +1,20 @@
+export type CategorySlug =
+  | "fashion"
+  | "hospitality"
+  | "architecture"
+  | "food"
+  | "product"
+  | "documentary"
+  | "film-fashion"
+  | "film-advertising"
+  | "film-documentary"
+  | "film-experimental";
+
 export interface Project {
   id: string;
   title: string;
   category: string;
-  categorySlug: "fashion" | "hospitality" | "architecture" | "food" | "product" | "film-fashion" | "film-advertising" | "film-documentary" | "film-experimental";
+  categorySlug: CategorySlug;
   type: "photography" | "film";
   year: string;
   role: string;
@@ -15,7 +27,83 @@ export interface Project {
   director?: string;
   cinematography?: string;
   editor?: string;
-  videoPreview?: string;
+  videoUrl?: string;
+}
+
+export interface PhotographyImageItem {
+  src: string;
+  projectId: string;
+  caption: string;
+}
+
+export interface PhotographySection {
+  title: string;
+  slug: string;
+  images: PhotographyImageItem[];
+}
+
+export interface FilmCategoryItem {
+  title: string;
+  slug: string;
+  projectId: string;
+  image: string;
+}
+
+export interface SiteContent {
+  brandName: string;
+  brandSubtitle: string;
+  hero: {
+    image: string;
+    videoUrl?: string;
+    titleLine1: string;
+    titleLine2: string;
+    subtitle: string;
+    description: string;
+    ctaText: string;
+  };
+  homeCards: {
+    photographyTitle: string;
+    photographyDesc: string;
+    photographyImage: string;
+    filmsTitle: string;
+    filmsDesc: string;
+    filmsImage: string;
+    filmsSideLabel: string;
+  };
+  photographyPage: {
+    title: string;
+    subtitle: string;
+    bannerImage: string;
+  };
+  filmsPage: {
+    title: string;
+    subtitle: string;
+    bannerImage: string;
+  };
+  aboutPage: {
+    title: string;
+    portraitImage: string;
+    availabilityNote: string;
+    leadBio: string;
+    bodyBio: string;
+    disciplinesTitle: string;
+    disciplines: string[];
+    signatureName: string;
+    signatureRole: string;
+  };
+  contactPage: {
+    title: string;
+    subtitle: string;
+    locationTitle: string;
+    locationSub: string;
+    cities: string;
+    email: string;
+    instagramUrl: string;
+    vimeoUrl: string;
+  };
+  projects: Project[];
+  photographySections: PhotographySection[];
+  filmCategories: FilmCategoryItem[];
 }
 
 export const PROJECTS: Project[] = [
@@ -45,14 +133,14 @@ export const PROJECTS: Project[] = [
   {
     id: "cafe-lumiere",
     title: "Café Lumière",
-    category: "HOSPITALITY",
+    category: "PRODUCT",
     categorySlug: "hospitality",
     type: "photography",
     year: "2024",
-    role: "Interior & Atmosphere Photography",
+    role: "Product & Atmosphere Photography",
     discipline: "Product",
     description:
-      "Capturing the warm afternoon stillness of a brutalist-inspired sanctuary. Natural light filters through botanical textures, limewash walls and handcrafted timber furniture.",
+      "Capturing the warm afternoon stillness of a brutalist-inspired sanctuary. Natural light filters through botanical textures, limewash walls and handcrafted timber objects.",
     coverImage:
       "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1400&q=85",
     gallery: [
@@ -96,7 +184,7 @@ export const PROJECTS: Project[] = [
     role: "Photography & Creative Direction",
     discipline: "Advertising",
     description:
-      "A quiet exploration of seasonal produce, texture and light — where food becomes a study in form, colour and atmosphere.",
+      "A quiet exploration of seasonal produce, texture and light — where objects become a study in form, colour and atmosphere.",
     coverImage:
       "https://images.unsplash.com/photo-1490818387583-1baba5e638af?auto=format&fit=crop&w=1400&q=85",
     gallery: [
@@ -162,7 +250,7 @@ export const PROJECTS: Project[] = [
   {
     id: "vessels-of-earth",
     title: "Vessels of Earth",
-    category: "PRODUCT & STILL LIFE",
+    category: "ADVERTISING",
     categorySlug: "food",
     type: "photography",
     year: "2024",
@@ -226,7 +314,7 @@ export const PROJECTS: Project[] = [
   },
 ];
 
-export const PHOTOGRAPHY_SECTIONS = [
+export const PHOTOGRAPHY_SECTIONS: PhotographySection[] = [
   {
     title: "FASHION & EDITORIAL",
     slug: "fashion",
@@ -359,7 +447,7 @@ export const PHOTOGRAPHY_SECTIONS = [
   },
 ];
 
-export const FILM_CATEGORIES = [
+export const FILM_CATEGORIES: FilmCategoryItem[] = [
   {
     title: "FASHION FILMS",
     slug: "film-fashion",
@@ -390,3 +478,81 @@ export const FILM_CATEGORIES = [
   },
 ];
 
+export const DEFAULT_SITE_CONTENT: SiteContent = {
+  brandName: "AJNAS",
+  brandSubtitle: "PHOTOGRAPHER & FILM DIRECTOR",
+  hero: {
+    image:
+      "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=2000&q=85",
+    titleLine1: "Images with",
+    titleLine2: "a point of view.",
+    subtitle: "PHOTOGRAPHER & FILM DIRECTOR",
+    description:
+      "Fashion, spaces, objects and stories — explored through editorial photography and moving image.",
+    ctaText: "EXPLORE SELECTED WORK",
+  },
+  homeCards: {
+    photographyTitle: "PHOTOGRAPHY",
+    photographyDesc:
+      "Fashion, hospitality, architecture, food, product and portraiture.",
+    photographyImage:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85",
+    filmsTitle: "FILMS",
+    filmsDesc:
+      "Fashion films, advertising films, editorial documentaries and visual narratives.",
+    filmsImage:
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=85",
+    filmsSideLabel: "ADVERTISING",
+  },
+  photographyPage: {
+    title: "Photography",
+    subtitle:
+      "FASHION & EDITORIAL • PRODUCT • ARCHITECTURE • ADVERTISING • DOCUMENTARY",
+    bannerImage:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=2000&q=85",
+  },
+  filmsPage: {
+    title: "Films",
+    subtitle:
+      "FASHION FILMS • ADVERTISING FILMS • EDITORIAL DOCUMENTARIES • EXPERIMENTAL & ART FILMS",
+    bannerImage:
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=2000&q=85",
+  },
+  aboutPage: {
+    title: "About",
+    portraitImage:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85",
+    availabilityNote:
+      "Available for selected commissions and creative collaborations worldwide.",
+    leadBio:
+      "I am an independent image-maker and film director working across fashion, still life, architecture, hospitality and moving image.",
+    bodyBio:
+      "My practice explores the relationship between form, atmosphere and storytelling, bringing an editorial sensibility to both still and moving images. Working closely with designers, architects, hospitality brands and publications across Bangalore, Calicut and internationally.",
+    disciplinesTitle: "CREATIVE DISCIPLINES",
+    disciplines: [
+      "Fashion Editorial",
+      "Product & Campaign Imagery",
+      "Architecture & Spaces",
+      "Advertising",
+      "Documentary",
+      "Fashion Films",
+      "Advertising Films",
+      "Editorial Documentaries",
+    ],
+    signatureName: "Ajnas",
+    signatureRole: "PHOTOGRAPHER & FILM DIRECTOR",
+  },
+  contactPage: {
+    title: "Let's work together.",
+    subtitle: "For commissions, collaborations and project enquiries.",
+    locationTitle: "Based in India.",
+    locationSub: "Available for international projects.",
+    cities: "BANGALORE / CALICUT",
+    email: "hello@ajnas.studio",
+    instagramUrl: "#instagram",
+    vimeoUrl: "#vimeo",
+  },
+  projects: PROJECTS,
+  photographySections: PHOTOGRAPHY_SECTIONS,
+  filmCategories: FILM_CATEGORIES,
+};
