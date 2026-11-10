@@ -69,7 +69,7 @@
       "role": "Photography & Art Direction",
       "discipline": "Fashion & Editorial",
       "description": "Click to edit this project description in Edit Mode.",
-      "coverImage": "/api/media/1794312016545-post-1.jpg",
+      "coverImage": "/api/media/1794314006313-project-cover-form-0404-desktop.jpg",
       "gallery": [
         "/api/media/1794312016545-post-1.jpg"
       ],
@@ -425,7 +425,7 @@
       "image": "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=85"
     }
   ],
-  "updatedAt": 1794313948652,
+  "updatedAt": 1794314014493,
   "imageSettings": {
     "hero": {
       "desktopSrc": "/api/media/1794313944938-hero-desktop.jpg",
@@ -442,6 +442,24 @@
       "mobileZoom": 121,
       "mobilePanX": 57,
       "mobilePanY": -5,
+      "desktopFit": "cover",
+      "mobileFit": "cover"
+    },
+    "project-cover-form-0404": {
+      "desktopSrc": "/api/media/1794314006313-project-cover-form-0404-desktop.jpg",
+      "mobileSrc": "/api/media/1794314013102-project-cover-form-0404-mobile.jpg",
+      "sourceSrc": "/api/media/1794312016545-post-1.jpg",
+      "mobileSourceSrc": "/api/media/1794312016545-post-1.jpg",
+      "desktopWidth": 1600,
+      "desktopHeight": 1100,
+      "mobileWidth": 900,
+      "mobileHeight": 1100,
+      "desktopZoom": 59,
+      "desktopPanX": 0,
+      "desktopPanY": -8,
+      "mobileZoom": 100,
+      "mobilePanX": 0,
+      "mobilePanY": 0,
       "desktopFit": "cover",
       "mobileFit": "cover"
     }
