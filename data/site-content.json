@@ -31,7 +31,7 @@
   "aboutPage": {
     "title": "About",
     "portraitImage": "/api/media/1794337028057-blurred-figure-before-a-concrete-moodboard--1-.jpg",
-    "availabilityNote": "Available for selected commissions and creative collaborations worldwide.",
+    "availabilityNote": "",
     "leadBio": "I am an independent fashion photographer and fashion film creator from God's Own Country, India, working across fashion, campaigns and moving image.",
     "bodyBio": "My journey into photography began before I completed my higher secondary education. What started as a curiosity towards images gradually became a creative practice shaped by observation, experimentation and a desire to see the world differently.\n\nAt 20, I continue to explore the relationship between light, form and storytelling through fashion photography and fashion films. My work is driven by an interest in people, places and the subtle details that often go unnoticed.\n\nI believe photography is more than documenting what exists. It is about finding a point of view, creating a feeling and giving ideas their own visual language.\n\nMy journey is still unfolding, and I remain open to new perspectives, creative collaborations and opportunities to explore the world through my own visual language.",
     "disciplinesTitle": "CREATIVE DISCIPLINES",
@@ -412,5 +412,5 @@
       "desktopSrc": "/api/media/1794337028057-blurred-figure-before-a-concrete-moodboard--1-.jpg"
     }
   },
-  "updatedAt": 1794337946516
+  "updatedAt": 1794338024351
 }
