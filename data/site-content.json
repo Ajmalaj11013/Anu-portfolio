@@ -2,7 +2,7 @@
   "brandName": "AJNAS",
   "brandSubtitle": "PHOTOGRAPHER & FASHION FILM DIRECTOR",
   "hero": {
-    "image": "/api/media/1794340379475-landscap.jpg",
+    "image": "/api/media/1794340442629-hero-desktop.jpg",
     "titleLine1": "Images with",
     "titleLine2": "a point of view.",
     "subtitle": "PHOTOGRAPHER & FILM DIRECTOR",
@@ -412,10 +412,23 @@
       "desktopSrc": "/api/media/1794337028057-blurred-figure-before-a-concrete-moodboard--1-.jpg"
     },
     "hero": {
+      "desktopSrc": "/api/media/1794340442629-hero-desktop.jpg",
+      "mobileSrc": "/api/media/1794340444850-hero-mobile.jpg",
       "sourceSrc": "/api/media/1794340379475-landscap.jpg",
       "mobileSourceSrc": "/api/media/1794340379475-landscap.jpg",
-      "desktopSrc": "/api/media/1794340379475-landscap.jpg"
+      "desktopWidth": 1920,
+      "desktopHeight": 1080,
+      "mobileWidth": 900,
+      "mobileHeight": 1200,
+      "desktopZoom": 139,
+      "desktopPanX": 0,
+      "desktopPanY": 0,
+      "mobileZoom": 126,
+      "mobilePanX": 3,
+      "mobilePanY": 7,
+      "desktopFit": "cover",
+      "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794340403252
+  "updatedAt": 1794340446191
 }
