@@ -45,7 +45,7 @@
       "Advertising Films",
       "Editorial Documentaries"
     ],
-    "signatureName": "Ajnas",
+    "signatureName": "Ajnas ",
     "signatureRole": "PHOTOGRAPHER & FILM DIRECTOR"
   },
   "contactPage": {
@@ -412,5 +412,5 @@
       "desktopSrc": "/api/media/1794337028057-blurred-figure-before-a-concrete-moodboard--1-.jpg"
     }
   },
-  "updatedAt": 1794337034996
+  "updatedAt": 1794337055020
 }
