@@ -58,28 +58,7 @@
     "instagramUrl": "#instagram",
     "vimeoUrl": "#vimeo"
   },
-  "projects": [
-    {
-      "id": "solitude-in-stone",
-      "title": "Solitude in Stone",
-      "category": "EXPERIMENTAL FILM",
-      "categorySlug": "film-experimental",
-      "type": "film",
-      "year": "2023",
-      "role": "Director",
-      "discipline": "Experimental & Art Films",
-      "director": "Ajnas",
-      "cinematography": "Ajnas",
-      "editor": "Ajnas",
-      "duration": "03:30",
-      "description": "An experimental visual poem examining how shadow, skin, and ancient stone echo memory.",
-      "coverImage": "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1400&q=85",
-      "gallery": [
-        "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=85"
-      ],
-      "featured": false
-    }
-  ],
+  "projects": [],
   "photographySections": [
     {
       "title": "FASHION & EDITORIAL",
@@ -263,5 +242,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794341537903
+  "updatedAt": 1794341539812
 }
