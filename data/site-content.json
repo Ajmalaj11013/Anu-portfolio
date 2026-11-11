@@ -21,7 +21,7 @@
   "photographyPage": {
     "title": "Photography",
     "subtitle": "FASHION & EDITORIAL • PRODUCT • ARCHITECTURE • ADVERTISING • DOCUMENTARY",
-    "bannerImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=2000&q=85"
+    "bannerImage": "/api/media/1794409181787-landscap.jpg"
   },
   "filmsPage": {
     "title": "Films",
@@ -350,7 +350,12 @@
       "sourceSrc": "/api/media/1794342500214-landscap.jpg",
       "mobileSourceSrc": "/api/media/1794342500214-landscap.jpg",
       "desktopSrc": "/api/media/1794342500214-landscap.jpg"
+    },
+    "photography-banner": {
+      "sourceSrc": "/api/media/1794409181787-landscap.jpg",
+      "mobileSourceSrc": "/api/media/1794409181787-landscap.jpg",
+      "desktopSrc": "/api/media/1794409181787-landscap.jpg"
     }
   },
-  "updatedAt": 1794342506872
+  "updatedAt": 1794409183415
 }
