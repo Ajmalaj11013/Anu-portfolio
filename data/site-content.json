@@ -21,7 +21,7 @@
   "photographyPage": {
     "title": "Photography",
     "subtitle": "FASHION & EDITORIAL • PRODUCT • ARCHITECTURE • ADVERTISING • DOCUMENTARY",
-    "bannerImage": "/api/media/1794409194378-photography-banner-desktop.jpg"
+    "bannerImage": "/api/media/1794409216862-photography-banner-desktop.jpg"
   },
   "filmsPage": {
     "title": "Films",
@@ -352,8 +352,8 @@
       "desktopSrc": "/api/media/1794342500214-landscap.jpg"
     },
     "photography-banner": {
-      "desktopSrc": "/api/media/1794409194378-photography-banner-desktop.jpg",
-      "mobileSrc": "/api/media/1794409196204-photography-banner-mobile.jpg",
+      "desktopSrc": "/api/media/1794409216862-photography-banner-desktop.jpg",
+      "mobileSrc": "/api/media/1794409218937-photography-banner-mobile.jpg",
       "sourceSrc": "/api/media/1794409181787-landscap.jpg",
       "mobileSourceSrc": "/api/media/1794409181787-landscap.jpg",
       "desktopWidth": 1920,
@@ -370,5 +370,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794409197772
+  "updatedAt": 1794409220316
 }
