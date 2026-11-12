@@ -399,7 +399,25 @@
       "mobilePanY": 0,
       "desktopFit": "cover",
       "mobileFit": "cover"
+    },
+    "project-detail-main-still-form-1648": {
+      "desktopSrc": "/api/media/1794470732820-project-detail-main-still-form-1648-desktop.jpg",
+      "mobileSrc": "/api/media/1794470735071-project-detail-main-still-form-1648-mobile.jpg",
+      "sourceSrc": "/api/media/1794469194341-landscap.jpg",
+      "mobileSourceSrc": "/api/media/1794469194341-landscap.jpg",
+      "desktopWidth": 1600,
+      "desktopHeight": 1100,
+      "mobileWidth": 900,
+      "mobileHeight": 1100,
+      "desktopZoom": 100,
+      "desktopPanX": 0,
+      "desktopPanY": 0,
+      "mobileZoom": 100,
+      "mobilePanX": 49,
+      "mobilePanY": 0,
+      "desktopFit": "contain",
+      "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794470698276
+  "updatedAt": 1794470736180
 }
