@@ -69,7 +69,7 @@
       "role": "Photography & Direction",
       "discipline": "Fashion & Editorial",
       "description": "Click to edit this project description in Edit Mode.",
-      "coverImage": "/api/media/1794342477885-landscap.jpg",
+      "coverImage": "/api/media/1794469079416-project-cover-still-form-1648-desktop.jpg",
       "gallery": [
         "/api/media/1794342500214-landscap.jpg"
       ],
@@ -342,9 +342,22 @@
       "mobileFit": "cover"
     },
     "project-cover-still-form-1648": {
+      "desktopSrc": "/api/media/1794469079416-project-cover-still-form-1648-desktop.jpg",
+      "mobileSrc": "/api/media/1794469081564-project-cover-still-form-1648-mobile.jpg",
       "sourceSrc": "/api/media/1794342477885-landscap.jpg",
       "mobileSourceSrc": "/api/media/1794342477885-landscap.jpg",
-      "desktopSrc": "/api/media/1794342477885-landscap.jpg"
+      "desktopWidth": 900,
+      "desktopHeight": 1200,
+      "mobileWidth": 800,
+      "mobileHeight": 1000,
+      "desktopZoom": 100,
+      "desktopPanX": 62,
+      "desktopPanY": -3,
+      "mobileZoom": 100,
+      "mobilePanX": 53,
+      "mobilePanY": 0,
+      "desktopFit": "cover",
+      "mobileFit": "cover"
     },
     "project-gallery-still-form-1648-0": {
       "sourceSrc": "/api/media/1794342500214-landscap.jpg",
@@ -370,5 +383,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794409225543
+  "updatedAt": 1794469082786
 }
