@@ -419,8 +419,8 @@
       "mobileFit": "cover"
     },
     "home-selected-thumb-over-ddose-9869": {
-      "desktopSrc": "/api/media/1794471490030-home-selected-thumb-over-ddose-9869-desktop.jpg",
-      "mobileSrc": "/api/media/1794471492733-home-selected-thumb-over-ddose-9869-mobile.jpg",
+      "desktopSrc": "/api/media/1794471512448-home-selected-thumb-over-ddose-9869-desktop.jpg",
+      "mobileSrc": "/api/media/1794471514876-home-selected-thumb-over-ddose-9869-mobile.jpg",
       "sourceSrc": "/api/media/1794342045973-editorial-overdose4263.jpg",
       "mobileSourceSrc": "/api/media/1794342045973-editorial-overdose4263.jpg",
       "desktopWidth": 900,
@@ -428,14 +428,14 @@
       "mobileWidth": 800,
       "mobileHeight": 1000,
       "desktopZoom": 115,
-      "desktopPanX": 44,
+      "desktopPanX": 47,
       "desktopPanY": -5,
       "mobileZoom": 100,
-      "mobilePanX": 38,
+      "mobilePanX": 39,
       "mobilePanY": 0,
       "desktopFit": "cover",
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794471494647
+  "updatedAt": 1794471516168
 }
