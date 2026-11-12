@@ -401,8 +401,8 @@
       "mobileFit": "cover"
     },
     "project-detail-main-still-form-1648": {
-      "desktopSrc": "/api/media/1794470837617-project-detail-main-still-form-1648-desktop.jpg",
-      "mobileSrc": "/api/media/1794470839753-project-detail-main-still-form-1648-mobile.jpg",
+      "desktopSrc": "/api/media/1794470959956-project-detail-main-still-form-1648-desktop.jpg",
+      "mobileSrc": "/api/media/1794470963547-project-detail-main-still-form-1648-mobile.jpg",
       "sourceSrc": "/api/media/1794469194341-landscap.jpg",
       "mobileSourceSrc": "/api/media/1794469194341-landscap.jpg",
       "desktopWidth": 1600,
@@ -411,7 +411,7 @@
       "mobileHeight": 1100,
       "desktopZoom": 100,
       "desktopPanX": 0,
-      "desktopPanY": -2,
+      "desktopPanY": -4,
       "mobileZoom": 100,
       "mobilePanX": 49,
       "mobilePanY": 0,
@@ -419,5 +419,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794470918361
+  "updatedAt": 1794470964741
 }
