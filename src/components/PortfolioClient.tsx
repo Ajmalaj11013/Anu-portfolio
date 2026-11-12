@@ -301,7 +301,7 @@ function ResponsivePic({
   imageSettings?: Record<string, ResponsiveImageConfig>;
 }) {
   const cfg = imageSettings?.[slotKey];
-  const desktopUrl = src;
+  const desktopUrl = cfg?.desktopSrc || src;
   const mobileUrl = cfg?.mobileSrc;
 
   if (mobileUrl) {
@@ -314,6 +314,34 @@ function ResponsivePic({
   }
 
   return <img src={desktopUrl} alt={alt} className={className} />;
+}
+
+/**
+ * Recover the original unresized project cover or gallery image if a previous
+ * shared resize slot (`project-cover-*` / `project-gallery-*`) overwrote it.
+ */
+function getBaseProjectCover(
+  project: ProjectItem,
+  imageSettings?: Record<string, ResponsiveImageConfig>
+): string {
+  const legacyCfg = imageSettings?.[`project-cover-${project.id}`];
+  if (legacyCfg?.sourceSrc && project.coverImage === legacyCfg.desktopSrc) {
+    return legacyCfg.sourceSrc;
+  }
+  return project.coverImage;
+}
+
+function getBaseGalleryImage(
+  project: ProjectItem,
+  idx: number,
+  imgUrl: string,
+  imageSettings?: Record<string, ResponsiveImageConfig>
+): string {
+  const legacyCfg = imageSettings?.[`project-gallery-${project.id}-${idx}`];
+  if (legacyCfg?.sourceSrc && imgUrl === legacyCfg.desktopSrc) {
+    return legacyCfg.sourceSrc;
+  }
+  return imgUrl;
 }
 
 /**
@@ -760,19 +788,22 @@ export default function PortfolioClient({
     reader.readAsDataURL(file);
   };
 
-  // Helper to reset a slot's mobile override when a brand-new source image is uploaded
+  // Helper to reset one or more slots' resize overrides when a brand-new source image is uploaded
   const withFreshImageSlot = (
     base: SiteContent,
-    slotKey: string,
+    slotKeyOrKeys: string | string[],
     newUrl: string
   ): SiteContent => {
+    const keys = Array.isArray(slotKeyOrKeys) ? slotKeyOrKeys : [slotKeyOrKeys];
     const nextSettings = { ...(base.imageSettings || {}) };
-    nextSettings[slotKey] = {
-      sourceSrc: newUrl,
-      mobileSourceSrc: newUrl,
-      desktopSrc: newUrl,
-      mobileSrc: undefined,
-    };
+    for (const key of keys) {
+      nextSettings[key] = {
+        sourceSrc: newUrl,
+        mobileSourceSrc: newUrl,
+        desktopSrc: newUrl,
+        mobileSrc: undefined,
+      };
+    }
     return {
       ...base,
       imageSettings: nextSettings,
@@ -788,7 +819,7 @@ export default function PortfolioClient({
     defaultDesktopHeight = 1000,
     defaultMobileWidth = 900,
     defaultMobileHeight = 1150,
-    onApplyDesktop,
+    onApplyDesktop = (base) => base,
   }: {
     slotKey: string;
     label: string;
@@ -797,7 +828,7 @@ export default function PortfolioClient({
     defaultDesktopHeight?: number;
     defaultMobileWidth?: number;
     defaultMobileHeight?: number;
-    onApplyDesktop: (base: SiteContent, desktopUrl: string) => SiteContent;
+    onApplyDesktop?: (base: SiteContent, desktopUrl: string) => SiteContent;
   }) => {
     const existing = content.imageSettings?.[slotKey];
     const source = existing?.sourceSrc || currentSrc;
@@ -943,13 +974,22 @@ export default function PortfolioClient({
         mobileRendered.dataUrl
       );
 
-      // 3. Apply Desktop URL to the slot and store Mobile URL + settings in content.imageSettings[slotKey]
-      const updatedWithDesktop = resizerModal.onApplyDesktop(
-        content,
-        savedDesktopUrl
-      );
+      // 3. Store Desktop URL + Mobile URL + crop settings strictly under content.imageSettings[slotKey]
+      // so resizing a thumbnail NEVER overwrites the shared project detail image (or vice versa).
+      const cleanedProjects = content.projects.map((proj) => {
+        const baseCover = getBaseProjectCover(proj, content.imageSettings);
+        const baseGallery = proj.gallery.map((gUrl, gIdx) =>
+          getBaseGalleryImage(proj, gIdx, gUrl, content.imageSettings)
+        );
+        return {
+          ...proj,
+          coverImage: baseCover,
+          gallery: baseGallery,
+        };
+      });
+
       const nextSettings: Record<string, ResponsiveImageConfig> = {
-        ...(updatedWithDesktop.imageSettings || {}),
+        ...(content.imageSettings || {}),
         [resizerModal.slotKey]: {
           desktopSrc: savedDesktopUrl,
           mobileSrc: savedMobileUrl,
@@ -972,7 +1012,8 @@ export default function PortfolioClient({
 
       await persistContent(
         {
-          ...updatedWithDesktop,
+          ...content,
+          projects: cleanedProjects,
           imageSettings: nextSettings,
         },
         true
@@ -987,6 +1028,28 @@ export default function PortfolioClient({
         "Could not resize this image directly. If it is an external image, please upload the image file from your computer first."
       );
     }
+  };
+
+  const handleResetSlotResize = async () => {
+    if (!resizerModal || resizerModal.isSaving) return;
+    const nextSettings = { ...(content.imageSettings || {}) };
+    delete nextSettings[resizerModal.slotKey];
+    const cleanedProjects = content.projects.map((proj) => ({
+      ...proj,
+      coverImage: getBaseProjectCover(proj, content.imageSettings),
+      gallery: proj.gallery.map((gUrl, gIdx) =>
+        getBaseGalleryImage(proj, gIdx, gUrl, content.imageSettings)
+      ),
+    }));
+    await persistContent(
+      {
+        ...content,
+        projects: cleanedProjects,
+        imageSettings: nextSettings,
+      },
+      true
+    );
+    setResizerModal(null);
   };
 
   useEffect(() => {
@@ -1785,8 +1848,11 @@ export default function PortfolioClient({
                           />
                         ) : (
                           <ResponsivePic
-                            slotKey={`project-cover-${item.id}`}
-                            src={item.coverImage}
+                            slotKey={`home-selected-thumb-${item.id}`}
+                            src={getBaseProjectCover(
+                              item,
+                              content.imageSettings
+                            )}
                             alt={item.title}
                             className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
                             imageSettings={content.imageSettings}
@@ -1823,7 +1889,11 @@ export default function PortfolioClient({
                                       ? { ...content, projects: next }
                                       : withFreshImageSlot(
                                           { ...content, projects: next },
-                                          `project-cover-${item.id}`,
+                                          [
+                                            `home-selected-thumb-${item.id}`,
+                                            `project-detail-main-${item.id}`,
+                                            `project-cover-${item.id}`,
+                                          ],
                                           url
                                         )
                                   );
@@ -1839,24 +1909,19 @@ export default function PortfolioClient({
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   openImageResizer({
-                                    slotKey: `project-cover-${item.id}`,
-                                    label: `${item.title} — Cover`,
-                                    currentSrc: item.coverImage,
+                                    slotKey: `home-selected-thumb-${item.id}`,
+                                    label: `${item.title} — Selected Work Thumbnail`,
+                                    currentSrc: getBaseProjectCover(
+                                      item,
+                                      content.imageSettings
+                                    ),
                                     defaultDesktopWidth: 900,
                                     defaultDesktopHeight: 1200,
                                     defaultMobileWidth: 800,
                                     defaultMobileHeight: 1000,
-                                    onApplyDesktop: (base, desktopUrl) => ({
-                                      ...base,
-                                      projects: base.projects.map((p) =>
-                                        p.id === item.id
-                                          ? { ...p, coverImage: desktopUrl }
-                                          : p
-                                      ),
-                                    }),
                                   });
                                 }}
-                                title="Resize image for Desktop & Mobile"
+                                title="Resize thumbnail for Desktop & Mobile (independent of Detail view)"
                                 className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
                               >
                                 <Crop className="w-3 h-3" />
@@ -2837,8 +2902,11 @@ export default function PortfolioClient({
                             />
                           ) : (
                             <ResponsivePic
-                              slotKey={`project-cover-${film.id}`}
-                              src={film.coverImage}
+                              slotKey={`films-archive-thumb-${film.id}`}
+                              src={getBaseProjectCover(
+                                film,
+                                content.imageSettings
+                              )}
                               alt={film.title}
                               className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
                               imageSettings={content.imageSettings}
@@ -2876,7 +2944,11 @@ export default function PortfolioClient({
                                         ? { ...content, projects: next }
                                         : withFreshImageSlot(
                                             { ...content, projects: next },
-                                            `project-cover-${film.id}`,
+                                            [
+                                              `films-archive-thumb-${film.id}`,
+                                              `project-detail-main-${film.id}`,
+                                              `project-cover-${film.id}`,
+                                            ],
                                             url
                                           )
                                     );
@@ -2893,24 +2965,19 @@ export default function PortfolioClient({
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     openImageResizer({
-                                      slotKey: `project-cover-${film.id}`,
-                                      label: `${film.title} — Film Cover`,
-                                      currentSrc: film.coverImage,
+                                      slotKey: `films-archive-thumb-${film.id}`,
+                                      label: `${film.title} — Film Archive Thumbnail`,
+                                      currentSrc: getBaseProjectCover(
+                                        film,
+                                        content.imageSettings
+                                      ),
                                       defaultDesktopWidth: 1280,
                                       defaultDesktopHeight: 720,
                                       defaultMobileWidth: 900,
                                       defaultMobileHeight: 600,
-                                      onApplyDesktop: (base, desktopUrl) => ({
-                                        ...base,
-                                        projects: base.projects.map((p) =>
-                                          p.id === film.id
-                                            ? { ...p, coverImage: desktopUrl }
-                                            : p
-                                        ),
-                                      }),
                                     });
                                   }}
-                                  title="Resize cover image for Desktop & Mobile"
+                                  title="Resize thumbnail for Desktop & Mobile (independent of Detail view)"
                                   className="px-2.5 py-1 bg-[#171715]/90 text-[#F4F2ED] text-[9px] tracking-wider uppercase border border-[#B7A28B] inline-flex items-center space-x-1 hover:bg-[#B7A28B] hover:text-[#171715]"
                                 >
                                   <Crop className="w-3 h-3" />
@@ -3066,7 +3133,15 @@ export default function PortfolioClient({
                     if (currentProject.type === "film" || currentProject.videoUrl) {
                       setActiveVideoModal(currentProject);
                     } else {
-                      setLightboxImage(currentProject.coverImage);
+                      const detailMainUrl =
+                        content.imageSettings?.[
+                          `project-detail-main-${currentProject.id}`
+                        ]?.desktopSrc ||
+                        getBaseProjectCover(
+                          currentProject,
+                          content.imageSettings
+                        );
+                      setLightboxImage(detailMainUrl);
                     }
                   }}
                   className="relative aspect-[16/11] w-full overflow-hidden cursor-pointer group"
@@ -3096,8 +3171,11 @@ export default function PortfolioClient({
                     }
                     return (
                       <ResponsivePic
-                        slotKey={`project-cover-${currentProject.id}`}
-                        src={currentProject.coverImage}
+                        slotKey={`project-detail-main-${currentProject.id}`}
+                        src={getBaseProjectCover(
+                          currentProject,
+                          content.imageSettings
+                        )}
                         alt={currentProject.title}
                         className="w-full h-full object-cover editorial-image-grade group-hover:scale-[1.02]"
                         imageSettings={content.imageSettings}
@@ -3137,7 +3215,10 @@ export default function PortfolioClient({
                               persistContent(
                                 withFreshImageSlot(
                                   { ...content, projects: nextProjects },
-                                  `project-cover-${currentProject.id}`,
+                                  [
+                                    `project-detail-main-${currentProject.id}`,
+                                    `project-cover-${currentProject.id}`,
+                                  ],
                                   url
                                 )
                               );
@@ -3154,21 +3235,16 @@ export default function PortfolioClient({
                           onClick={(e) => {
                             e.stopPropagation();
                             openImageResizer({
-                              slotKey: `project-cover-${currentProject.id}`,
-                              label: `${currentProject.title} — Main Image`,
-                              currentSrc: currentProject.coverImage,
+                              slotKey: `project-detail-main-${currentProject.id}`,
+                              label: `${currentProject.title} — Detail Main Image`,
+                              currentSrc: getBaseProjectCover(
+                                currentProject,
+                                content.imageSettings
+                              ),
                               defaultDesktopWidth: 1600,
                               defaultDesktopHeight: 1100,
                               defaultMobileWidth: 900,
                               defaultMobileHeight: 1100,
-                              onApplyDesktop: (base, desktopUrl) => ({
-                                ...base,
-                                projects: base.projects.map((p) =>
-                                  p.id === currentProject.id
-                                    ? { ...p, coverImage: desktopUrl }
-                                    : p
-                                ),
-                              }),
                             });
                           }}
                           className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
@@ -3211,18 +3287,29 @@ export default function PortfolioClient({
                 <div className="grid grid-cols-3 gap-3 sm:gap-4">
                   {currentProject.gallery.slice(1, 4).map((imgUrl, idx) => {
                     const actualIdx = idx + 1;
-                    const slotKey = `project-gallery-${currentProject.id}-${actualIdx}`;
+                    const slotKey = `project-detail-still-${currentProject.id}-${actualIdx}`;
+                    const baseStillUrl = getBaseGalleryImage(
+                      currentProject,
+                      actualIdx,
+                      imgUrl,
+                      content.imageSettings
+                    );
                     return (
                       <div
                         key={actualIdx}
                         onClick={() => {
-                          if (!editMode) setLightboxImage(imgUrl);
+                          if (!editMode) {
+                            const fullUrl =
+                              content.imageSettings?.[slotKey]?.desktopSrc ||
+                              baseStillUrl;
+                            setLightboxImage(fullUrl);
+                          }
                         }}
                         className="relative aspect-square overflow-hidden cursor-pointer group"
                       >
                         <ResponsivePic
                           slotKey={slotKey}
-                          src={imgUrl}
+                          src={baseStillUrl}
                           alt={`${currentProject.title} still ${actualIdx}`}
                           className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
                           imageSettings={content.imageSettings}
@@ -3245,7 +3332,10 @@ export default function PortfolioClient({
                                   persistContent(
                                     withFreshImageSlot(
                                       { ...content, projects: nextProjects },
-                                      slotKey,
+                                      [
+                                        slotKey,
+                                        `project-gallery-${currentProject.id}-${actualIdx}`,
+                                      ],
                                       url
                                     )
                                   );
@@ -3261,28 +3351,15 @@ export default function PortfolioClient({
                                 e.stopPropagation();
                                 openImageResizer({
                                   slotKey,
-                                  label: `${currentProject.title} — Still ${actualIdx}`,
-                                  currentSrc: imgUrl,
+                                  label: `${currentProject.title} — Detail Still ${actualIdx}`,
+                                  currentSrc: baseStillUrl,
                                   defaultDesktopWidth: 1200,
                                   defaultDesktopHeight: 1200,
                                   defaultMobileWidth: 900,
                                   defaultMobileHeight: 900,
-                                  onApplyDesktop: (base, desktopUrl) => ({
-                                    ...base,
-                                    projects: base.projects.map((p) =>
-                                      p.id === currentProject.id
-                                        ? {
-                                            ...p,
-                                            gallery: p.gallery.map((g, i) =>
-                                              i === actualIdx ? desktopUrl : g
-                                            ),
-                                          }
-                                        : p
-                                    ),
-                                  }),
                                 });
                               }}
-                              title="Resize for Desktop & Mobile"
+                              title="Resize detail still for Desktop & Mobile (independent of thumbnail)"
                               className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
                             >
                               <Crop className="w-3 h-3" />
@@ -3430,18 +3507,30 @@ export default function PortfolioClient({
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       {currentProject.gallery.map((gImg, i) => {
-                        const slotKey = `project-gallery-${currentProject.id}-${i}`;
+                        const slotKey = `project-detail-thumb-${currentProject.id}-${i}`;
+                        const baseThumbUrl = getBaseGalleryImage(
+                          currentProject,
+                          i,
+                          gImg,
+                          content.imageSettings
+                        );
                         return (
                           <div
                             key={i}
                             onClick={() => {
-                              if (!editMode) setLightboxImage(gImg);
+                              if (!editMode) {
+                                const detailUrl =
+                                  content.imageSettings?.[
+                                    `project-detail-still-${currentProject.id}-${i}`
+                                  ]?.desktopSrc || baseThumbUrl;
+                                setLightboxImage(detailUrl);
+                              }
                             }}
                             className="relative aspect-[4/3] overflow-hidden cursor-pointer group"
                           >
                             <ResponsivePic
                               slotKey={slotKey}
-                              src={gImg}
+                              src={baseThumbUrl}
                               alt={`${currentProject.title} thumbnail ${i + 1}`}
                               className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
                               imageSettings={content.imageSettings}
@@ -3468,7 +3557,10 @@ export default function PortfolioClient({
                                             ...content,
                                             projects: nextProjects,
                                           },
-                                          slotKey,
+                                          [
+                                            slotKey,
+                                            `project-gallery-${currentProject.id}-${i}`,
+                                          ],
                                           url
                                         )
                                       );
@@ -3484,29 +3576,15 @@ export default function PortfolioClient({
                                     e.stopPropagation();
                                     openImageResizer({
                                       slotKey,
-                                      label: `${currentProject.title} — Gallery ${i + 1}`,
-                                      currentSrc: gImg,
+                                      label: `${currentProject.title} — Gallery Thumbnail ${i + 1}`,
+                                      currentSrc: baseThumbUrl,
                                       defaultDesktopWidth: 1200,
                                       defaultDesktopHeight: 900,
                                       defaultMobileWidth: 900,
                                       defaultMobileHeight: 750,
-                                      onApplyDesktop: (base, desktopUrl) => ({
-                                        ...base,
-                                        projects: base.projects.map((p) =>
-                                          p.id === currentProject.id
-                                            ? {
-                                                ...p,
-                                                gallery: p.gallery.map(
-                                                  (g, idx) =>
-                                                    idx === i ? desktopUrl : g
-                                                ),
-                                              }
-                                            : p
-                                        ),
-                                      }),
                                     });
                                   }}
-                                  title="Resize for Desktop & Mobile"
+                                  title="Resize thumbnail for Desktop & Mobile (independent of detail view)"
                                   className="p-1 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
                                 >
                                   <Crop className="w-3 h-3" />
@@ -5305,7 +5383,15 @@ export default function PortfolioClient({
                 </span>
               </p>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+              <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
+                <button
+                  type="button"
+                  disabled={resizerModal.isSaving}
+                  onClick={handleResetSlotResize}
+                  className="px-3.5 py-2.5 text-[10px] tracking-[0.2em] uppercase border border-[#B7A28B]/60 text-[#373632] hover:bg-[#373632] hover:text-[#F4F2ED] transition-colors"
+                >
+                  RESET TO ORIGINAL
+                </button>
                 <button
                   type="button"
                   disabled={resizerModal.isSaving}
