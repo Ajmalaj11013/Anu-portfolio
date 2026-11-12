@@ -321,7 +321,7 @@ function ResponsivePic({
  * shared resize slot (`project-cover-*` / `project-gallery-*`) overwrote it.
  */
 function getBaseProjectCover(
-  project: ProjectItem,
+  project: Project,
   imageSettings?: Record<string, ResponsiveImageConfig>
 ): string {
   const legacyCfg = imageSettings?.[`project-cover-${project.id}`];
@@ -332,7 +332,7 @@ function getBaseProjectCover(
 }
 
 function getBaseGalleryImage(
-  project: ProjectItem,
+  project: Project,
   idx: number,
   imgUrl: string,
   imageSettings?: Record<string, ResponsiveImageConfig>
