@@ -383,8 +383,8 @@
       "mobileFit": "cover"
     },
     "home-selected-thumb-still-form-1648": {
-      "desktopSrc": "/api/media/1794471338504-home-selected-thumb-still-form-1648-desktop.jpg",
-      "mobileSrc": "/api/media/1794471340514-home-selected-thumb-still-form-1648-mobile.jpg",
+      "desktopSrc": "/api/media/1794471350844-home-selected-thumb-still-form-1648-desktop.jpg",
+      "mobileSrc": "/api/media/1794471352675-home-selected-thumb-still-form-1648-mobile.jpg",
       "sourceSrc": "/api/media/1794469194341-landscap.jpg",
       "mobileSourceSrc": "/api/media/1794469194341-landscap.jpg",
       "desktopWidth": 900,
@@ -393,7 +393,7 @@
       "mobileHeight": 1000,
       "desktopZoom": 100,
       "desktopPanX": 53,
-      "desktopPanY": -1,
+      "desktopPanY": 1,
       "mobileZoom": 100,
       "mobilePanX": 52,
       "mobilePanY": 0,
@@ -419,5 +419,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794471341785
+  "updatedAt": 1794471353840
 }
