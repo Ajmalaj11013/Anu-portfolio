@@ -435,7 +435,25 @@
       "mobilePanY": 0,
       "desktopFit": "cover",
       "mobileFit": "cover"
+    },
+    "project-detail-main-over-ddose-9869": {
+      "desktopSrc": "/api/media/1794471578764-project-detail-main-over-ddose-9869-desktop.jpg",
+      "mobileSrc": "/api/media/1794471581450-project-detail-main-over-ddose-9869-mobile.jpg",
+      "sourceSrc": "/api/media/1794342045973-editorial-overdose4263.jpg",
+      "mobileSourceSrc": "/api/media/1794342045973-editorial-overdose4263.jpg",
+      "desktopWidth": 1600,
+      "desktopHeight": 1100,
+      "mobileWidth": 900,
+      "mobileHeight": 1100,
+      "desktopZoom": 100,
+      "desktopPanX": 0,
+      "desktopPanY": 0,
+      "mobileZoom": 52,
+      "mobilePanX": -5,
+      "mobilePanY": 0,
+      "desktopFit": "cover",
+      "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794471524305
+  "updatedAt": 1794471582674
 }
