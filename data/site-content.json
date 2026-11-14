@@ -514,25 +514,7 @@
       "sourceSrc": "/api/media/1794683406801-22.jpg",
       "mobileSourceSrc": "/api/media/1794683406801-22.jpg",
       "desktopSrc": "/api/media/1794683406801-22.jpg"
-    },
-    "home-selected-thumb-over-dose-8594": {
-      "desktopSrc": "/api/media/1794683636112-home-selected-thumb-over-dose-8594-desktop.jpg",
-      "mobileSrc": "/api/media/1794683638464-home-selected-thumb-over-dose-8594-mobile.jpg",
-      "sourceSrc": "/api/media/1794683406801-22.jpg",
-      "mobileSourceSrc": "/api/media/1794683406801-22.jpg",
-      "desktopWidth": 900,
-      "desktopHeight": 1200,
-      "mobileWidth": 800,
-      "mobileHeight": 1000,
-      "desktopZoom": 100,
-      "desktopPanX": -10,
-      "desktopPanY": -1,
-      "mobileZoom": 100,
-      "mobilePanX": 0,
-      "mobilePanY": 0,
-      "desktopFit": "cover",
-      "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794683639653
+  "updatedAt": 1794683691269
 }
