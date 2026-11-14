@@ -61,7 +61,7 @@
   "projects": [
     {
       "id": "zazu-3485",
-      "title": "zazu",
+      "title": "",
       "category": "ADVERTISING",
       "categorySlug": "food",
       "type": "photography",
@@ -595,5 +595,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794685070860
+  "updatedAt": 1794685196350
 }
