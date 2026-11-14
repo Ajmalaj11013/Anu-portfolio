@@ -516,8 +516,8 @@
       "mobileFit": "cover"
     },
     "project-detail-thumb-over-dose-8594-0": {
-      "desktopSrc": "/api/media/1794683887908-project-detail-thumb-over-dose-8594-0-desktop.jpg",
-      "mobileSrc": "/api/media/1794683891418-project-detail-thumb-over-dose-8594-0-mobile.jpg",
+      "desktopSrc": "/api/media/1794683912045-project-detail-thumb-over-dose-8594-0-desktop.jpg",
+      "mobileSrc": "/api/media/1794683915073-project-detail-thumb-over-dose-8594-0-mobile.jpg",
       "sourceSrc": "/api/media/1794683216736-11.jpg",
       "mobileSourceSrc": "/api/media/1794683216736-11.jpg",
       "desktopWidth": 1050,
@@ -534,5 +534,5 @@
       "mobileFit": "contain"
     }
   },
-  "updatedAt": 1794683892774
+  "updatedAt": 1794683916499
 }
