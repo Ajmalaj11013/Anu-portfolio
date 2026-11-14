@@ -554,9 +554,22 @@
       "mobileFit": "cover"
     },
     "project-detail-main-zazu-3485": {
+      "desktopSrc": "/api/media/1794684885273-project-detail-main-zazu-3485-desktop.jpg",
+      "mobileSrc": "/api/media/1794684887648-project-detail-main-zazu-3485-mobile.jpg",
       "sourceSrc": "/api/media/1794684826063-final.--_.jpg",
       "mobileSourceSrc": "/api/media/1794684826063-final.--_.jpg",
-      "desktopSrc": "/api/media/1794684826063-final.--_.jpg"
+      "desktopWidth": 1600,
+      "desktopHeight": 1000,
+      "mobileWidth": 960,
+      "mobileHeight": 720,
+      "desktopZoom": 94,
+      "desktopPanX": 0,
+      "desktopPanY": -1,
+      "mobileZoom": 73,
+      "mobilePanX": 4,
+      "mobilePanY": 0,
+      "desktopFit": "cover",
+      "mobileFit": "cover"
     },
     "project-cover-zazu-3485": {
       "sourceSrc": "/api/media/1794684826063-final.--_.jpg",
@@ -564,5 +577,5 @@
       "desktopSrc": "/api/media/1794684826063-final.--_.jpg"
     }
   },
-  "updatedAt": 1794684827683
+  "updatedAt": 1794684888950
 }
