@@ -61,7 +61,7 @@
   "projects": [
     {
       "id": "over-dose-8594",
-      "title": "OVER DOSE ",
+      "title": "\\",
       "category": "PRODUCT",
       "categorySlug": "hospitality",
       "type": "photography",
@@ -535,5 +535,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794684520199
+  "updatedAt": 1794684549328
 }
