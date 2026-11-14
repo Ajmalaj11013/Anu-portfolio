@@ -69,7 +69,7 @@
       "role": "Photography & Art Direction",
       "discipline": "Fashion & Editorial",
       "description": "Click to edit this project description in Edit Mode.",
-      "coverImage": "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=85",
+      "coverImage": "/api/media/1794683406801-22.jpg",
       "gallery": [
         "/api/media/1794683216736-11.jpg"
       ],
@@ -491,7 +491,17 @@
       "mobilePanY": 0,
       "desktopFit": "cover",
       "mobileFit": "cover"
+    },
+    "project-detail-main-over-dose-8594": {
+      "sourceSrc": "/api/media/1794683406801-22.jpg",
+      "mobileSourceSrc": "/api/media/1794683406801-22.jpg",
+      "desktopSrc": "/api/media/1794683406801-22.jpg"
+    },
+    "project-cover-over-dose-8594": {
+      "sourceSrc": "/api/media/1794683406801-22.jpg",
+      "mobileSourceSrc": "/api/media/1794683406801-22.jpg",
+      "desktopSrc": "/api/media/1794683406801-22.jpg"
     }
   },
-  "updatedAt": 1794683388334
+  "updatedAt": 1794683408231
 }
