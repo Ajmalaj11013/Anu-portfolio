@@ -67,7 +67,7 @@
       "type": "photography",
       "year": "2026",
       "role": "Photography & Art Direction",
-      "discipline": "",
+      "discipline": "Fashion & Editorial",
       "description": "Click to edit this project description in Edit Mode.",
       "coverImage": "/api/media/1794683406801-22.jpg",
       "gallery": [
@@ -534,5 +534,5 @@
       "mobileFit": "contain"
     }
   },
-  "updatedAt": 1794683958377
+  "updatedAt": 1794683969542
 }
