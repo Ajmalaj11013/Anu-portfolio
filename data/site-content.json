@@ -101,7 +101,7 @@
     },
     {
       "id": "over-ddose-9869",
-      "title": "OVER DDOSE ",
+      "title": "",
       "category": "ARCHITECTURE",
       "categorySlug": "architecture",
       "type": "photography",
@@ -534,5 +534,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794684584916
+  "updatedAt": 1794684594375
 }
