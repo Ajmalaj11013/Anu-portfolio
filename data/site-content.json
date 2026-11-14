@@ -493,15 +493,15 @@
       "mobileFit": "cover"
     },
     "project-detail-main-over-dose-8594": {
-      "desktopSrc": "/api/media/1794683538149-project-detail-main-over-dose-8594-desktop.jpg",
-      "mobileSrc": "/api/media/1794683540309-project-detail-main-over-dose-8594-mobile.jpg",
+      "desktopSrc": "/api/media/1794683605836-project-detail-main-over-dose-8594-desktop.jpg",
+      "mobileSrc": "/api/media/1794683608456-project-detail-main-over-dose-8594-mobile.jpg",
       "sourceSrc": "/api/media/1794683406801-22.jpg",
       "mobileSourceSrc": "/api/media/1794683406801-22.jpg",
       "desktopWidth": 1600,
       "desktopHeight": 1100,
       "mobileWidth": 960,
       "mobileHeight": 720,
-      "desktopZoom": 100,
+      "desktopZoom": 101,
       "desktopPanX": -3,
       "desktopPanY": 1,
       "mobileZoom": 114,
@@ -516,5 +516,5 @@
       "desktopSrc": "/api/media/1794683406801-22.jpg"
     }
   },
-  "updatedAt": 1794683541734
+  "updatedAt": 1794683610257
 }
