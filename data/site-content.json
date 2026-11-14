@@ -582,10 +582,23 @@
       "mobileFit": "cover"
     },
     "home-selected-thumb-zazu-3485": {
+      "desktopSrc": "/api/media/1794685253073-home-selected-thumb-zazu-3485-desktop.jpg",
+      "mobileSrc": "/api/media/1794685255267-home-selected-thumb-zazu-3485-mobile.jpg",
       "sourceSrc": "/api/media/1794685229372-final-.jpg",
       "mobileSourceSrc": "/api/media/1794685229372-final-.jpg",
-      "desktopSrc": "/api/media/1794685229372-final-.jpg"
+      "desktopWidth": 900,
+      "desktopHeight": 1200,
+      "mobileWidth": 800,
+      "mobileHeight": 1000,
+      "desktopZoom": 110,
+      "desktopPanX": 86,
+      "desktopPanY": -3,
+      "mobileZoom": 100,
+      "mobilePanX": 0,
+      "mobilePanY": 0,
+      "desktopFit": "cover",
+      "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794685230835
+  "updatedAt": 1794685256598
 }
