@@ -82,7 +82,7 @@
     },
     {
       "id": "still-form-1648",
-      "title": "FASHION & ",
+      "title": "FASHION & ED",
       "category": "FASHION EDITORIAL",
       "categorySlug": "fashion",
       "type": "photography",
@@ -535,5 +535,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794684510688
+  "updatedAt": 1794684512601
 }
