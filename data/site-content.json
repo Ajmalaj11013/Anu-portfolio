@@ -70,7 +70,9 @@
       "discipline": "Fashion & Editorial",
       "description": "Click to edit this project description in Edit Mode.",
       "coverImage": "/api/media/1794684826063-final.--_.jpg",
-      "gallery": [],
+      "gallery": [
+        "/api/media/1794685040986-final.--_.jpg"
+      ],
       "featured": true,
       "director": "AJNAS",
       "cinematography": "AJNAS",
@@ -575,5 +577,5 @@
       "desktopSrc": "/api/media/1794684826063-final.--_.jpg"
     }
   },
-  "updatedAt": 1794685030192
+  "updatedAt": 1794685042833
 }
