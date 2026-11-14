@@ -69,7 +69,7 @@
       "role": "Photography & Art Direction",
       "discipline": "Fashion & Editorial",
       "description": "Click to edit this project description in Edit Mode.",
-      "coverImage": "/api/media/1794684826063-final.--_.jpg",
+      "coverImage": "/api/media/1794685207160-final.--_.jpg",
       "gallery": [
         "/api/media/1794685040986-final.--_.jpg"
       ],
@@ -554,27 +554,14 @@
       "mobileFit": "cover"
     },
     "project-detail-main-zazu-3485": {
-      "desktopSrc": "/api/media/1794684995252-project-detail-main-zazu-3485-desktop.jpg",
-      "mobileSrc": "/api/media/1794684997816-project-detail-main-zazu-3485-mobile.jpg",
-      "sourceSrc": "/api/media/1794684826063-final.--_.jpg",
-      "mobileSourceSrc": "/api/media/1794684826063-final.--_.jpg",
-      "desktopWidth": 1600,
-      "desktopHeight": 1000,
-      "mobileWidth": 960,
-      "mobileHeight": 720,
-      "desktopZoom": 106,
-      "desktopPanX": -4,
-      "desktopPanY": 0,
-      "mobileZoom": 73,
-      "mobilePanX": 4,
-      "mobilePanY": 0,
-      "desktopFit": "contain",
-      "mobileFit": "cover"
+      "sourceSrc": "/api/media/1794685207160-final.--_.jpg",
+      "mobileSourceSrc": "/api/media/1794685207160-final.--_.jpg",
+      "desktopSrc": "/api/media/1794685207160-final.--_.jpg"
     },
     "project-cover-zazu-3485": {
-      "sourceSrc": "/api/media/1794684826063-final.--_.jpg",
-      "mobileSourceSrc": "/api/media/1794684826063-final.--_.jpg",
-      "desktopSrc": "/api/media/1794684826063-final.--_.jpg"
+      "sourceSrc": "/api/media/1794685207160-final.--_.jpg",
+      "mobileSourceSrc": "/api/media/1794685207160-final.--_.jpg",
+      "desktopSrc": "/api/media/1794685207160-final.--_.jpg"
     },
     "project-detail-thumb-zazu-3485-0": {
       "desktopSrc": "/api/media/1794685062922-project-detail-thumb-zazu-3485-0-desktop.jpg",
@@ -593,7 +580,12 @@
       "mobilePanY": 0,
       "desktopFit": "cover",
       "mobileFit": "cover"
+    },
+    "home-selected-thumb-zazu-3485": {
+      "sourceSrc": "/api/media/1794685207160-final.--_.jpg",
+      "mobileSourceSrc": "/api/media/1794685207160-final.--_.jpg",
+      "desktopSrc": "/api/media/1794685207160-final.--_.jpg"
     }
   },
-  "updatedAt": 1794685196350
+  "updatedAt": 1794685208831
 }
