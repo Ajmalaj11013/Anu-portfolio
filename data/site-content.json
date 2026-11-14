@@ -69,7 +69,7 @@
       "role": "Photography & Art Direction",
       "discipline": "Fashion & Editorial",
       "description": "Click to edit this project description in Edit Mode.",
-      "coverImage": "/api/media/1794685207160-final.--_.jpg",
+      "coverImage": "/api/media/1794685229372-final-.jpg",
       "gallery": [
         "/api/media/1794685040986-final.--_.jpg"
       ],
@@ -554,14 +554,14 @@
       "mobileFit": "cover"
     },
     "project-detail-main-zazu-3485": {
-      "sourceSrc": "/api/media/1794685207160-final.--_.jpg",
-      "mobileSourceSrc": "/api/media/1794685207160-final.--_.jpg",
-      "desktopSrc": "/api/media/1794685207160-final.--_.jpg"
+      "sourceSrc": "/api/media/1794685229372-final-.jpg",
+      "mobileSourceSrc": "/api/media/1794685229372-final-.jpg",
+      "desktopSrc": "/api/media/1794685229372-final-.jpg"
     },
     "project-cover-zazu-3485": {
-      "sourceSrc": "/api/media/1794685207160-final.--_.jpg",
-      "mobileSourceSrc": "/api/media/1794685207160-final.--_.jpg",
-      "desktopSrc": "/api/media/1794685207160-final.--_.jpg"
+      "sourceSrc": "/api/media/1794685229372-final-.jpg",
+      "mobileSourceSrc": "/api/media/1794685229372-final-.jpg",
+      "desktopSrc": "/api/media/1794685229372-final-.jpg"
     },
     "project-detail-thumb-zazu-3485-0": {
       "desktopSrc": "/api/media/1794685062922-project-detail-thumb-zazu-3485-0-desktop.jpg",
@@ -582,10 +582,10 @@
       "mobileFit": "cover"
     },
     "home-selected-thumb-zazu-3485": {
-      "sourceSrc": "/api/media/1794685207160-final.--_.jpg",
-      "mobileSourceSrc": "/api/media/1794685207160-final.--_.jpg",
-      "desktopSrc": "/api/media/1794685207160-final.--_.jpg"
+      "sourceSrc": "/api/media/1794685229372-final-.jpg",
+      "mobileSourceSrc": "/api/media/1794685229372-final-.jpg",
+      "desktopSrc": "/api/media/1794685229372-final-.jpg"
     }
   },
-  "updatedAt": 1794685208831
+  "updatedAt": 1794685230835
 }
