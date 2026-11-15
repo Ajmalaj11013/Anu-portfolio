@@ -409,8 +409,8 @@
       "desktopSrc": "/api/media/1794342500214-landscap.jpg"
     },
     "photography-banner": {
-      "desktopSrc": "/api/media/1794409216862-photography-banner-desktop.jpg",
-      "mobileSrc": "/api/media/1794409218937-photography-banner-mobile.jpg",
+      "desktopSrc": "/api/media/1794727445978-photography-banner-desktop.jpg",
+      "mobileSrc": "/api/media/1794727447814-photography-banner-mobile.jpg",
       "sourceSrc": "/api/media/1794409181787-landscap.jpg",
       "mobileSourceSrc": "/api/media/1794409181787-landscap.jpg",
       "desktopWidth": 1920,
@@ -418,11 +418,11 @@
       "mobileWidth": 900,
       "mobileHeight": 600,
       "desktopZoom": 100,
-      "desktopPanX": 1,
-      "desktopPanY": 18,
+      "desktopPanX": -1,
+      "desktopPanY": 19,
       "mobileZoom": 100,
-      "mobilePanX": 0,
-      "mobilePanY": 0,
+      "mobilePanX": -1,
+      "mobilePanY": -1,
       "desktopFit": "cover",
       "mobileFit": "cover"
     },
@@ -617,5 +617,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794727259110
+  "updatedAt": 1794727450131
 }
