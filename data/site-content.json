@@ -93,8 +93,8 @@
       "gallery": [
         "/api/media/1794683216736-11.jpg",
         "/api/media/1794726903948-22.jpg",
-        "/api/media/1794726937742-landscap.jpg",
         "/api/media/1794726979553-post-1.jpg",
+        "/api/media/1794726937742-landscap.jpg",
         "/api/media/1794726964335-full-szie.jpg"
       ],
       "featured": true,
@@ -512,5 +512,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794729968148
+  "updatedAt": 1794729969871
 }
