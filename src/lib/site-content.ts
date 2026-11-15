@@ -26,7 +26,7 @@ export function sanitizeSiteContent(data: StoredContent): StoredContent {
       const mobileSrc = cleanUrl(cfg.mobileSrc) || undefined;
       const sourceSrc = cleanUrl(cfg.sourceSrc);
       const mobileSourceSrc = cleanUrl(cfg.mobileSourceSrc) || sourceSrc || undefined;
-      if (desktopSrc || mobileSrc || sourceSrc) {
+      if (desktopSrc || mobileSrc || sourceSrc || typeof cfg.offsetY === "number") {
         nextSettings[key] = {
           ...cfg,
           desktopSrc: desktopSrc || undefined,

@@ -11,6 +11,10 @@ import {
 import {
   ArrowRight,
   ArrowLeft,
+  ArrowUp,
+  ArrowDown,
+  ChevronUp,
+  ChevronDown,
   Play,
   Menu,
   X,
@@ -300,7 +304,7 @@ function stripFallbackImages(data: StoredSiteContent): StoredSiteContent {
       const mobileSrc = cleanUrl(cfg.mobileSrc) || undefined;
       const sourceSrc = cleanUrl(cfg.sourceSrc);
       const mobileSourceSrc = cleanUrl(cfg.mobileSourceSrc) || sourceSrc || undefined;
-      if (desktopSrc || mobileSrc || sourceSrc) {
+      if (desktopSrc || mobileSrc || sourceSrc || typeof cfg.offsetY === "number") {
         nextSettings[key] = {
           ...cfg,
           desktopSrc: desktopSrc || undefined,
@@ -958,12 +962,12 @@ export default function PortfolioClient({
         setResizerModal((prev) =>
           prev && prev.slotKey === slotKey
             ? {
-                ...prev,
-                desktopWidth: isVertical ? 900 : 1200,
-                desktopHeight: isVertical ? 1200 : 900,
-                mobileWidth: isVertical ? 800 : 960,
-                mobileHeight: isVertical ? 1060 : 720,
-              }
+              ...prev,
+              desktopWidth: isVertical ? 900 : 1200,
+              desktopHeight: isVertical ? 1200 : 900,
+              mobileWidth: isVertical ? 800 : 960,
+              mobileHeight: isVertical ? 1060 : 720,
+            }
             : prev
         );
       };
@@ -1213,7 +1217,7 @@ export default function PortfolioClient({
   const prevProject =
     projects.length > 0
       ? projects[(currentProjectIndex - 1 + projects.length) % projects.length] ||
-        currentProject
+      currentProject
       : currentProject;
   const nextProject =
     projects.length > 0
@@ -1277,6 +1281,24 @@ export default function PortfolioClient({
     persistContent({
       ...content,
       projects: nextProjects,
+      imageSettings: nextSettings,
+    });
+  };
+
+  // Nudge a gallery image vertically up or down within its column (in px)
+  const nudgeImageVerticalOffset = (slotKey: string, deltaPx: number | null) => {
+    const prevCfg = content.imageSettings?.[slotKey] || {};
+    const currentOffset = prevCfg.offsetY || 0;
+    const nextOffset = deltaPx === null ? 0 : currentOffset + deltaPx;
+    const nextSettings: Record<string, ResponsiveImageConfig> = {
+      ...(content.imageSettings || {}),
+      [slotKey]: {
+        ...prevCfg,
+        offsetY: nextOffset,
+      },
+    };
+    persistContent({
+      ...content,
       imageSettings: nextSettings,
     });
   };
@@ -1414,11 +1436,10 @@ export default function PortfolioClient({
               }
               setEditMode(!editMode);
             }}
-            className={`inline-flex items-center space-x-2 text-[10px] tracking-[0.2em] uppercase px-3 py-1.5 transition-colors ${
-              editMode
+            className={`inline-flex items-center space-x-2 text-[10px] tracking-[0.2em] uppercase px-3 py-1.5 transition-colors ${editMode
                 ? "bg-[#B7A28B] text-[#171715] font-medium"
                 : "bg-[#373632] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
-            }`}
+              }`}
           >
             {editMode ? (
               <>
@@ -1452,10 +1473,10 @@ export default function PortfolioClient({
                   {saveStatus === "saving"
                     ? "SAVING..."
                     : saveStatus === "saved"
-                    ? "SAVED TO CLOUD"
-                    : saveStatus === "local-only"
-                    ? "SAVED IN BROWSER"
-                    : "SAVE"}
+                      ? "SAVED TO CLOUD"
+                      : saveStatus === "local-only"
+                        ? "SAVED IN BROWSER"
+                        : "SAVE"}
                 </span>
               </button>
 
@@ -1554,53 +1575,48 @@ export default function PortfolioClient({
                     ?.scrollIntoView({ behavior: "smooth" });
                 }
               }}
-              className={`px-3 py-1.5 transition-colors ${
-                view === "home"
+              className={`px-3 py-1.5 transition-colors ${view === "home"
                   ? "text-[#373632] font-medium border-b border-[#B7A28B]"
                   : "text-[#373632] hover:bg-[#171715] hover:text-[#F4F2ED]"
-              }`}
+                }`}
             >
               WORK
             </button>
             <button
               onClick={() => navigateToCategory("photography", "all")}
-              className={`px-3 py-1.5 transition-colors ${
-                view === "photography" ||
-                (view === "project" && currentProject.type === "photography")
+              className={`px-3 py-1.5 transition-colors ${view === "photography" ||
+                  (view === "project" && currentProject.type === "photography")
                   ? "text-[#373632] font-medium border-b border-[#B7A28B]"
                   : "text-[#373632] hover:bg-[#171715] hover:text-[#F4F2ED]"
-              }`}
+                }`}
             >
               PHOTOGRAPHY
             </button>
             <button
               onClick={() => navigateToCategory("films", "all")}
-              className={`px-3 py-1.5 transition-colors ${
-                view === "films" ||
-                (view === "project" && currentProject.type === "film")
+              className={`px-3 py-1.5 transition-colors ${view === "films" ||
+                  (view === "project" && currentProject.type === "film")
                   ? "text-[#373632] font-medium border-b border-[#B7A28B]"
                   : "text-[#373632] hover:bg-[#171715] hover:text-[#F4F2ED]"
-              }`}
+                }`}
             >
               FILMS
             </button>
             <button
               onClick={() => setView("about")}
-              className={`px-3 py-1.5 transition-colors ${
-                view === "about"
+              className={`px-3 py-1.5 transition-colors ${view === "about"
                   ? "text-[#373632] font-medium border-b border-[#B7A28B]"
                   : "text-[#373632] hover:bg-[#171715] hover:text-[#F4F2ED]"
-              }`}
+                }`}
             >
               ABOUT
             </button>
             <button
               onClick={() => setView("contact")}
-              className={`px-3 py-1.5 transition-colors ${
-                view === "contact"
+              className={`px-3 py-1.5 transition-colors ${view === "contact"
                   ? "text-[#373632] font-medium border-b border-[#B7A28B]"
                   : "text-[#373632] hover:bg-[#171715] hover:text-[#F4F2ED]"
-              }`}
+                }`}
             >
               CONTACT
             </button>
@@ -2025,11 +2041,10 @@ export default function PortfolioClient({
                       <button
                         key={cat.val}
                         onClick={() => setHomeCategoryFilter(cat.val)}
-                        className={`px-2.5 py-1 transition-colors ${
-                          homeCategoryFilter === cat.val
+                        className={`px-2.5 py-1 transition-colors ${homeCategoryFilter === cat.val
                             ? "bg-[#171715] text-[#F4F2ED] font-medium"
                             : "text-[#8C8980] hover:bg-[#171715] hover:text-[#F4F2ED]"
-                        }`}
+                          }`}
                       >
                         {cat.label}
                       </button>
@@ -2113,26 +2128,26 @@ export default function PortfolioClient({
                                   const next = content.projects.map((p) =>
                                     p.id === item.id
                                       ? {
-                                          ...p,
-                                          coverImage: isVid
-                                            ? p.coverImage
-                                            : url,
-                                          videoUrl: isVid ? url : p.videoUrl,
-                                        }
+                                        ...p,
+                                        coverImage: isVid
+                                          ? p.coverImage
+                                          : url,
+                                        videoUrl: isVid ? url : p.videoUrl,
+                                      }
                                       : p
                                   );
                                   persistContent(
                                     isVid
                                       ? { ...content, projects: next }
                                       : withFreshImageSlot(
-                                          { ...content, projects: next },
-                                          [
-                                            `home-selected-thumb-${item.id}`,
-                                            `project-detail-main-${item.id}`,
-                                            `project-cover-${item.id}`,
-                                          ],
-                                          url
-                                        )
+                                        { ...content, projects: next },
+                                        [
+                                          `home-selected-thumb-${item.id}`,
+                                          `project-detail-main-${item.id}`,
+                                          `project-cover-${item.id}`,
+                                        ],
+                                        url
+                                      )
                                   );
                                 });
                               }}
@@ -2620,11 +2635,10 @@ export default function PortfolioClient({
                 <button
                   key={tab.value}
                   onClick={() => setPhotoFilter(tab.value)}
-                  className={`px-3 py-1.5 transition-colors ${
-                    photoFilter === tab.value
+                  className={`px-3 py-1.5 transition-colors ${photoFilter === tab.value
                       ? "bg-[#171715] text-[#F4F2ED] font-medium"
                       : "text-[#8C8980] hover:bg-[#171715] hover:text-[#F4F2ED]"
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -2671,16 +2685,16 @@ export default function PortfolioClient({
                                   content.photographySections.map((s) =>
                                     s.slug === section.slug
                                       ? {
-                                          ...s,
-                                          images: [
-                                            ...s.images,
-                                            {
-                                              src: url,
-                                              projectId: defaultProjId,
-                                              caption: "New Photograph",
-                                            },
-                                          ],
-                                        }
+                                        ...s,
+                                        images: [
+                                          ...s.images,
+                                          {
+                                            src: url,
+                                            projectId: defaultProjId,
+                                            caption: "New Photograph",
+                                          },
+                                        ],
+                                      }
                                       : s
                                   );
                                 persistContent({
@@ -2756,13 +2770,12 @@ export default function PortfolioClient({
                           onClick={() => {
                             if (!editMode) navigateToProject(img.projectId);
                           }}
-                          className={`group cursor-pointer relative aspect-[4/3] overflow-hidden transition-all ${
-                            editMode &&
-                            dragOverPhotoSecItem?.slug === section.slug &&
-                            dragOverPhotoSecItem?.index === idx
+                          className={`group cursor-pointer relative aspect-[4/3] overflow-hidden transition-all ${editMode &&
+                              dragOverPhotoSecItem?.slug === section.slug &&
+                              dragOverPhotoSecItem?.index === idx
                               ? "ring-2 ring-[#B7A28B] scale-[0.98]"
                               : ""
-                          }`}
+                            }`}
                         >
                           <ResponsivePic
                             slotKey={`photo-sec-${section.slug}-${idx}`}
@@ -2781,13 +2794,13 @@ export default function PortfolioClient({
                                     content.photographySections.map((s) =>
                                       s.slug === section.slug
                                         ? {
-                                            ...s,
-                                            images: s.images.map((im, i) =>
-                                              i === idx
-                                                ? { ...im, caption: val }
-                                                : im
-                                            ),
-                                          }
+                                          ...s,
+                                          images: s.images.map((im, i) =>
+                                            i === idx
+                                              ? { ...im, caption: val }
+                                              : im
+                                          ),
+                                        }
                                         : s
                                     );
                                   persistContent({
@@ -2835,6 +2848,57 @@ export default function PortfolioClient({
                                   <ArrowRight className="w-3.5 h-3.5" />
                                 </button>
                               )}
+                              {idx >= 1 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const cols =
+                                      typeof window !== "undefined" &&
+                                      window.innerWidth < 640
+                                        ? 1
+                                        : typeof window !== "undefined" &&
+                                          window.innerWidth < 1024
+                                        ? 2
+                                        : 4;
+                                    swapPhotographySectionImages(
+                                      section.slug,
+                                      idx,
+                                      Math.max(0, idx - cols)
+                                    );
+                                  }}
+                                  title="Move image Up (previous row)"
+                                  className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                                >
+                                  <ArrowUp className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                              {idx < section.images.length - 1 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const cols =
+                                      typeof window !== "undefined" &&
+                                      window.innerWidth < 640
+                                        ? 1
+                                        : typeof window !== "undefined" &&
+                                          window.innerWidth < 1024
+                                        ? 2
+                                        : 4;
+                                    swapPhotographySectionImages(
+                                      section.slug,
+                                      idx,
+                                      Math.min(
+                                        section.images.length - 1,
+                                        idx + cols
+                                      )
+                                    );
+                                  }}
+                                  title="Move image Down (next row)"
+                                  className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                                >
+                                  <ArrowDown className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -2843,13 +2907,13 @@ export default function PortfolioClient({
                                       content.photographySections.map((s) =>
                                         s.slug === section.slug
                                           ? {
-                                              ...s,
-                                              images: s.images.map((im, i) =>
-                                                i === idx
-                                                  ? { ...im, src: url }
-                                                  : im
-                                              ),
-                                            }
+                                            ...s,
+                                            images: s.images.map((im, i) =>
+                                              i === idx
+                                                ? { ...im, src: url }
+                                                : im
+                                            ),
+                                          }
                                           : s
                                       );
                                     persistContent(
@@ -2886,13 +2950,13 @@ export default function PortfolioClient({
                                         base.photographySections.map((s) =>
                                           s.slug === section.slug
                                             ? {
-                                                ...s,
-                                                images: s.images.map((im, i) =>
-                                                  i === idx
-                                                    ? { ...im, src: desktopUrl }
-                                                    : im
-                                                ),
-                                              }
+                                              ...s,
+                                              images: s.images.map((im, i) =>
+                                                i === idx
+                                                  ? { ...im, src: desktopUrl }
+                                                  : im
+                                              ),
+                                            }
                                             : s
                                         ),
                                     }),
@@ -2910,11 +2974,11 @@ export default function PortfolioClient({
                                     content.photographySections.map((s) =>
                                       s.slug === section.slug
                                         ? {
-                                            ...s,
-                                            images: s.images.filter(
-                                              (_, i) => i !== idx
-                                            ),
-                                          }
+                                          ...s,
+                                          images: s.images.filter(
+                                            (_, i) => i !== idx
+                                          ),
+                                        }
                                         : s
                                     );
                                   persistContent({
@@ -3247,26 +3311,26 @@ export default function PortfolioClient({
                                     const next = content.projects.map((p) =>
                                       p.id === film.id
                                         ? {
-                                            ...p,
-                                            coverImage: isVid
-                                              ? p.coverImage
-                                              : url,
-                                            videoUrl: isVid ? url : p.videoUrl,
-                                          }
+                                          ...p,
+                                          coverImage: isVid
+                                            ? p.coverImage
+                                            : url,
+                                          videoUrl: isVid ? url : p.videoUrl,
+                                        }
                                         : p
                                     );
                                     persistContent(
                                       isVid
                                         ? { ...content, projects: next }
                                         : withFreshImageSlot(
-                                            { ...content, projects: next },
-                                            [
-                                              `films-archive-thumb-${film.id}`,
-                                              `project-detail-main-${film.id}`,
-                                              `project-cover-${film.id}`,
-                                            ],
-                                            url
-                                          )
+                                          { ...content, projects: next },
+                                          [
+                                            `films-archive-thumb-${film.id}`,
+                                            `project-detail-main-${film.id}`,
+                                            `project-cover-${film.id}`,
+                                          ],
+                                          url
+                                        )
                                     );
                                   });
                                 }}
@@ -3445,124 +3509,124 @@ export default function PortfolioClient({
               <div className="lg:col-span-8 space-y-6">
                 {(currentProject.type === "film" ||
                   Boolean(currentProject.videoUrl)) && (
-                  <div
-                    onClick={() => {
-                      if (editMode) return;
-                      setActiveVideoModal(currentProject);
-                    }}
-                    className="relative aspect-[16/11] w-full overflow-hidden cursor-pointer group"
-                  >
-                    {(() => {
-                      const parsedVid = parseVideoEmbed(
-                        currentProject.videoUrl
-                      );
-                      if (parsedVid?.kind === "iframe") {
+                    <div
+                      onClick={() => {
+                        if (editMode) return;
+                        setActiveVideoModal(currentProject);
+                      }}
+                      className="relative aspect-[16/11] w-full overflow-hidden cursor-pointer group"
+                    >
+                      {(() => {
+                        const parsedVid = parseVideoEmbed(
+                          currentProject.videoUrl
+                        );
+                        if (parsedVid?.kind === "iframe") {
+                          return (
+                            <iframe
+                              src={parsedVid.src}
+                              title={currentProject.title}
+                              allow="autoplay; fullscreen; picture-in-picture"
+                              allowFullScreen
+                              className="w-full h-full border-0"
+                            />
+                          );
+                        }
+                        if (parsedVid?.kind === "native") {
+                          return (
+                            <video
+                              src={parsedVid.src}
+                              controls
+                              playsInline
+                              className="w-full h-full object-cover"
+                            />
+                          );
+                        }
                         return (
-                          <iframe
-                            src={parsedVid.src}
-                            title={currentProject.title}
-                            allow="autoplay; fullscreen; picture-in-picture"
-                            allowFullScreen
-                            className="w-full h-full border-0"
+                          <ResponsivePic
+                            slotKey={`project-detail-main-${currentProject.id}`}
+                            src={getBaseProjectCover(
+                              currentProject,
+                              content.imageSettings
+                            )}
+                            alt={currentProject.title}
+                            className="w-full h-full object-cover editorial-image-grade group-hover:scale-[1.02]"
+                            imageSettings={content.imageSettings}
                           />
                         );
-                      }
-                      if (parsedVid?.kind === "native") {
-                        return (
-                          <video
-                            src={parsedVid.src}
-                            controls
-                            playsInline
-                            className="w-full h-full object-cover"
-                          />
-                        );
-                      }
-                      return (
-                        <ResponsivePic
-                          slotKey={`project-detail-main-${currentProject.id}`}
-                          src={getBaseProjectCover(
-                            currentProject,
-                            content.imageSettings
-                          )}
-                          alt={currentProject.title}
-                          className="w-full h-full object-cover editorial-image-grade group-hover:scale-[1.02]"
-                          imageSettings={content.imageSettings}
-                        />
-                      );
-                    })()}
-                    {!isVideoAsset(currentProject.videoUrl) && (
-                      <div className="absolute inset-0 bg-[#171715]/30 flex items-center justify-center group-hover:bg-[#171715]/45 transition-colors pointer-events-none">
-                        <div className="w-16 h-16 rounded-full border border-[#F4F2ED] flex items-center justify-center bg-[#171715]/45 backdrop-blur-sm group-hover:scale-110 transition-transform">
-                          <Play className="w-6 h-6 text-[#F4F2ED] fill-[#F4F2ED] ml-1" />
+                      })()}
+                      {!isVideoAsset(currentProject.videoUrl) && (
+                        <div className="absolute inset-0 bg-[#171715]/30 flex items-center justify-center group-hover:bg-[#171715]/45 transition-colors pointer-events-none">
+                          <div className="w-16 h-16 rounded-full border border-[#F4F2ED] flex items-center justify-center bg-[#171715]/45 backdrop-blur-sm group-hover:scale-110 transition-transform">
+                            <Play className="w-6 h-6 text-[#F4F2ED] fill-[#F4F2ED] ml-1" />
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {editMode && (
-                      <div className="absolute top-3 right-3 z-20 flex flex-wrap items-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            triggerFileUpload((url, isVid) => {
-                              if (isVid) {
+                      {editMode && (
+                        <div className="absolute top-3 right-3 z-20 flex flex-wrap items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              triggerFileUpload((url, isVid) => {
+                                if (isVid) {
+                                  updateCurrentProject({
+                                    videoUrl: url,
+                                    type: "film",
+                                  });
+                                } else {
+                                  const nextProjects = content.projects.map((p) =>
+                                    p.id === currentProject.id
+                                      ? { ...p, coverImage: url }
+                                      : p
+                                  );
+                                  persistContent(
+                                    withFreshImageSlot(
+                                      { ...content, projects: nextProjects },
+                                      [
+                                        `project-detail-main-${currentProject.id}`,
+                                        `project-cover-${currentProject.id}`,
+                                      ],
+                                      url
+                                    )
+                                  );
+                                }
+                              });
+                            }}
+                            className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                          >
+                            <Upload className="w-3.5 h-3.5" />
+                            <span>UPLOAD VIDEO</span>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              promptVideoUrl((url) => {
                                 updateCurrentProject({
                                   videoUrl: url,
                                   type: "film",
                                 });
-                              } else {
-                                const nextProjects = content.projects.map((p) =>
-                                  p.id === currentProject.id
-                                    ? { ...p, coverImage: url }
-                                    : p
-                                );
-                                persistContent(
-                                  withFreshImageSlot(
-                                    { ...content, projects: nextProjects },
-                                    [
-                                      `project-detail-main-${currentProject.id}`,
-                                      `project-cover-${currentProject.id}`,
-                                    ],
-                                    url
-                                  )
-                                );
-                              }
-                            });
-                          }}
-                          className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
-                        >
-                          <Upload className="w-3.5 h-3.5" />
-                          <span>UPLOAD VIDEO</span>
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            promptVideoUrl((url) => {
-                              updateCurrentProject({
-                                videoUrl: url,
-                                type: "film",
-                              });
-                            }, currentProject.videoUrl);
-                          }}
-                          className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
-                        >
-                          <Link2 className="w-3.5 h-3.5" />
-                          <span>VIDEO URL (VIMEO / YT)</span>
-                        </button>
-                        {currentProject.videoUrl && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              updateCurrentProject({ videoUrl: undefined });
+                              }, currentProject.videoUrl);
                             }}
-                            className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-2.5 py-2 border border-[#B7A28B] hover:bg-red-800"
+                            className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
                           >
-                            REMOVE VIDEO
+                            <Link2 className="w-3.5 h-3.5" />
+                            <span>VIDEO URL (VIMEO / YT)</span>
                           </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
+                          {currentProject.videoUrl && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateCurrentProject({ videoUrl: undefined });
+                              }}
+                              className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-2.5 py-2 border border-[#B7A28B] hover:bg-red-800"
+                            >
+                              REMOVE VIDEO
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                 {/* Gallery Images Section */}
                 <div>
@@ -3573,7 +3637,7 @@ export default function PortfolioClient({
                       </p>
                       {editMode && currentProject.gallery.length > 1 && (
                         <span className="text-[9px] tracking-[0.14em] uppercase text-[#8C8980]">
-                          (Drag &amp; drop or use &larr; &rarr; arrows to swap &amp; arrange)
+                          (Drag &amp; drop or use &larr; &rarr; &uarr; &darr; arrows to move &amp; arrange)
                         </span>
                       )}
                     </div>
@@ -3607,9 +3671,16 @@ export default function PortfolioClient({
                         dragOverGalleryIndex === i &&
                         draggedGalleryIndex !== null &&
                         draggedGalleryIndex !== i;
+                      const verticalOffset =
+                        content.imageSettings?.[slotKey]?.offsetY || 0;
                       return (
                         <div
                           key={i}
+                          style={
+                            verticalOffset
+                              ? { transform: `translateY(${verticalOffset}px)` }
+                              : undefined
+                          }
                           draggable={editMode}
                           onDragStart={() => {
                             if (!editMode) return;
@@ -3647,13 +3718,11 @@ export default function PortfolioClient({
                               setLightboxImage(baseThumbUrl);
                             }
                           }}
-                          className={`relative w-full overflow-hidden cursor-pointer group transition-all ${
-                            editMode ? "cursor-grab active:cursor-grabbing" : ""
-                          } ${
-                            isDragTarget
+                          className={`relative w-full overflow-hidden cursor-pointer group transition-all ${editMode ? "cursor-grab active:cursor-grabbing" : ""
+                            } ${isDragTarget
                               ? "ring-2 ring-[#171715] opacity-80 scale-[0.98]"
                               : ""
-                          }`}
+                            }`}
                         >
                           <ResponsivePic
                             slotKey={slotKey}
@@ -3669,9 +3738,48 @@ export default function PortfolioClient({
                           )}
                           {editMode && (
                             <>
-                              <span className="absolute bottom-2 left-2 z-20 px-1.5 py-0.5 bg-[#171715]/85 text-[#F4F2ED] text-[9px] tracking-widest pointer-events-none">
-                                #{i + 1}
-                              </span>
+                              <div className="absolute bottom-2 left-2 z-20 flex items-center gap-1">
+                                <span className="px-1.5 py-0.5 bg-[#171715]/85 text-[#F4F2ED] text-[9px] tracking-widest pointer-events-none">
+                                  #{i + 1}
+                                </span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    nudgeImageVerticalOffset(slotKey, -12);
+                                  }}
+                                  title="Shift image slightly UP vertically in its column"
+                                  className="px-1.5 py-0.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] inline-flex items-center text-[9px] tracking-wider"
+                                >
+                                  <ChevronUp className="w-3 h-3" />
+                                  <span>UP</span>
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    nudgeImageVerticalOffset(slotKey, 12);
+                                  }}
+                                  title="Shift image slightly DOWN vertically in its column"
+                                  className="px-1.5 py-0.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] inline-flex items-center text-[9px] tracking-wider"
+                                >
+                                  <ChevronDown className="w-3 h-3" />
+                                  <span>DOWN</span>
+                                </button>
+                                {verticalOffset !== 0 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      nudgeImageVerticalOffset(slotKey, null);
+                                    }}
+                                    title="Reset vertical offset"
+                                    className="px-1.5 py-0.5 bg-[#B7A28B] text-[#171715] text-[9px] tracking-wider font-medium"
+                                  >
+                                    {verticalOffset > 0
+                                      ? `+${verticalOffset}px`
+                                      : `${verticalOffset}px`}{" "}
+                                    &times;
+                                  </button>
+                                )}
+                              </div>
                               <div className="absolute top-2 right-2 z-20 flex flex-wrap items-center justify-end gap-1">
                                 {i > 0 && (
                                   <button
@@ -3679,7 +3787,7 @@ export default function PortfolioClient({
                                       e.stopPropagation();
                                       swapProjectGalleryImages(i, i - 1);
                                     }}
-                                    title="Swap with previous photo (Move Left)"
+                                    title="Move Left (swap with previous photo)"
                                     className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
                                   >
                                     <ArrowLeft className="w-3.5 h-3.5" />
@@ -3691,10 +3799,53 @@ export default function PortfolioClient({
                                       e.stopPropagation();
                                       swapProjectGalleryImages(i, i + 1);
                                     }}
-                                    title="Swap with next photo (Move Right)"
+                                    title="Move Right (swap with next photo)"
                                     className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
                                   >
                                     <ArrowRight className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                                {i > 0 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const cols =
+                                        typeof window !== "undefined" &&
+                                        window.innerWidth < 640
+                                          ? 2
+                                          : 3;
+                                      swapProjectGalleryImages(
+                                        i,
+                                        Math.max(0, i - cols)
+                                      );
+                                    }}
+                                    title="Move Up a Row"
+                                    className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                                  >
+                                    <ArrowUp className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                                {i < currentProject.gallery.length - 1 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const cols =
+                                        typeof window !== "undefined" &&
+                                        window.innerWidth < 640
+                                          ? 2
+                                          : 3;
+                                      swapProjectGalleryImages(
+                                        i,
+                                        Math.min(
+                                          currentProject.gallery.length - 1,
+                                          i + cols
+                                        )
+                                      );
+                                    }}
+                                    title="Move Down a Row"
+                                    className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                                  >
+                                    <ArrowDown className="w-3.5 h-3.5" />
                                   </button>
                                 )}
                                 <button
@@ -4991,20 +5142,20 @@ export default function PortfolioClient({
               setResizerModal((prev) =>
                 prev
                   ? {
-                      ...prev,
-                      desktopPanX: clamp(d.initialPanX + dx),
-                      desktopPanY: clamp(d.initialPanY + dy),
-                    }
+                    ...prev,
+                    desktopPanX: clamp(d.initialPanX + dx),
+                    desktopPanY: clamp(d.initialPanY + dy),
+                  }
                   : null
               );
             } else {
               setResizerModal((prev) =>
                 prev
                   ? {
-                      ...prev,
-                      mobilePanX: clamp(d.initialPanX + dx),
-                      mobilePanY: clamp(d.initialPanY + dy),
-                    }
+                    ...prev,
+                    mobilePanX: clamp(d.initialPanX + dx),
+                    mobilePanY: clamp(d.initialPanY + dy),
+                  }
                   : null
               );
             }
@@ -5041,11 +5192,10 @@ export default function PortfolioClient({
                     onClick={() =>
                       setResizerModal({ ...resizerModal, activeTab: "both" })
                     }
-                    className={`px-3 py-1.5 transition-colors ${
-                      resizerModal.activeTab === "both"
+                    className={`px-3 py-1.5 transition-colors ${resizerModal.activeTab === "both"
                         ? "bg-[#171715] text-[#F4F2ED]"
                         : "text-[#373632] hover:bg-[#171715]/10"
-                    }`}
+                      }`}
                   >
                     BOTH (SIDE BY SIDE)
                   </button>
@@ -5054,11 +5204,10 @@ export default function PortfolioClient({
                     onClick={() =>
                       setResizerModal({ ...resizerModal, activeTab: "desktop" })
                     }
-                    className={`px-3 py-1.5 inline-flex items-center space-x-1 transition-colors ${
-                      resizerModal.activeTab === "desktop"
+                    className={`px-3 py-1.5 inline-flex items-center space-x-1 transition-colors ${resizerModal.activeTab === "desktop"
                         ? "bg-[#171715] text-[#F4F2ED]"
                         : "text-[#373632] hover:bg-[#171715]/10"
-                    }`}
+                      }`}
                   >
                     <Monitor className="w-3 h-3" />
                     <span>DESKTOP</span>
@@ -5068,11 +5217,10 @@ export default function PortfolioClient({
                     onClick={() =>
                       setResizerModal({ ...resizerModal, activeTab: "mobile" })
                     }
-                    className={`px-3 py-1.5 inline-flex items-center space-x-1 transition-colors ${
-                      resizerModal.activeTab === "mobile"
+                    className={`px-3 py-1.5 inline-flex items-center space-x-1 transition-colors ${resizerModal.activeTab === "mobile"
                         ? "bg-[#171715] text-[#F4F2ED]"
                         : "text-[#373632] hover:bg-[#171715]/10"
-                    }`}
+                      }`}
                   >
                     <Smartphone className="w-3 h-3" />
                     <span>MOBILE</span>
@@ -5093,541 +5241,536 @@ export default function PortfolioClient({
 
             {/* Editor Grid */}
             <div
-              className={`grid grid-cols-1 ${
-                resizerModal.activeTab === "both" ? "lg:grid-cols-2" : ""
-              } gap-6`}
+              className={`grid grid-cols-1 ${resizerModal.activeTab === "both" ? "lg:grid-cols-2" : ""
+                } gap-6`}
             >
               {/* ==================== DESKTOP PANEL ==================== */}
               {(resizerModal.activeTab === "both" ||
                 resizerModal.activeTab === "desktop") && (
-                <div className="border border-[#B7A28B]/50 bg-[#D8D5CD]/35 p-4 space-y-4 flex flex-col justify-between">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Monitor className="w-4 h-4 text-[#373632]" />
-                        <span className="text-[11px] tracking-[0.2em] uppercase font-medium text-[#373632]">
-                          DESKTOP IMAGE ({resizerModal.desktopWidth} &times;{" "}
-                          {resizerModal.desktopHeight} px)
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          triggerFileUpload((url) =>
-                            setResizerModal((prev) =>
-                              prev
-                                ? {
+                  <div className="border border-[#B7A28B]/50 bg-[#D8D5CD]/35 p-4 space-y-4 flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Monitor className="w-4 h-4 text-[#373632]" />
+                          <span className="text-[11px] tracking-[0.2em] uppercase font-medium text-[#373632]">
+                            DESKTOP IMAGE ({resizerModal.desktopWidth} &times;{" "}
+                            {resizerModal.desktopHeight} px)
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            triggerFileUpload((url) =>
+                              setResizerModal((prev) =>
+                                prev
+                                  ? {
                                     ...prev,
                                     sourceSrc: url,
                                   }
-                                : null
+                                  : null
+                              )
                             )
-                          )
-                        }
-                        className="text-[9px] tracking-[0.16em] uppercase px-2.5 py-1 bg-[#171715] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] inline-flex items-center space-x-1"
-                      >
-                        <Upload className="w-2.5 h-2.5" />
-                        <span>UPLOAD DESKTOP SOURCE</span>
-                      </button>
+                          }
+                          className="text-[9px] tracking-[0.16em] uppercase px-2.5 py-1 bg-[#171715] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] inline-flex items-center space-x-1"
+                        >
+                          <Upload className="w-2.5 h-2.5" />
+                          <span>UPLOAD DESKTOP SOURCE</span>
+                        </button>
+                      </div>
+
+                      {/* Interactive Desktop Canvas Preview */}
+                      <div className="relative w-full h-[230px] sm:h-[260px] bg-[#171715] border border-[#B7A28B]/40 flex items-center justify-center overflow-hidden p-2 select-none">
+                        <canvas
+                          ref={desktopCanvasRef}
+                          onMouseDown={(e) => {
+                            dragStateRef.current = {
+                              target: "desktop",
+                              startX: e.clientX,
+                              startY: e.clientY,
+                              initialPanX: resizerModal.desktopPanX,
+                              initialPanY: resizerModal.desktopPanY,
+                            };
+                          }}
+                          className="max-w-full max-h-full object-contain cursor-grab active:cursor-grabbing shadow-md"
+                        />
+                        <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-[#171715]/80 text-[#F4F2ED] text-[9px] tracking-widest uppercase pointer-events-none">
+                          Drag image to reposition
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Interactive Desktop Canvas Preview */}
-                    <div className="relative w-full h-[230px] sm:h-[260px] bg-[#171715] border border-[#B7A28B]/40 flex items-center justify-center overflow-hidden p-2 select-none">
-                      <canvas
-                        ref={desktopCanvasRef}
-                        onMouseDown={(e) => {
-                          dragStateRef.current = {
-                            target: "desktop",
-                            startX: e.clientX,
-                            startY: e.clientY,
-                            initialPanX: resizerModal.desktopPanX,
-                            initialPanY: resizerModal.desktopPanY,
-                          };
-                        }}
-                        className="max-w-full max-h-full object-contain cursor-grab active:cursor-grabbing shadow-md"
-                      />
-                      <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-[#171715]/80 text-[#F4F2ED] text-[9px] tracking-widest uppercase pointer-events-none">
-                        Drag image to reposition
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Desktop Controls */}
-                  <div className="space-y-3 pt-2 border-t border-[#B7A28B]/30 text-xs">
-                    {/* Width / Height + Presets */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
-                      <div>
-                        <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
-                          Width (px)
-                        </label>
-                        <input
-                          type="number"
-                          min={200}
-                          max={3840}
-                          step={10}
-                          value={resizerModal.desktopWidth}
-                          onChange={(e) =>
-                            setResizerModal({
-                              ...resizerModal,
-                              desktopWidth:
-                                Math.max(
-                                  200,
-                                  Math.min(3840, Number(e.target.value) || 1200)
-                                ),
-                            })
-                          }
-                          className="w-full bg-[#F4F2ED] border border-[#B7A28B]/60 px-2.5 py-1.5 text-xs text-[#373632]"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
-                          Height (px)
-                        </label>
-                        <input
-                          type="number"
-                          min={200}
-                          max={3840}
-                          step={10}
-                          value={resizerModal.desktopHeight}
-                          onChange={(e) =>
-                            setResizerModal({
-                              ...resizerModal,
-                              desktopHeight:
-                                Math.max(
-                                  200,
-                                  Math.min(3840, Number(e.target.value) || 800)
-                                ),
-                            })
-                          }
-                          className="w-full bg-[#F4F2ED] border border-[#B7A28B]/60 px-2.5 py-1.5 text-xs text-[#373632]"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
-                          Mode
-                        </label>
-                        <div className="grid grid-cols-2 border border-[#B7A28B]/60 bg-[#F4F2ED]">
-                          <button
-                            type="button"
-                            onClick={() =>
+                    {/* Desktop Controls */}
+                    <div className="space-y-3 pt-2 border-t border-[#B7A28B]/30 text-xs">
+                      {/* Width / Height + Presets */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
+                        <div>
+                          <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
+                            Width (px)
+                          </label>
+                          <input
+                            type="number"
+                            min={200}
+                            max={3840}
+                            step={10}
+                            value={resizerModal.desktopWidth}
+                            onChange={(e) =>
                               setResizerModal({
                                 ...resizerModal,
-                                desktopFit: "cover",
+                                desktopWidth:
+                                  Math.max(
+                                    200,
+                                    Math.min(3840, Number(e.target.value) || 1200)
+                                  ),
                               })
                             }
-                            className={`py-1.5 text-[9px] tracking-widest uppercase ${
-                              resizerModal.desktopFit === "cover"
-                                ? "bg-[#171715] text-[#F4F2ED]"
-                                : "text-[#373632]"
-                            }`}
-                          >
-                            FILL (CROP)
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
+                            className="w-full bg-[#F4F2ED] border border-[#B7A28B]/60 px-2.5 py-1.5 text-xs text-[#373632]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
+                            Height (px)
+                          </label>
+                          <input
+                            type="number"
+                            min={200}
+                            max={3840}
+                            step={10}
+                            value={resizerModal.desktopHeight}
+                            onChange={(e) =>
                               setResizerModal({
                                 ...resizerModal,
-                                desktopFit: "contain",
+                                desktopHeight:
+                                  Math.max(
+                                    200,
+                                    Math.min(3840, Number(e.target.value) || 800)
+                                  ),
                               })
                             }
-                            className={`py-1.5 text-[9px] tracking-widest uppercase ${
-                              resizerModal.desktopFit === "contain"
-                                ? "bg-[#171715] text-[#F4F2ED]"
-                                : "text-[#373632]"
-                            }`}
-                          >
-                            FIT (FULL)
-                          </button>
+                            className="w-full bg-[#F4F2ED] border border-[#B7A28B]/60 px-2.5 py-1.5 text-xs text-[#373632]"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
+                            Mode
+                          </label>
+                          <div className="grid grid-cols-2 border border-[#B7A28B]/60 bg-[#F4F2ED]">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setResizerModal({
+                                  ...resizerModal,
+                                  desktopFit: "cover",
+                                })
+                              }
+                              className={`py-1.5 text-[9px] tracking-widest uppercase ${resizerModal.desktopFit === "cover"
+                                  ? "bg-[#171715] text-[#F4F2ED]"
+                                  : "text-[#373632]"
+                                }`}
+                            >
+                              FILL (CROP)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setResizerModal({
+                                  ...resizerModal,
+                                  desktopFit: "contain",
+                                })
+                              }
+                              className={`py-1.5 text-[9px] tracking-widest uppercase ${resizerModal.desktopFit === "contain"
+                                  ? "bg-[#171715] text-[#F4F2ED]"
+                                  : "text-[#373632]"
+                                }`}
+                            >
+                              FIT (FULL)
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Aspect Ratio Quick Presets */}
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="text-[9px] tracking-widest uppercase text-[#8C8980] mr-1">
-                        Presets:
-                      </span>
-                      {[
-                        { label: "16:9 Wide", w: 1920, h: 1080 },
-                        { label: "16:10 Editorial", w: 1600, h: 1000 },
-                        { label: "4:3 Classic", w: 1400, h: 1050 },
-                        { label: "3:4 Portrait", w: 1050, h: 1400 },
-                        { label: "1:1 Square", w: 1200, h: 1200 },
-                      ].map((p) => (
+                      {/* Aspect Ratio Quick Presets */}
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[9px] tracking-widest uppercase text-[#8C8980] mr-1">
+                          Presets:
+                        </span>
+                        {[
+                          { label: "16:9 Wide", w: 1920, h: 1080 },
+                          { label: "16:10 Editorial", w: 1600, h: 1000 },
+                          { label: "4:3 Classic", w: 1400, h: 1050 },
+                          { label: "3:4 Portrait", w: 1050, h: 1400 },
+                          { label: "1:1 Square", w: 1200, h: 1200 },
+                        ].map((p) => (
+                          <button
+                            key={p.label}
+                            type="button"
+                            onClick={() =>
+                              setResizerModal({
+                                ...resizerModal,
+                                desktopWidth: p.w,
+                                desktopHeight: p.h,
+                              })
+                            }
+                            className="px-2 py-0.5 text-[9px] tracking-wider uppercase border border-[#B7A28B]/60 bg-[#F4F2ED] hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
+                          >
+                            {p.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Zoom & Pan Sliders */}
+                      <div className="space-y-2">
+                        <div>
+                          <div className="flex justify-between text-[10px] text-[#373632]">
+                            <span className="uppercase tracking-wider">
+                              Desktop Zoom
+                            </span>
+                            <span>{resizerModal.desktopZoom}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={25}
+                            max={300}
+                            value={resizerModal.desktopZoom}
+                            onChange={(e) =>
+                              setResizerModal({
+                                ...resizerModal,
+                                desktopZoom: Number(e.target.value),
+                              })
+                            }
+                            className="w-full accent-[#171715]"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <div className="flex justify-between text-[10px] text-[#373632]">
+                              <span className="uppercase tracking-wider">
+                                Horizontal (X)
+                              </span>
+                              <span>{resizerModal.desktopPanX}%</span>
+                            </div>
+                            <input
+                              type="range"
+                              min={-100}
+                              max={100}
+                              value={resizerModal.desktopPanX}
+                              onChange={(e) =>
+                                setResizerModal({
+                                  ...resizerModal,
+                                  desktopPanX: Number(e.target.value),
+                                })
+                              }
+                              className="w-full accent-[#171715]"
+                            />
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-[10px] text-[#373632]">
+                              <span className="uppercase tracking-wider">
+                                Vertical (Y)
+                              </span>
+                              <span>{resizerModal.desktopPanY}%</span>
+                            </div>
+                            <input
+                              type="range"
+                              min={-100}
+                              max={100}
+                              value={resizerModal.desktopPanY}
+                              onChange={(e) =>
+                                setResizerModal({
+                                  ...resizerModal,
+                                  desktopPanY: Number(e.target.value),
+                                })
+                              }
+                              className="w-full accent-[#171715]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end">
                         <button
-                          key={p.label}
                           type="button"
                           onClick={() =>
                             setResizerModal({
                               ...resizerModal,
-                              desktopWidth: p.w,
-                              desktopHeight: p.h,
+                              desktopZoom: 100,
+                              desktopPanX: 0,
+                              desktopPanY: 0,
+                              desktopFit: "cover",
                             })
                           }
-                          className="px-2 py-0.5 text-[9px] tracking-wider uppercase border border-[#B7A28B]/60 bg-[#F4F2ED] hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
+                          className="text-[9px] tracking-widest uppercase underline text-[#8C8980] hover:text-[#171715]"
                         >
-                          {p.label}
+                          Reset Desktop Framing
                         </button>
-                      ))}
-                    </div>
-
-                    {/* Zoom & Pan Sliders */}
-                    <div className="space-y-2">
-                      <div>
-                        <div className="flex justify-between text-[10px] text-[#373632]">
-                          <span className="uppercase tracking-wider">
-                            Desktop Zoom
-                          </span>
-                          <span>{resizerModal.desktopZoom}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min={25}
-                          max={300}
-                          value={resizerModal.desktopZoom}
-                          onChange={(e) =>
-                            setResizerModal({
-                              ...resizerModal,
-                              desktopZoom: Number(e.target.value),
-                            })
-                          }
-                          className="w-full accent-[#171715]"
-                        />
                       </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <div className="flex justify-between text-[10px] text-[#373632]">
-                            <span className="uppercase tracking-wider">
-                              Horizontal (X)
-                            </span>
-                            <span>{resizerModal.desktopPanX}%</span>
-                          </div>
-                          <input
-                            type="range"
-                            min={-100}
-                            max={100}
-                            value={resizerModal.desktopPanX}
-                            onChange={(e) =>
-                              setResizerModal({
-                                ...resizerModal,
-                                desktopPanX: Number(e.target.value),
-                              })
-                            }
-                            className="w-full accent-[#171715]"
-                          />
-                        </div>
-                        <div>
-                          <div className="flex justify-between text-[10px] text-[#373632]">
-                            <span className="uppercase tracking-wider">
-                              Vertical (Y)
-                            </span>
-                            <span>{resizerModal.desktopPanY}%</span>
-                          </div>
-                          <input
-                            type="range"
-                            min={-100}
-                            max={100}
-                            value={resizerModal.desktopPanY}
-                            onChange={(e) =>
-                              setResizerModal({
-                                ...resizerModal,
-                                desktopPanY: Number(e.target.value),
-                              })
-                            }
-                            className="w-full accent-[#171715]"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setResizerModal({
-                            ...resizerModal,
-                            desktopZoom: 100,
-                            desktopPanX: 0,
-                            desktopPanY: 0,
-                            desktopFit: "cover",
-                          })
-                        }
-                        className="text-[9px] tracking-widest uppercase underline text-[#8C8980] hover:text-[#171715]"
-                      >
-                        Reset Desktop Framing
-                      </button>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* ==================== MOBILE PANEL ==================== */}
               {(resizerModal.activeTab === "both" ||
                 resizerModal.activeTab === "mobile") && (
-                <div className="border border-[#B7A28B]/50 bg-[#D8D5CD]/35 p-4 space-y-4 flex flex-col justify-between">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Smartphone className="w-4 h-4 text-[#373632]" />
-                        <span className="text-[11px] tracking-[0.2em] uppercase font-medium text-[#373632]">
-                          MOBILE IMAGE ({resizerModal.mobileWidth} &times;{" "}
-                          {resizerModal.mobileHeight} px)
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          triggerFileUpload((url) =>
-                            setResizerModal((prev) =>
-                              prev
-                                ? {
+                  <div className="border border-[#B7A28B]/50 bg-[#D8D5CD]/35 p-4 space-y-4 flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Smartphone className="w-4 h-4 text-[#373632]" />
+                          <span className="text-[11px] tracking-[0.2em] uppercase font-medium text-[#373632]">
+                            MOBILE IMAGE ({resizerModal.mobileWidth} &times;{" "}
+                            {resizerModal.mobileHeight} px)
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            triggerFileUpload((url) =>
+                              setResizerModal((prev) =>
+                                prev
+                                  ? {
                                     ...prev,
                                     mobileSourceSrc: url,
                                   }
-                                : null
+                                  : null
+                              )
                             )
-                          )
-                        }
-                        className="text-[9px] tracking-[0.16em] uppercase px-2.5 py-1 bg-[#171715] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] inline-flex items-center space-x-1"
-                      >
-                        <Upload className="w-2.5 h-2.5" />
-                        <span>UPLOAD SEPARATE MOBILE PHOTO</span>
-                      </button>
+                          }
+                          className="text-[9px] tracking-[0.16em] uppercase px-2.5 py-1 bg-[#171715] text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] inline-flex items-center space-x-1"
+                        >
+                          <Upload className="w-2.5 h-2.5" />
+                          <span>UPLOAD SEPARATE MOBILE PHOTO</span>
+                        </button>
+                      </div>
+
+                      {/* Interactive Mobile Canvas Preview */}
+                      <div className="relative w-full h-[230px] sm:h-[260px] bg-[#171715] border border-[#B7A28B]/40 flex items-center justify-center overflow-hidden p-2 select-none">
+                        <canvas
+                          ref={mobileCanvasRef}
+                          onMouseDown={(e) => {
+                            dragStateRef.current = {
+                              target: "mobile",
+                              startX: e.clientX,
+                              startY: e.clientY,
+                              initialPanX: resizerModal.mobilePanX,
+                              initialPanY: resizerModal.mobilePanY,
+                            };
+                          }}
+                          className="max-w-full max-h-full object-contain cursor-grab active:cursor-grabbing shadow-md"
+                        />
+                        <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-[#171715]/80 text-[#F4F2ED] text-[9px] tracking-widest uppercase pointer-events-none">
+                          Drag image to reposition
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Interactive Mobile Canvas Preview */}
-                    <div className="relative w-full h-[230px] sm:h-[260px] bg-[#171715] border border-[#B7A28B]/40 flex items-center justify-center overflow-hidden p-2 select-none">
-                      <canvas
-                        ref={mobileCanvasRef}
-                        onMouseDown={(e) => {
-                          dragStateRef.current = {
-                            target: "mobile",
-                            startX: e.clientX,
-                            startY: e.clientY,
-                            initialPanX: resizerModal.mobilePanX,
-                            initialPanY: resizerModal.mobilePanY,
-                          };
-                        }}
-                        className="max-w-full max-h-full object-contain cursor-grab active:cursor-grabbing shadow-md"
-                      />
-                      <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-[#171715]/80 text-[#F4F2ED] text-[9px] tracking-widest uppercase pointer-events-none">
-                        Drag image to reposition
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Mobile Controls */}
-                  <div className="space-y-3 pt-2 border-t border-[#B7A28B]/30 text-xs">
-                    {/* Width / Height + Mode */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
-                      <div>
-                        <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
-                          Width (px)
-                        </label>
-                        <input
-                          type="number"
-                          min={200}
-                          max={2400}
-                          step={10}
-                          value={resizerModal.mobileWidth}
-                          onChange={(e) =>
-                            setResizerModal({
-                              ...resizerModal,
-                              mobileWidth:
-                                Math.max(
-                                  200,
-                                  Math.min(2400, Number(e.target.value) || 900)
-                                ),
-                            })
-                          }
-                          className="w-full bg-[#F4F2ED] border border-[#B7A28B]/60 px-2.5 py-1.5 text-xs text-[#373632]"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
-                          Height (px)
-                        </label>
-                        <input
-                          type="number"
-                          min={200}
-                          max={2400}
-                          step={10}
-                          value={resizerModal.mobileHeight}
-                          onChange={(e) =>
-                            setResizerModal({
-                              ...resizerModal,
-                              mobileHeight:
-                                Math.max(
-                                  200,
-                                  Math.min(2400, Number(e.target.value) || 1200)
-                                ),
-                            })
-                          }
-                          className="w-full bg-[#F4F2ED] border border-[#B7A28B]/60 px-2.5 py-1.5 text-xs text-[#373632]"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
-                          Mode
-                        </label>
-                        <div className="grid grid-cols-2 border border-[#B7A28B]/60 bg-[#F4F2ED]">
-                          <button
-                            type="button"
-                            onClick={() =>
+                    {/* Mobile Controls */}
+                    <div className="space-y-3 pt-2 border-t border-[#B7A28B]/30 text-xs">
+                      {/* Width / Height + Mode */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
+                        <div>
+                          <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
+                            Width (px)
+                          </label>
+                          <input
+                            type="number"
+                            min={200}
+                            max={2400}
+                            step={10}
+                            value={resizerModal.mobileWidth}
+                            onChange={(e) =>
                               setResizerModal({
                                 ...resizerModal,
-                                mobileFit: "cover",
+                                mobileWidth:
+                                  Math.max(
+                                    200,
+                                    Math.min(2400, Number(e.target.value) || 900)
+                                  ),
                               })
                             }
-                            className={`py-1.5 text-[9px] tracking-widest uppercase ${
-                              resizerModal.mobileFit === "cover"
-                                ? "bg-[#171715] text-[#F4F2ED]"
-                                : "text-[#373632]"
-                            }`}
-                          >
-                            FILL (CROP)
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
+                            className="w-full bg-[#F4F2ED] border border-[#B7A28B]/60 px-2.5 py-1.5 text-xs text-[#373632]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
+                            Height (px)
+                          </label>
+                          <input
+                            type="number"
+                            min={200}
+                            max={2400}
+                            step={10}
+                            value={resizerModal.mobileHeight}
+                            onChange={(e) =>
                               setResizerModal({
                                 ...resizerModal,
-                                mobileFit: "contain",
+                                mobileHeight:
+                                  Math.max(
+                                    200,
+                                    Math.min(2400, Number(e.target.value) || 1200)
+                                  ),
                               })
                             }
-                            className={`py-1.5 text-[9px] tracking-widest uppercase ${
-                              resizerModal.mobileFit === "contain"
-                                ? "bg-[#171715] text-[#F4F2ED]"
-                                : "text-[#373632]"
-                            }`}
-                          >
-                            FIT (FULL)
-                          </button>
+                            className="w-full bg-[#F4F2ED] border border-[#B7A28B]/60 px-2.5 py-1.5 text-xs text-[#373632]"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="block text-[9px] tracking-widest uppercase text-[#8C8980] mb-1">
+                            Mode
+                          </label>
+                          <div className="grid grid-cols-2 border border-[#B7A28B]/60 bg-[#F4F2ED]">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setResizerModal({
+                                  ...resizerModal,
+                                  mobileFit: "cover",
+                                })
+                              }
+                              className={`py-1.5 text-[9px] tracking-widest uppercase ${resizerModal.mobileFit === "cover"
+                                  ? "bg-[#171715] text-[#F4F2ED]"
+                                  : "text-[#373632]"
+                                }`}
+                            >
+                              FILL (CROP)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setResizerModal({
+                                  ...resizerModal,
+                                  mobileFit: "contain",
+                                })
+                              }
+                              className={`py-1.5 text-[9px] tracking-widest uppercase ${resizerModal.mobileFit === "contain"
+                                  ? "bg-[#171715] text-[#F4F2ED]"
+                                  : "text-[#373632]"
+                                }`}
+                            >
+                              FIT (FULL)
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Aspect Ratio Quick Presets */}
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="text-[9px] tracking-widest uppercase text-[#8C8980] mr-1">
-                        Presets:
-                      </span>
-                      {[
-                        { label: "3:4 Vertical", w: 900, h: 1200 },
-                        { label: "4:5 Portrait", w: 800, h: 1000 },
-                        { label: "9:16 Tall", w: 900, h: 1600 },
-                        { label: "1:1 Square", w: 900, h: 900 },
-                        { label: "4:3 Landscape", w: 960, h: 720 },
-                      ].map((p) => (
+                      {/* Aspect Ratio Quick Presets */}
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[9px] tracking-widest uppercase text-[#8C8980] mr-1">
+                          Presets:
+                        </span>
+                        {[
+                          { label: "3:4 Vertical", w: 900, h: 1200 },
+                          { label: "4:5 Portrait", w: 800, h: 1000 },
+                          { label: "9:16 Tall", w: 900, h: 1600 },
+                          { label: "1:1 Square", w: 900, h: 900 },
+                          { label: "4:3 Landscape", w: 960, h: 720 },
+                        ].map((p) => (
+                          <button
+                            key={p.label}
+                            type="button"
+                            onClick={() =>
+                              setResizerModal({
+                                ...resizerModal,
+                                mobileWidth: p.w,
+                                mobileHeight: p.h,
+                              })
+                            }
+                            className="px-2 py-0.5 text-[9px] tracking-wider uppercase border border-[#B7A28B]/60 bg-[#F4F2ED] hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
+                          >
+                            {p.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Zoom & Pan Sliders */}
+                      <div className="space-y-2">
+                        <div>
+                          <div className="flex justify-between text-[10px] text-[#373632]">
+                            <span className="uppercase tracking-wider">
+                              Mobile Zoom
+                            </span>
+                            <span>{resizerModal.mobileZoom}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={25}
+                            max={300}
+                            value={resizerModal.mobileZoom}
+                            onChange={(e) =>
+                              setResizerModal({
+                                ...resizerModal,
+                                mobileZoom: Number(e.target.value),
+                              })
+                            }
+                            className="w-full accent-[#171715]"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <div className="flex justify-between text-[10px] text-[#373632]">
+                              <span className="uppercase tracking-wider">
+                                Horizontal (X)
+                              </span>
+                              <span>{resizerModal.mobilePanX}%</span>
+                            </div>
+                            <input
+                              type="range"
+                              min={-100}
+                              max={100}
+                              value={resizerModal.mobilePanX}
+                              onChange={(e) =>
+                                setResizerModal({
+                                  ...resizerModal,
+                                  mobilePanX: Number(e.target.value),
+                                })
+                              }
+                              className="w-full accent-[#171715]"
+                            />
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-[10px] text-[#373632]">
+                              <span className="uppercase tracking-wider">
+                                Vertical (Y)
+                              </span>
+                              <span>{resizerModal.mobilePanY}%</span>
+                            </div>
+                            <input
+                              type="range"
+                              min={-100}
+                              max={100}
+                              value={resizerModal.mobilePanY}
+                              onChange={(e) =>
+                                setResizerModal({
+                                  ...resizerModal,
+                                  mobilePanY: Number(e.target.value),
+                                })
+                              }
+                              className="w-full accent-[#171715]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end">
                         <button
-                          key={p.label}
                           type="button"
                           onClick={() =>
                             setResizerModal({
                               ...resizerModal,
-                              mobileWidth: p.w,
-                              mobileHeight: p.h,
+                              mobileZoom: 100,
+                              mobilePanX: 0,
+                              mobilePanY: 0,
+                              mobileFit: "cover",
                             })
                           }
-                          className="px-2 py-0.5 text-[9px] tracking-wider uppercase border border-[#B7A28B]/60 bg-[#F4F2ED] hover:bg-[#171715] hover:text-[#F4F2ED] transition-colors"
+                          className="text-[9px] tracking-widest uppercase underline text-[#8C8980] hover:text-[#171715]"
                         >
-                          {p.label}
+                          Reset Mobile Framing
                         </button>
-                      ))}
-                    </div>
-
-                    {/* Zoom & Pan Sliders */}
-                    <div className="space-y-2">
-                      <div>
-                        <div className="flex justify-between text-[10px] text-[#373632]">
-                          <span className="uppercase tracking-wider">
-                            Mobile Zoom
-                          </span>
-                          <span>{resizerModal.mobileZoom}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min={25}
-                          max={300}
-                          value={resizerModal.mobileZoom}
-                          onChange={(e) =>
-                            setResizerModal({
-                              ...resizerModal,
-                              mobileZoom: Number(e.target.value),
-                            })
-                          }
-                          className="w-full accent-[#171715]"
-                        />
                       </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <div className="flex justify-between text-[10px] text-[#373632]">
-                            <span className="uppercase tracking-wider">
-                              Horizontal (X)
-                            </span>
-                            <span>{resizerModal.mobilePanX}%</span>
-                          </div>
-                          <input
-                            type="range"
-                            min={-100}
-                            max={100}
-                            value={resizerModal.mobilePanX}
-                            onChange={(e) =>
-                              setResizerModal({
-                                ...resizerModal,
-                                mobilePanX: Number(e.target.value),
-                              })
-                            }
-                            className="w-full accent-[#171715]"
-                          />
-                        </div>
-                        <div>
-                          <div className="flex justify-between text-[10px] text-[#373632]">
-                            <span className="uppercase tracking-wider">
-                              Vertical (Y)
-                            </span>
-                            <span>{resizerModal.mobilePanY}%</span>
-                          </div>
-                          <input
-                            type="range"
-                            min={-100}
-                            max={100}
-                            value={resizerModal.mobilePanY}
-                            onChange={(e) =>
-                              setResizerModal({
-                                ...resizerModal,
-                                mobilePanY: Number(e.target.value),
-                              })
-                            }
-                            className="w-full accent-[#171715]"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setResizerModal({
-                            ...resizerModal,
-                            mobileZoom: 100,
-                            mobilePanX: 0,
-                            mobilePanY: 0,
-                            mobileFit: "cover",
-                          })
-                        }
-                        className="text-[9px] tracking-widest uppercase underline text-[#8C8980] hover:text-[#171715]"
-                      >
-                        Reset Mobile Framing
-                      </button>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
 
             {/* Footer Actions */}
