@@ -92,7 +92,8 @@
       "coverImage": "/api/media/1794683406801-22.jpg",
       "gallery": [
         "/api/media/1794683216736-11.jpg",
-        "/api/media/1794726903948-22.jpg"
+        "/api/media/1794726903948-22.jpg",
+        "/api/media/1794726937742-landscap.jpg"
       ],
       "featured": true,
       "director": "AJNAS",
@@ -614,5 +615,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794726917524
+  "updatedAt": 1794726939040
 }
