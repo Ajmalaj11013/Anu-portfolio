@@ -94,8 +94,8 @@
         "/api/media/1794726964335-full-szie.jpg",
         "/api/media/1794726937742-landscap.jpg",
         "/api/media/1794683216736-11.jpg",
-        "/api/media/1794726979553-post-1.jpg",
-        "/api/media/1794726903948-22.jpg"
+        "/api/media/1794726903948-22.jpg",
+        "/api/media/1794726979553-post-1.jpg"
       ],
       "featured": true,
       "director": "AJNAS",
@@ -476,7 +476,7 @@
       "mobileFit": "cover"
     },
     "project-gallery-item-over-dose-8594-3": {
-      "offsetY": 12
+      "offsetY": 0
     },
     "project-gallery-item-over-dose-8594-0": {
       "offsetY": 12
@@ -503,9 +503,9 @@
       "offsetY": 12
     },
     "project-gallery-item-over-dose-8594-4": {
-      "offsetY": 0
+      "offsetY": 12
     },
-    "project-detail-thumb-over-dose-8594-4": {
+    "project-detail-thumb-over-dose-8594-3": {
       "desktopSrc": "/api/media/1794684137441-project-detail-thumb-over-dose-8594-1-desktop.jpg",
       "mobileSrc": "/api/media/1794684140112-project-detail-thumb-over-dose-8594-1-mobile.jpg",
       "sourceSrc": "/api/media/1794684009433-22.jpg",
@@ -524,5 +524,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794730789114
+  "updatedAt": 1794730791082
 }
