@@ -502,6 +502,20 @@ export default function PortfolioClient({
   const [activeVideoModal, setActiveVideoModal] = useState<Project | null>(
     null
   );
+  const [draggedGalleryIndex, setDraggedGalleryIndex] = useState<number | null>(
+    null
+  );
+  const [dragOverGalleryIndex, setDragOverGalleryIndex] = useState<
+    number | null
+  >(null);
+  const [draggedPhotoSecItem, setDraggedPhotoSecItem] = useState<{
+    slug: string;
+    index: number;
+  } | null>(null);
+  const [dragOverPhotoSecItem, setDragOverPhotoSecItem] = useState<{
+    slug: string;
+    index: number;
+  } | null>(null);
 
   // Hidden file input ref for quick image/video uploads
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -1211,6 +1225,112 @@ export default function PortfolioClient({
       p.id === currentProject.id ? { ...p, ...patch } : p
     );
     persistContent({ ...content, projects: nextProjects });
+  };
+
+  // Swap two gallery images in the current project (and swap their custom Desktop/Mobile resize settings)
+  const swapProjectGalleryImages = (fromIdx: number, toIdx: number) => {
+    const gal = currentProject.gallery;
+    if (
+      fromIdx === toIdx ||
+      fromIdx < 0 ||
+      toIdx < 0 ||
+      fromIdx >= gal.length ||
+      toIdx >= gal.length
+    ) {
+      return;
+    }
+
+    const nextGal = [...gal];
+    const temp = nextGal[fromIdx];
+    nextGal[fromIdx] = nextGal[toIdx];
+    nextGal[toIdx] = temp;
+
+    const nextSettings: Record<string, ResponsiveImageConfig> = {
+      ...(content.imageSettings || {}),
+    };
+    const prefixes = [
+      `project-gallery-item-${currentProject.id}-`,
+      `project-detail-thumb-${currentProject.id}-`,
+      `project-gallery-${currentProject.id}-`,
+    ];
+    for (const prefix of prefixes) {
+      const keyA = `${prefix}${fromIdx}`;
+      const keyB = `${prefix}${toIdx}`;
+      const cfgA = nextSettings[keyA];
+      const cfgB = nextSettings[keyB];
+      if (cfgB !== undefined) {
+        nextSettings[keyA] = cfgB;
+      } else {
+        delete nextSettings[keyA];
+      }
+      if (cfgA !== undefined) {
+        nextSettings[keyB] = cfgA;
+      } else {
+        delete nextSettings[keyB];
+      }
+    }
+
+    const nextProjects = content.projects.map((p) =>
+      p.id === currentProject.id ? { ...p, gallery: nextGal } : p
+    );
+
+    persistContent({
+      ...content,
+      projects: nextProjects,
+      imageSettings: nextSettings,
+    });
+  };
+
+  // Swap two images in a Photography Page category section (and their resize settings)
+  const swapPhotographySectionImages = (
+    sectionSlug: string,
+    fromIdx: number,
+    toIdx: number
+  ) => {
+    const sec = content.photographySections.find((s) => s.slug === sectionSlug);
+    if (
+      !sec ||
+      fromIdx === toIdx ||
+      fromIdx < 0 ||
+      toIdx < 0 ||
+      fromIdx >= sec.images.length ||
+      toIdx >= sec.images.length
+    ) {
+      return;
+    }
+
+    const nextImages = [...sec.images];
+    const temp = nextImages[fromIdx];
+    nextImages[fromIdx] = nextImages[toIdx];
+    nextImages[toIdx] = temp;
+
+    const nextSettings: Record<string, ResponsiveImageConfig> = {
+      ...(content.imageSettings || {}),
+    };
+    const keyA = `photo-sec-${sectionSlug}-${fromIdx}`;
+    const keyB = `photo-sec-${sectionSlug}-${toIdx}`;
+    const cfgA = nextSettings[keyA];
+    const cfgB = nextSettings[keyB];
+    if (cfgB !== undefined) {
+      nextSettings[keyA] = cfgB;
+    } else {
+      delete nextSettings[keyA];
+    }
+    if (cfgA !== undefined) {
+      nextSettings[keyB] = cfgA;
+    } else {
+      delete nextSettings[keyB];
+    }
+
+    const nextSecs = content.photographySections.map((s) =>
+      s.slug === sectionSlug ? { ...s, images: nextImages } : s
+    );
+
+    persistContent({
+      ...content,
+      photographySections: nextSecs,
+      imageSettings: nextSettings,
+    });
   };
 
   const handleDeleteProject = (projectId: string, e: React.MouseEvent) => {
@@ -2592,10 +2712,57 @@ export default function PortfolioClient({
                       {section.images.map((img, idx) => (
                         <div
                           key={`${sIdx}-${idx}`}
+                          draggable={editMode}
+                          onDragStart={() => {
+                            if (!editMode) return;
+                            setDraggedPhotoSecItem({
+                              slug: section.slug,
+                              index: idx,
+                            });
+                          }}
+                          onDragOver={(e) => {
+                            if (!editMode) return;
+                            e.preventDefault();
+                            setDragOverPhotoSecItem({
+                              slug: section.slug,
+                              index: idx,
+                            });
+                          }}
+                          onDragLeave={() => {
+                            if (!editMode) return;
+                            setDragOverPhotoSecItem(null);
+                          }}
+                          onDrop={(e) => {
+                            if (!editMode) return;
+                            e.preventDefault();
+                            if (
+                              draggedPhotoSecItem &&
+                              draggedPhotoSecItem.slug === section.slug &&
+                              draggedPhotoSecItem.index !== idx
+                            ) {
+                              swapPhotographySectionImages(
+                                section.slug,
+                                draggedPhotoSecItem.index,
+                                idx
+                              );
+                            }
+                            setDraggedPhotoSecItem(null);
+                            setDragOverPhotoSecItem(null);
+                          }}
+                          onDragEnd={() => {
+                            setDraggedPhotoSecItem(null);
+                            setDragOverPhotoSecItem(null);
+                          }}
                           onClick={() => {
                             if (!editMode) navigateToProject(img.projectId);
                           }}
-                          className="group cursor-pointer relative aspect-[4/3] overflow-hidden"
+                          className={`group cursor-pointer relative aspect-[4/3] overflow-hidden transition-all ${
+                            editMode &&
+                            dragOverPhotoSecItem?.slug === section.slug &&
+                            dragOverPhotoSecItem?.index === idx
+                              ? "ring-2 ring-[#B7A28B] scale-[0.98]"
+                              : ""
+                          }`}
                         >
                           <ResponsivePic
                             slotKey={`photo-sec-${section.slug}-${idx}`}
@@ -2633,9 +2800,41 @@ export default function PortfolioClient({
                             </span>
                           </div>
 
-                          {/* Upload / Replace, Resize, or Remove Image in Photography Section */}
+                          {/* Upload / Replace, Resize, Swap, or Remove Image in Photography Section */}
                           {editMode && (
-                            <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
+                            <div className="absolute top-2 right-2 z-20 flex flex-wrap items-center gap-1">
+                              {idx > 0 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    swapPhotographySectionImages(
+                                      section.slug,
+                                      idx,
+                                      idx - 1
+                                    );
+                                  }}
+                                  title="Move left / swap with previous"
+                                  className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                                >
+                                  <ArrowLeft className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                              {idx < section.images.length - 1 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    swapPhotographySectionImages(
+                                      section.slug,
+                                      idx,
+                                      idx + 1
+                                    );
+                                  }}
+                                  title="Move right / swap with next"
+                                  className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                                >
+                                  <ArrowRight className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -3368,9 +3567,16 @@ export default function PortfolioClient({
                 {/* Gallery Images Section */}
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-[9px] tracking-[0.22em] uppercase text-[#373632] font-medium">
-                      GALLERY
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <p className="text-[9px] tracking-[0.22em] uppercase text-[#373632] font-medium">
+                        GALLERY
+                      </p>
+                      {editMode && currentProject.gallery.length > 1 && (
+                        <span className="text-[9px] tracking-[0.14em] uppercase text-[#8C8980]">
+                          (Drag &amp; drop or use &larr; &rarr; arrows to swap &amp; arrange)
+                        </span>
+                      )}
+                    </div>
                     {editMode && (
                       <button
                         onClick={() =>
@@ -3396,15 +3602,58 @@ export default function PortfolioClient({
                         gImg,
                         content.imageSettings
                       );
+                      const isDragTarget =
+                        editMode &&
+                        dragOverGalleryIndex === i &&
+                        draggedGalleryIndex !== null &&
+                        draggedGalleryIndex !== i;
                       return (
                         <div
                           key={i}
+                          draggable={editMode}
+                          onDragStart={() => {
+                            if (!editMode) return;
+                            setDraggedGalleryIndex(i);
+                          }}
+                          onDragOver={(e) => {
+                            if (!editMode) return;
+                            e.preventDefault();
+                            if (dragOverGalleryIndex !== i) {
+                              setDragOverGalleryIndex(i);
+                            }
+                          }}
+                          onDragLeave={() => {
+                            if (!editMode) return;
+                            setDragOverGalleryIndex(null);
+                          }}
+                          onDrop={(e) => {
+                            if (!editMode) return;
+                            e.preventDefault();
+                            if (
+                              draggedGalleryIndex !== null &&
+                              draggedGalleryIndex !== i
+                            ) {
+                              swapProjectGalleryImages(draggedGalleryIndex, i);
+                            }
+                            setDraggedGalleryIndex(null);
+                            setDragOverGalleryIndex(null);
+                          }}
+                          onDragEnd={() => {
+                            setDraggedGalleryIndex(null);
+                            setDragOverGalleryIndex(null);
+                          }}
                           onClick={() => {
                             if (!editMode) {
                               setLightboxImage(baseThumbUrl);
                             }
                           }}
-                          className="relative w-full overflow-hidden cursor-pointer group"
+                          className={`relative w-full overflow-hidden cursor-pointer group transition-all ${
+                            editMode ? "cursor-grab active:cursor-grabbing" : ""
+                          } ${
+                            isDragTarget
+                              ? "ring-2 ring-[#171715] opacity-80 scale-[0.98]"
+                              : ""
+                          }`}
                         >
                           <ResponsivePic
                             slotKey={slotKey}
@@ -3419,76 +3668,105 @@ export default function PortfolioClient({
                             </div>
                           )}
                           {editMode && (
-                            <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  triggerFileUpload((url) => {
+                            <>
+                              <span className="absolute bottom-2 left-2 z-20 px-1.5 py-0.5 bg-[#171715]/85 text-[#F4F2ED] text-[9px] tracking-widest pointer-events-none">
+                                #{i + 1}
+                              </span>
+                              <div className="absolute top-2 right-2 z-20 flex flex-wrap items-center justify-end gap-1">
+                                {i > 0 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      swapProjectGalleryImages(i, i - 1);
+                                    }}
+                                    title="Swap with previous photo (Move Left)"
+                                    className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                                  >
+                                    <ArrowLeft className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                                {i < currentProject.gallery.length - 1 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      swapProjectGalleryImages(i, i + 1);
+                                    }}
+                                    title="Swap with next photo (Move Right)"
+                                    className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                                  >
+                                    <ArrowRight className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    triggerFileUpload((url) => {
+                                      const nextGal =
+                                        currentProject.gallery.map((g, idx) =>
+                                          idx === i ? url : g
+                                        );
+                                      const nextProjects =
+                                        content.projects.map((p) =>
+                                          p.id === currentProject.id
+                                            ? { ...p, gallery: nextGal }
+                                            : p
+                                        );
+                                      persistContent(
+                                        withFreshImageSlot(
+                                          {
+                                            ...content,
+                                            projects: nextProjects,
+                                          },
+                                          [
+                                            slotKey,
+                                            `project-detail-thumb-${currentProject.id}-${i}`,
+                                            `project-gallery-${currentProject.id}-${i}`,
+                                          ],
+                                          url
+                                        )
+                                      );
+                                    });
+                                  }}
+                                  title="Replace photo"
+                                  className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                                >
+                                  <Upload className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openImageResizer({
+                                      slotKey,
+                                      label: `${currentProject.title} — Gallery Image ${i + 1}`,
+                                      currentSrc: baseThumbUrl,
+                                      defaultDesktopWidth: 1200,
+                                      defaultDesktopHeight: 900,
+                                      defaultMobileWidth: 900,
+                                      defaultMobileHeight: 750,
+                                      autoOrientation: true,
+                                    });
+                                  }}
+                                  title="Resize gallery image for Desktop & Mobile"
+                                  className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                                >
+                                  <Crop className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     const nextGal =
-                                      currentProject.gallery.map((g, idx) =>
-                                        idx === i ? url : g
+                                      currentProject.gallery.filter(
+                                        (_, idx) => idx !== i
                                       );
-                                    const nextProjects =
-                                      content.projects.map((p) =>
-                                        p.id === currentProject.id
-                                          ? { ...p, gallery: nextGal }
-                                          : p
-                                      );
-                                    persistContent(
-                                      withFreshImageSlot(
-                                        {
-                                          ...content,
-                                          projects: nextProjects,
-                                        },
-                                        [
-                                          slotKey,
-                                          `project-detail-thumb-${currentProject.id}-${i}`,
-                                          `project-gallery-${currentProject.id}-${i}`,
-                                        ],
-                                        url
-                                      )
-                                    );
-                                  });
-                                }}
-                                title="Replace photo"
-                                className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
-                              >
-                                <Upload className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  openImageResizer({
-                                    slotKey,
-                                    label: `${currentProject.title} — Gallery Image ${i + 1}`,
-                                    currentSrc: baseThumbUrl,
-                                    defaultDesktopWidth: 1200,
-                                    defaultDesktopHeight: 900,
-                                    defaultMobileWidth: 900,
-                                    defaultMobileHeight: 750,
-                                    autoOrientation: true,
-                                  });
-                                }}
-                                title="Resize gallery image for Desktop & Mobile"
-                                className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
-                              >
-                                <Crop className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const nextGal =
-                                    currentProject.gallery.filter(
-                                      (_, idx) => idx !== i
-                                    );
-                                  updateCurrentProject({ gallery: nextGal });
-                                }}
-                                title="Remove photo"
-                                className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-red-700"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
+                                    updateCurrentProject({ gallery: nextGal });
+                                  }}
+                                  title="Remove photo"
+                                  className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-red-700"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </>
                           )}
                         </div>
                       );
