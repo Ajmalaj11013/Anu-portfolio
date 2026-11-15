@@ -481,7 +481,7 @@
     },
     "project-gallery-item-over-dose-8594-2": {
       "offsetY": 12,
-      "offsetX": 36
+      "offsetX": 48
     },
     "project-gallery-item-over-dose-8594-1": {
       "offsetY": 12
@@ -545,5 +545,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794732131321
+  "updatedAt": 1794732131827
 }
