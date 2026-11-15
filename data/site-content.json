@@ -94,8 +94,8 @@
         "/api/media/1794726903948-22.jpg",
         "/api/media/1794726979553-post-1.jpg",
         "/api/media/1794726937742-landscap.jpg",
-        "/api/media/1794726964335-full-szie.jpg",
-        "/api/media/1794683216736-11.jpg"
+        "/api/media/1794683216736-11.jpg",
+        "/api/media/1794726964335-full-szie.jpg"
       ],
       "featured": true,
       "director": "AJNAS",
@@ -508,7 +508,7 @@
       "desktopFit": "cover",
       "mobileFit": "cover"
     },
-    "project-detail-thumb-over-dose-8594-4": {
+    "project-detail-thumb-over-dose-8594-3": {
       "desktopSrc": "/api/media/1794683912045-project-detail-thumb-over-dose-8594-0-desktop.jpg",
       "mobileSrc": "/api/media/1794683915073-project-detail-thumb-over-dose-8594-0-mobile.jpg",
       "sourceSrc": "/api/media/1794683216736-11.jpg",
@@ -527,5 +527,5 @@
       "mobileFit": "contain"
     }
   },
-  "updatedAt": 1794730983814
+  "updatedAt": 1794730984506
 }
