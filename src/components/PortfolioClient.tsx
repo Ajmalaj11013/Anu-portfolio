@@ -3125,267 +3125,272 @@ export default function PortfolioClient({
 
             {/* Asymmetric Two-Column Project Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-              {/* Left 8 Columns: Main Feature Image/Film + Bottom 3-Up Grid */}
-              <div className="lg:col-span-8 space-y-4">
-                <div
-                  onClick={() => {
-                    if (editMode) return;
-                    if (currentProject.type === "film" || currentProject.videoUrl) {
+              {/* Left 8 Columns: Film Player (only for films) + Gallery Images */}
+              <div className="lg:col-span-8 space-y-6">
+                {(currentProject.type === "film" ||
+                  Boolean(currentProject.videoUrl)) && (
+                  <div
+                    onClick={() => {
+                      if (editMode) return;
                       setActiveVideoModal(currentProject);
-                    } else {
-                      const detailMainUrl =
-                        content.imageSettings?.[
-                          `project-detail-main-${currentProject.id}`
-                        ]?.desktopSrc ||
-                        getBaseProjectCover(
-                          currentProject,
-                          content.imageSettings
+                    }}
+                    className="relative aspect-[16/11] w-full overflow-hidden cursor-pointer group"
+                  >
+                    {(() => {
+                      const parsedVid = parseVideoEmbed(
+                        currentProject.videoUrl
+                      );
+                      if (parsedVid?.kind === "iframe") {
+                        return (
+                          <iframe
+                            src={parsedVid.src}
+                            title={currentProject.title}
+                            allow="autoplay; fullscreen; picture-in-picture"
+                            allowFullScreen
+                            className="w-full h-full border-0"
+                          />
                         );
-                      setLightboxImage(detailMainUrl);
-                    }
-                  }}
-                  className="relative aspect-[16/11] w-full overflow-hidden cursor-pointer group"
-                >
-                  {(() => {
-                    const parsedVid = parseVideoEmbed(currentProject.videoUrl);
-                    if (parsedVid?.kind === "iframe") {
+                      }
+                      if (parsedVid?.kind === "native") {
+                        return (
+                          <video
+                            src={parsedVid.src}
+                            controls
+                            playsInline
+                            className="w-full h-full object-cover"
+                          />
+                        );
+                      }
                       return (
-                        <iframe
-                          src={parsedVid.src}
-                          title={currentProject.title}
-                          allow="autoplay; fullscreen; picture-in-picture"
-                          allowFullScreen
-                          className="w-full h-full border-0"
+                        <ResponsivePic
+                          slotKey={`project-detail-main-${currentProject.id}`}
+                          src={getBaseProjectCover(
+                            currentProject,
+                            content.imageSettings
+                          )}
+                          alt={currentProject.title}
+                          className="w-full h-full object-cover editorial-image-grade group-hover:scale-[1.02]"
+                          imageSettings={content.imageSettings}
                         />
                       );
-                    }
-                    if (parsedVid?.kind === "native") {
-                      return (
-                        <video
-                          src={parsedVid.src}
-                          controls
-                          playsInline
-                          className="w-full h-full object-cover"
-                        />
-                      );
-                    }
-                    return (
-                      <ResponsivePic
-                        slotKey={`project-detail-main-${currentProject.id}`}
-                        src={getBaseProjectCover(
-                          currentProject,
-                          content.imageSettings
-                        )}
-                        alt={currentProject.title}
-                        className="w-full h-full object-cover editorial-image-grade group-hover:scale-[1.02]"
-                        imageSettings={content.imageSettings}
-                      />
-                    );
-                  })()}
-                  {!isVideoAsset(currentProject.videoUrl) &&
-                    (currentProject.type === "film" ? (
+                    })()}
+                    {!isVideoAsset(currentProject.videoUrl) && (
                       <div className="absolute inset-0 bg-[#171715]/30 flex items-center justify-center group-hover:bg-[#171715]/45 transition-colors pointer-events-none">
                         <div className="w-16 h-16 rounded-full border border-[#F4F2ED] flex items-center justify-center bg-[#171715]/45 backdrop-blur-sm group-hover:scale-110 transition-transform">
                           <Play className="w-6 h-6 text-[#F4F2ED] fill-[#F4F2ED] ml-1" />
                         </div>
                       </div>
-                    ) : (
-                      <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-[#171715]/80 text-[#F4F2ED] p-2 pointer-events-none">
-                        <Maximize2 className="w-4 h-4" />
-                      </div>
-                    ))}
+                    )}
 
-                  {editMode && (
-                    <div className="absolute top-3 right-3 z-20 flex flex-wrap items-center gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          triggerFileUpload((url, isVid) => {
-                            if (isVid) {
-                              updateCurrentProject({
-                                videoUrl: url,
-                                type: "film",
-                              });
-                            } else {
-                              const nextProjects = content.projects.map((p) =>
-                                p.id === currentProject.id
-                                  ? { ...p, coverImage: url }
-                                  : p
-                              );
-                              persistContent(
-                                withFreshImageSlot(
-                                  { ...content, projects: nextProjects },
-                                  [
-                                    `project-detail-main-${currentProject.id}`,
-                                    `project-cover-${currentProject.id}`,
-                                  ],
-                                  url
-                                )
-                              );
-                            }
-                          });
-                        }}
-                        className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
-                      >
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>UPLOAD MAIN IMAGE / VIDEO</span>
-                      </button>
-                      {!isVideoAsset(currentProject.videoUrl) && (
+                    {editMode && (
+                      <div className="absolute top-3 right-3 z-20 flex flex-wrap items-center gap-2">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            openImageResizer({
-                              slotKey: `project-detail-main-${currentProject.id}`,
-                              label: `${currentProject.title} — Detail Main Image`,
-                              currentSrc: getBaseProjectCover(
-                                currentProject,
-                                content.imageSettings
-                              ),
-                              defaultDesktopWidth: 1600,
-                              defaultDesktopHeight: 1100,
-                              defaultMobileWidth: 900,
-                              defaultMobileHeight: 1100,
+                            triggerFileUpload((url, isVid) => {
+                              if (isVid) {
+                                updateCurrentProject({
+                                  videoUrl: url,
+                                  type: "film",
+                                });
+                              } else {
+                                const nextProjects = content.projects.map((p) =>
+                                  p.id === currentProject.id
+                                    ? { ...p, coverImage: url }
+                                    : p
+                                );
+                                persistContent(
+                                  withFreshImageSlot(
+                                    { ...content, projects: nextProjects },
+                                    [
+                                      `project-detail-main-${currentProject.id}`,
+                                      `project-cover-${currentProject.id}`,
+                                    ],
+                                    url
+                                  )
+                                );
+                              }
                             });
                           }}
                           className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
                         >
-                          <Crop className="w-3.5 h-3.5" />
-                          <span>RESIZE (DESKTOP / MOBILE)</span>
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>UPLOAD VIDEO</span>
                         </button>
-                      )}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          promptVideoUrl((url) => {
-                            updateCurrentProject({
-                              videoUrl: url,
-                              type: "film",
-                            });
-                          }, currentProject.videoUrl);
-                        }}
-                        className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
-                      >
-                        <Link2 className="w-3.5 h-3.5" />
-                        <span>VIDEO URL (VIMEO / YT)</span>
-                      </button>
-                      {currentProject.videoUrl && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            updateCurrentProject({ videoUrl: undefined });
+                            promptVideoUrl((url) => {
+                              updateCurrentProject({
+                                videoUrl: url,
+                                type: "film",
+                              });
+                            }, currentProject.videoUrl);
                           }}
-                          className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-2.5 py-2 border border-[#B7A28B] hover:bg-red-800"
+                          className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-3 py-2 border border-[#B7A28B] inline-flex items-center space-x-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
                         >
-                          REMOVE VIDEO
+                          <Link2 className="w-3.5 h-3.5" />
+                          <span>VIDEO URL (VIMEO / YT)</span>
                         </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Bottom 3-Column Stills Row */}
-                <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                  {currentProject.gallery.slice(1, 4).map((imgUrl, idx) => {
-                    const actualIdx = idx + 1;
-                    const slotKey = `project-detail-still-${currentProject.id}-${actualIdx}`;
-                    const baseStillUrl = getBaseGalleryImage(
-                      currentProject,
-                      actualIdx,
-                      imgUrl,
-                      content.imageSettings
-                    );
-                    return (
-                      <div
-                        key={actualIdx}
-                        onClick={() => {
-                          if (!editMode) {
-                            const fullUrl =
-                              content.imageSettings?.[slotKey]?.desktopSrc ||
-                              baseStillUrl;
-                            setLightboxImage(fullUrl);
-                          }
-                        }}
-                        className="relative aspect-square overflow-hidden cursor-pointer group"
-                      >
-                        <ResponsivePic
-                          slotKey={slotKey}
-                          src={baseStillUrl}
-                          alt={`${currentProject.title} still ${actualIdx}`}
-                          className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
-                          imageSettings={content.imageSettings}
-                        />
-                        {editMode && (
-                          <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                triggerFileUpload((url) => {
-                                  const nextGal = currentProject.gallery.map(
-                                    (g, i) => (i === actualIdx ? url : g)
-                                  );
-                                  const nextProjects = content.projects.map(
-                                    (p) =>
-                                      p.id === currentProject.id
-                                        ? { ...p, gallery: nextGal }
-                                        : p
-                                  );
-                                  persistContent(
-                                    withFreshImageSlot(
-                                      { ...content, projects: nextProjects },
-                                      [
-                                        slotKey,
-                                        `project-gallery-${currentProject.id}-${actualIdx}`,
-                                      ],
-                                      url
-                                    )
-                                  );
-                                });
-                              }}
-                              title="Replace image"
-                              className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
-                            >
-                              <Upload className="w-3 h-3" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openImageResizer({
-                                  slotKey,
-                                  label: `${currentProject.title} — Detail Still ${actualIdx}`,
-                                  currentSrc: baseStillUrl,
-                                  defaultDesktopWidth: 1200,
-                                  defaultDesktopHeight: 1200,
-                                  defaultMobileWidth: 900,
-                                  defaultMobileHeight: 900,
-                                });
-                              }}
-                              title="Resize detail still for Desktop & Mobile (independent of thumbnail)"
-                              className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
-                            >
-                              <Crop className="w-3 h-3" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const nextGal = currentProject.gallery.filter(
-                                  (_, i) => i !== actualIdx
-                                );
-                                updateCurrentProject({ gallery: nextGal });
-                              }}
-                              title="Remove image"
-                              className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-red-700"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          </div>
+                        {currentProject.videoUrl && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateCurrentProject({ videoUrl: undefined });
+                            }}
+                            className="bg-[#171715]/90 text-[#F4F2ED] text-[10px] tracking-widest uppercase px-2.5 py-2 border border-[#B7A28B] hover:bg-red-800"
+                          >
+                            REMOVE VIDEO
+                          </button>
                         )}
                       </div>
-                    );
-                  })}
+                    )}
+                  </div>
+                )}
+
+                {/* Gallery Images Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-[9px] tracking-[0.22em] uppercase text-[#373632] font-medium">
+                      GALLERY
+                    </p>
+                    {editMode && (
+                      <button
+                        onClick={() =>
+                          triggerFileUpload((url) =>
+                            updateCurrentProject({
+                              gallery: [...currentProject.gallery, url],
+                            })
+                          )
+                        }
+                        className="inline-flex items-center space-x-1 bg-[#171715] text-[#F4F2ED] text-[9px] tracking-widest uppercase px-3 py-1.5 hover:bg-[#B7A28B] hover:text-[#171715]"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>ADD PHOTO</span>
+                      </button>
+                    )}
+                  </div>
+                  <div
+                    className={`grid grid-cols-1 ${
+                      currentProject.gallery.length > 1
+                        ? "sm:grid-cols-2"
+                        : ""
+                    } gap-4 sm:gap-5`}
+                  >
+                    {currentProject.gallery.map((gImg, i) => {
+                      const slotKey = `project-detail-thumb-${currentProject.id}-${i}`;
+                      const baseThumbUrl = getBaseGalleryImage(
+                        currentProject,
+                        i,
+                        gImg,
+                        content.imageSettings
+                      );
+                      return (
+                        <div
+                          key={i}
+                          onClick={() => {
+                            if (!editMode) {
+                              const detailUrl =
+                                content.imageSettings?.[slotKey]?.desktopSrc ||
+                                content.imageSettings?.[
+                                  `project-detail-still-${currentProject.id}-${i}`
+                                ]?.desktopSrc ||
+                                baseThumbUrl;
+                              setLightboxImage(detailUrl);
+                            }
+                          }}
+                          className="relative aspect-[4/3] overflow-hidden cursor-pointer group"
+                        >
+                          <ResponsivePic
+                            slotKey={slotKey}
+                            src={baseThumbUrl}
+                            alt={`${currentProject.title} gallery ${i + 1}`}
+                            className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
+                            imageSettings={content.imageSettings}
+                          />
+                          {!editMode && (
+                            <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-[#171715]/80 text-[#F4F2ED] p-1.5 pointer-events-none">
+                              <Maximize2 className="w-3.5 h-3.5" />
+                            </div>
+                          )}
+                          {editMode && (
+                            <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  triggerFileUpload((url) => {
+                                    const nextGal =
+                                      currentProject.gallery.map((g, idx) =>
+                                        idx === i ? url : g
+                                      );
+                                    const nextProjects =
+                                      content.projects.map((p) =>
+                                        p.id === currentProject.id
+                                          ? { ...p, gallery: nextGal }
+                                          : p
+                                      );
+                                    persistContent(
+                                      withFreshImageSlot(
+                                        {
+                                          ...content,
+                                          projects: nextProjects,
+                                        },
+                                        [
+                                          slotKey,
+                                          `project-gallery-${currentProject.id}-${i}`,
+                                        ],
+                                        url
+                                      )
+                                    );
+                                  });
+                                }}
+                                title="Replace photo"
+                                className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                              >
+                                <Upload className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openImageResizer({
+                                    slotKey,
+                                    label: `${currentProject.title} — Gallery Image ${i + 1}`,
+                                    currentSrc: baseThumbUrl,
+                                    defaultDesktopWidth: 1200,
+                                    defaultDesktopHeight: 900,
+                                    defaultMobileWidth: 900,
+                                    defaultMobileHeight: 750,
+                                  });
+                                }}
+                                title="Resize gallery image for Desktop & Mobile"
+                                className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
+                              >
+                                <Crop className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const nextGal =
+                                    currentProject.gallery.filter(
+                                      (_, idx) => idx !== i
+                                    );
+                                  updateCurrentProject({ gallery: nextGal });
+                                }}
+                                title="Remove photo"
+                                className="p-1.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-red-700"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
-              {/* Right 4 Columns: Editorial Notes, Role, Discipline & Side Gallery */}
+              {/* Right 4 Columns: Editorial Notes, Role & Discipline */}
               <div className="lg:col-span-4 flex flex-col justify-between space-y-8">
                 <div className="space-y-6">
                   <div className="text-xs sm:text-sm text-[#8C8980] leading-relaxed font-normal">
@@ -3481,134 +3486,6 @@ export default function PortfolioClient({
                         </div>
                       </div>
                     )}
-                  </div>
-
-                  {/* Right Column Thumbnail Gallery */}
-                  <div className="pt-2">
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-[9px] tracking-[0.22em] uppercase text-[#373632] font-medium">
-                        GALLERY
-                      </p>
-                      {editMode && (
-                        <button
-                          onClick={() =>
-                            triggerFileUpload((url) =>
-                              updateCurrentProject({
-                                gallery: [...currentProject.gallery, url],
-                              })
-                            )
-                          }
-                          className="inline-flex items-center space-x-1 bg-[#171715] text-[#F4F2ED] text-[9px] tracking-widest uppercase px-2.5 py-1 hover:bg-[#B7A28B] hover:text-[#171715]"
-                        >
-                          <Plus className="w-3 h-3" />
-                          <span>ADD PHOTO</span>
-                        </button>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      {currentProject.gallery.map((gImg, i) => {
-                        const slotKey = `project-detail-thumb-${currentProject.id}-${i}`;
-                        const baseThumbUrl = getBaseGalleryImage(
-                          currentProject,
-                          i,
-                          gImg,
-                          content.imageSettings
-                        );
-                        return (
-                          <div
-                            key={i}
-                            onClick={() => {
-                              if (!editMode) {
-                                const detailUrl =
-                                  content.imageSettings?.[
-                                    `project-detail-still-${currentProject.id}-${i}`
-                                  ]?.desktopSrc || baseThumbUrl;
-                                setLightboxImage(detailUrl);
-                              }
-                            }}
-                            className="relative aspect-[4/3] overflow-hidden cursor-pointer group"
-                          >
-                            <ResponsivePic
-                              slotKey={slotKey}
-                              src={baseThumbUrl}
-                              alt={`${currentProject.title} thumbnail ${i + 1}`}
-                              className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
-                              imageSettings={content.imageSettings}
-                            />
-                            {editMode && (
-                              <div className="absolute top-1.5 right-1.5 z-20 flex items-center gap-1">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    triggerFileUpload((url) => {
-                                      const nextGal =
-                                        currentProject.gallery.map((g, idx) =>
-                                          idx === i ? url : g
-                                        );
-                                      const nextProjects =
-                                        content.projects.map((p) =>
-                                          p.id === currentProject.id
-                                            ? { ...p, gallery: nextGal }
-                                            : p
-                                        );
-                                      persistContent(
-                                        withFreshImageSlot(
-                                          {
-                                            ...content,
-                                            projects: nextProjects,
-                                          },
-                                          [
-                                            slotKey,
-                                            `project-gallery-${currentProject.id}-${i}`,
-                                          ],
-                                          url
-                                        )
-                                      );
-                                    });
-                                  }}
-                                  title="Replace photo"
-                                  className="p-1 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
-                                >
-                                  <Upload className="w-3 h-3" />
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    openImageResizer({
-                                      slotKey,
-                                      label: `${currentProject.title} — Gallery Thumbnail ${i + 1}`,
-                                      currentSrc: baseThumbUrl,
-                                      defaultDesktopWidth: 1200,
-                                      defaultDesktopHeight: 900,
-                                      defaultMobileWidth: 900,
-                                      defaultMobileHeight: 750,
-                                    });
-                                  }}
-                                  title="Resize thumbnail for Desktop & Mobile (independent of detail view)"
-                                  className="p-1 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715]"
-                                >
-                                  <Crop className="w-3 h-3" />
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    const nextGal =
-                                      currentProject.gallery.filter(
-                                        (_, idx) => idx !== i
-                                      );
-                                    updateCurrentProject({ gallery: nextGal });
-                                  }}
-                                  title="Remove photo"
-                                  className="p-1 bg-[#171715]/90 text-[#F4F2ED] hover:bg-red-700"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
                   </div>
                 </div>
               </div>
