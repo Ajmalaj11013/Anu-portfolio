@@ -93,8 +93,8 @@
       "gallery": [
         "/api/media/1794726964335-full-szie.jpg",
         "/api/media/1794683216736-11.jpg",
-        "/api/media/1794726903948-22.jpg",
         "/api/media/1794726937742-landscap.jpg",
+        "/api/media/1794726903948-22.jpg",
         "/api/media/1794726979553-post-1.jpg"
       ],
       "featured": true,
@@ -480,6 +480,13 @@
       "offsetX": 0
     },
     "project-gallery-item-over-dose-8594-2": {
+      "offsetY": 12
+    },
+    "project-gallery-item-over-dose-8594-1": {
+      "offsetY": 12,
+      "offsetX": 0
+    },
+    "project-gallery-item-over-dose-8594-3": {
       "desktopSrc": "/api/media/1794731056487-project-gallery-item-over-dose-8594-3-desktop.jpg",
       "mobileSrc": "/api/media/1794731058628-project-gallery-item-over-dose-8594-3-mobile.jpg",
       "sourceSrc": "/api/media/1794726903948-22.jpg",
@@ -496,13 +503,6 @@
       "mobilePanY": 0,
       "desktopFit": "cover",
       "mobileFit": "cover",
-      "offsetY": 12
-    },
-    "project-gallery-item-over-dose-8594-1": {
-      "offsetY": 12,
-      "offsetX": 0
-    },
-    "project-gallery-item-over-dose-8594-3": {
       "offsetY": 12
     },
     "project-gallery-item-over-dose-8594-4": {
@@ -526,7 +526,7 @@
       "desktopFit": "contain",
       "mobileFit": "contain"
     },
-    "project-detail-thumb-over-dose-8594-2": {
+    "project-detail-thumb-over-dose-8594-3": {
       "desktopSrc": "/api/media/1794684137441-project-detail-thumb-over-dose-8594-1-desktop.jpg",
       "mobileSrc": "/api/media/1794684140112-project-detail-thumb-over-dose-8594-1-mobile.jpg",
       "sourceSrc": "/api/media/1794684009433-22.jpg",
@@ -545,5 +545,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794732355748
+  "updatedAt": 1794732360654
 }
