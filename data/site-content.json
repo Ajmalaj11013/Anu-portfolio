@@ -91,8 +91,8 @@
       "description": "Click to edit this project description in Edit Mode.",
       "coverImage": "/api/media/1794683406801-22.jpg",
       "gallery": [
-        "/api/media/1794683216736-11.jpg",
         "/api/media/1794726964335-full-szie.jpg",
+        "/api/media/1794683216736-11.jpg",
         "/api/media/1794726979553-post-1.jpg",
         "/api/media/1794726937742-landscap.jpg",
         "/api/media/1794726903948-22.jpg"
@@ -496,7 +496,7 @@
       "desktopFit": "cover",
       "mobileFit": "cover"
     },
-    "project-detail-thumb-over-dose-8594-0": {
+    "project-detail-thumb-over-dose-8594-1": {
       "desktopSrc": "/api/media/1794683912045-project-detail-thumb-over-dose-8594-0-desktop.jpg",
       "mobileSrc": "/api/media/1794683915073-project-detail-thumb-over-dose-8594-0-mobile.jpg",
       "sourceSrc": "/api/media/1794683216736-11.jpg",
@@ -515,5 +515,5 @@
       "mobileFit": "contain"
     }
   },
-  "updatedAt": 1794730658804
+  "updatedAt": 1794730659951
 }
