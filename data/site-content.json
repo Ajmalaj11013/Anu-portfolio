@@ -12,10 +12,10 @@
   "homeCards": {
     "photographyTitle": "PHOTOGRAPHY",
     "photographyDesc": "Fashion, hospitality, architecture, food, product and portraiture.",
-    "photographyImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85",
+    "photographyImage": "",
     "filmsTitle": "FILMS",
     "filmsDesc": "Fashion films, advertising films, editorial documentaries and visual narratives.",
-    "filmsImage": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=85",
+    "filmsImage": "",
     "filmsSideLabel": "ADVERTISING"
   },
   "photographyPage": {
@@ -94,8 +94,8 @@
         "/api/media/1794683216736-11.jpg",
         "/api/media/1794726903948-22.jpg",
         "/api/media/1794726937742-landscap.jpg",
-        "/api/media/1794726964335-full-szie.jpg",
-        "/api/media/1794726979553-post-1.jpg"
+        "/api/media/1794726979553-post-1.jpg",
+        "/api/media/1794726964335-full-szie.jpg"
       ],
       "featured": true,
       "director": "AJNAS",
@@ -148,132 +148,27 @@
     {
       "title": "FASHION & EDITORIAL",
       "slug": "fashion",
-      "images": [
-        {
-          "src": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=85",
-          "projectId": "the-silent-form",
-          "caption": "Coastal Reverie — Editorial"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=900&q=85",
-          "projectId": "the-silent-form",
-          "caption": "Chiaroscuro Portrait"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=900&q=85",
-          "projectId": "the-silent-form",
-          "caption": "The Silent Form"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=85",
-          "projectId": "the-silent-form",
-          "caption": "Study in Linen"
-        }
-      ]
+      "images": []
     },
     {
       "title": "PRODUCT",
       "slug": "hospitality",
-      "images": [
-        {
-          "src": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=900&q=85",
-          "projectId": "cafe-lumiere",
-          "caption": "Courtyard Dining"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=85",
-          "projectId": "cafe-lumiere",
-          "caption": "Villa Sanctuary"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=85",
-          "projectId": "cafe-lumiere",
-          "caption": "Ocean Overlook"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=900&q=85",
-          "projectId": "cafe-lumiere",
-          "caption": "Minimalist Suite"
-        }
-      ]
+      "images": []
     },
     {
       "title": "ARCHITECTURE",
       "slug": "architecture",
-      "images": [
-        {
-          "src": "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=900&q=85",
-          "projectId": "landscapes-of-living",
-          "caption": "Concrete & Light"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=85",
-          "projectId": "landscapes-of-living",
-          "caption": "Shadow Corridor"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=900&q=85",
-          "projectId": "landscapes-of-living",
-          "caption": "Tactile Ritual"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=900&q=85",
-          "projectId": "landscapes-of-living",
-          "caption": "Monolithic Pavilion"
-        }
-      ]
+      "images": []
     },
     {
       "title": "ADVERTISING",
       "slug": "food",
-      "images": [
-        {
-          "src": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=85",
-          "projectId": "the-seasonal-table",
-          "caption": "Artisanal Harvest"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=900&q=85",
-          "projectId": "vessels-of-earth",
-          "caption": "Botanical Essences"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85",
-          "projectId": "the-seasonal-table",
-          "caption": "Evening Decanter"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1490818387583-1baba5e638af?auto=format&fit=crop&w=900&q=85",
-          "projectId": "the-seasonal-table",
-          "caption": "Figs & Stoneware"
-        }
-      ]
+      "images": []
     },
     {
       "title": "DOCUMENTARY",
       "slug": "documentary",
-      "images": [
-        {
-          "src": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=85",
-          "projectId": "the-river-between",
-          "caption": "The River Between"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&q=85",
-          "projectId": "the-river-between",
-          "caption": "Morning Mist"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=900&q=85",
-          "projectId": "the-river-between",
-          "caption": "Quiet Resilience"
-        },
-        {
-          "src": "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=85",
-          "projectId": "the-river-between",
-          "caption": "Highland Passage"
-        }
-      ]
+      "images": []
     }
   ],
   "filmCategories": [
@@ -281,25 +176,25 @@
       "title": "FASHION FILMS",
       "slug": "film-fashion",
       "projectId": "in-between",
-      "image": "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1000&q=85"
+      "image": ""
     },
     {
       "title": "ADVERTISING & CAMPAIGN FILMS",
       "slug": "film-advertising",
       "projectId": "weight-of-being",
-      "image": "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1000&q=85"
+      "image": ""
     },
     {
       "title": "EDITORIAL DOCUMENTARIES",
       "slug": "film-documentary",
       "projectId": "the-river-between",
-      "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=85"
+      "image": ""
     },
     {
       "title": "EXPERIMENTAL & ART FILMS",
       "slug": "film-experimental",
       "projectId": "solitude-in-stone",
-      "image": "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=85"
+      "image": ""
     }
   ],
   "imageSettings": {
@@ -348,7 +243,7 @@
       "desktopSrc": "/api/media/1794342066308-project-cover-over-ddose-9869-desktop.jpg",
       "mobileSrc": "/api/media/1794342068486-project-cover-over-ddose-9869-mobile.jpg",
       "sourceSrc": "/api/media/1794342045973-editorial-overdose4263.jpg",
-      "mobileSourceSrc": "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=85",
+      "mobileSourceSrc": "/api/media/1794342045973-editorial-overdose4263.jpg",
       "desktopWidth": 900,
       "desktopHeight": 1200,
       "mobileWidth": 800,
@@ -617,5 +512,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794728866406
+  "updatedAt": 1794729968148
 }
