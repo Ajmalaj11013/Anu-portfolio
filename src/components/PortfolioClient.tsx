@@ -3270,13 +3270,7 @@ export default function PortfolioClient({
                       </button>
                     )}
                   </div>
-                  <div
-                    className={`grid grid-cols-1 ${
-                      currentProject.gallery.length > 1
-                        ? "sm:grid-cols-2"
-                        : ""
-                    } gap-4 sm:gap-5`}
-                  >
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                     {currentProject.gallery.map((gImg, i) => {
                       const slotKey = `project-detail-thumb-${currentProject.id}-${i}`;
                       const baseThumbUrl = getBaseGalleryImage(
@@ -3290,13 +3284,7 @@ export default function PortfolioClient({
                           key={i}
                           onClick={() => {
                             if (!editMode) {
-                              const detailUrl =
-                                content.imageSettings?.[slotKey]?.desktopSrc ||
-                                content.imageSettings?.[
-                                  `project-detail-still-${currentProject.id}-${i}`
-                                ]?.desktopSrc ||
-                                baseThumbUrl;
-                              setLightboxImage(detailUrl);
+                              setLightboxImage(baseThumbUrl);
                             }
                           }}
                           className="relative aspect-[4/3] overflow-hidden cursor-pointer group"
