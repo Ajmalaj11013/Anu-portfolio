@@ -92,8 +92,8 @@
       "coverImage": "/api/media/1794683406801-22.jpg",
       "gallery": [
         "/api/media/1794683216736-11.jpg",
-        "/api/media/1794726979553-post-1.jpg",
         "/api/media/1794726964335-full-szie.jpg",
+        "/api/media/1794726979553-post-1.jpg",
         "/api/media/1794726903948-22.jpg",
         "/api/media/1794726937742-landscap.jpg"
       ],
@@ -480,11 +480,11 @@
       "offsetX": 0
     },
     "project-gallery-item-over-dose-8594-2": {
-      "offsetY": 12,
-      "offsetX": 0
+      "offsetY": 12
     },
     "project-gallery-item-over-dose-8594-1": {
-      "offsetY": 12
+      "offsetY": 12,
+      "offsetX": 0
     },
     "project-gallery-item-over-dose-8594-3": {
       "desktopSrc": "/api/media/1794731056487-project-gallery-item-over-dose-8594-3-desktop.jpg",
@@ -545,5 +545,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794732140232
+  "updatedAt": 1794732171185
 }
