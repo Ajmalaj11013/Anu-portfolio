@@ -91,8 +91,8 @@
       "description": "Click to edit this project description in Edit Mode.",
       "coverImage": "/api/media/1794683406801-22.jpg",
       "gallery": [
-        "/api/media/1794683216736-11.jpg",
         "/api/media/1794726964335-full-szie.jpg",
+        "/api/media/1794683216736-11.jpg",
         "/api/media/1794726979553-post-1.jpg",
         "/api/media/1794726937742-landscap.jpg",
         "/api/media/1794726903948-22.jpg"
@@ -416,24 +416,6 @@
       "desktopFit": "cover",
       "mobileFit": "cover"
     },
-    "project-detail-thumb-over-dose-8594-0": {
-      "desktopSrc": "/api/media/1794683912045-project-detail-thumb-over-dose-8594-0-desktop.jpg",
-      "mobileSrc": "/api/media/1794683915073-project-detail-thumb-over-dose-8594-0-mobile.jpg",
-      "sourceSrc": "/api/media/1794683216736-11.jpg",
-      "mobileSourceSrc": "/api/media/1794683216736-11.jpg",
-      "desktopWidth": 1050,
-      "desktopHeight": 1400,
-      "mobileWidth": 800,
-      "mobileHeight": 1000,
-      "desktopZoom": 108,
-      "desktopPanX": 0,
-      "desktopPanY": 0,
-      "mobileZoom": 100,
-      "mobilePanX": 0,
-      "mobilePanY": 0,
-      "desktopFit": "contain",
-      "mobileFit": "contain"
-    },
     "project-detail-main-zazu-3485": {
       "desktopSrc": "/api/media/1794685288298-project-detail-main-zazu-3485-desktop.jpg",
       "mobileSrc": "/api/media/1794685291230-project-detail-main-zazu-3485-mobile.jpg",
@@ -513,7 +495,25 @@
       "mobilePanY": 1,
       "desktopFit": "cover",
       "mobileFit": "cover"
+    },
+    "project-detail-thumb-over-dose-8594-1": {
+      "desktopSrc": "/api/media/1794683912045-project-detail-thumb-over-dose-8594-0-desktop.jpg",
+      "mobileSrc": "/api/media/1794683915073-project-detail-thumb-over-dose-8594-0-mobile.jpg",
+      "sourceSrc": "/api/media/1794683216736-11.jpg",
+      "mobileSourceSrc": "/api/media/1794683216736-11.jpg",
+      "desktopWidth": 1050,
+      "desktopHeight": 1400,
+      "mobileWidth": 800,
+      "mobileHeight": 1000,
+      "desktopZoom": 108,
+      "desktopPanX": 0,
+      "desktopPanY": 0,
+      "mobileZoom": 100,
+      "mobilePanX": 0,
+      "mobilePanY": 0,
+      "desktopFit": "contain",
+      "mobileFit": "contain"
     }
   },
-  "updatedAt": 1794730651200
+  "updatedAt": 1794730655643
 }
