@@ -494,7 +494,7 @@
       "mobileFit": "contain"
     },
     "project-gallery-item-over-dose-8594-3": {
-      "offsetY": -36
+      "offsetY": -24
     },
     "project-detail-thumb-over-dose-8594-3": {
       "desktopSrc": "/api/media/1794684137441-project-detail-thumb-over-dose-8594-1-desktop.jpg",
@@ -515,5 +515,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794730737561
+  "updatedAt": 1794730738598
 }
