@@ -819,6 +819,7 @@ export default function PortfolioClient({
     defaultDesktopHeight = 1000,
     defaultMobileWidth = 900,
     defaultMobileHeight = 1150,
+    autoOrientation = false,
     onApplyDesktop = (base) => base,
   }: {
     slotKey: string;
@@ -828,6 +829,7 @@ export default function PortfolioClient({
     defaultDesktopHeight?: number;
     defaultMobileWidth?: number;
     defaultMobileHeight?: number;
+    autoOrientation?: boolean;
     onApplyDesktop?: (base: SiteContent, desktopUrl: string) => SiteContent;
   }) => {
     const existing = content.imageSettings?.[slotKey];
@@ -855,6 +857,25 @@ export default function PortfolioClient({
       isSaving: false,
       onApplyDesktop,
     });
+
+    if (autoOrientation && !existing?.desktopWidth) {
+      const probe = new Image();
+      probe.onload = () => {
+        const isVertical = probe.naturalHeight > probe.naturalWidth;
+        setResizerModal((prev) =>
+          prev && prev.slotKey === slotKey
+            ? {
+                ...prev,
+                desktopWidth: isVertical ? 900 : 1200,
+                desktopHeight: isVertical ? 1200 : 900,
+                mobileWidth: isVertical ? 800 : 960,
+                mobileHeight: isVertical ? 1060 : 720,
+              }
+            : prev
+        );
+      };
+      probe.src = source;
+    }
   };
 
   // Live render Desktop & Mobile preview canvases whenever resizer settings change
@@ -3270,9 +3291,9 @@ export default function PortfolioClient({
                       </button>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 items-start">
                     {currentProject.gallery.map((gImg, i) => {
-                      const slotKey = `project-detail-thumb-${currentProject.id}-${i}`;
+                      const slotKey = `project-gallery-item-${currentProject.id}-${i}`;
                       const baseThumbUrl = getBaseGalleryImage(
                         currentProject,
                         i,
@@ -3287,13 +3308,13 @@ export default function PortfolioClient({
                               setLightboxImage(baseThumbUrl);
                             }
                           }}
-                          className="relative aspect-[4/3] overflow-hidden cursor-pointer group"
+                          className="relative w-full overflow-hidden cursor-pointer group"
                         >
                           <ResponsivePic
                             slotKey={slotKey}
                             src={baseThumbUrl}
                             alt={`${currentProject.title} gallery ${i + 1}`}
-                            className="w-full h-full object-cover editorial-image-grade group-hover:scale-105"
+                            className="w-full h-auto block editorial-image-grade group-hover:scale-105"
                             imageSettings={content.imageSettings}
                           />
                           {!editMode && (
@@ -3325,6 +3346,7 @@ export default function PortfolioClient({
                                         },
                                         [
                                           slotKey,
+                                          `project-detail-thumb-${currentProject.id}-${i}`,
                                           `project-gallery-${currentProject.id}-${i}`,
                                         ],
                                         url
@@ -3348,6 +3370,7 @@ export default function PortfolioClient({
                                     defaultDesktopHeight: 900,
                                     defaultMobileWidth: 900,
                                     defaultMobileHeight: 750,
+                                    autoOrientation: true,
                                   });
                                 }}
                                 title="Resize gallery image for Desktop & Mobile"
