@@ -522,7 +522,10 @@
       "mobilePanY": 0,
       "desktopFit": "contain",
       "mobileFit": "contain"
+    },
+    "project-gallery-item-over-dose-8594-4": {
+      "offsetY": 12
     }
   },
-  "updatedAt": 1794730864388
+  "updatedAt": 1794730867893
 }
