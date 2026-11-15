@@ -283,6 +283,77 @@ async function renderResizedFile(
   });
 }
 
+function isFallbackImageUrl(url?: string): boolean {
+  return Boolean(url && url.includes("images.unsplash.com"));
+}
+
+function cleanUrl(url?: string): string {
+  if (!url || isFallbackImageUrl(url)) return "";
+  return url;
+}
+
+function stripFallbackImages(data: StoredSiteContent): StoredSiteContent {
+  const nextSettings: Record<string, ResponsiveImageConfig> = {};
+  if (data.imageSettings) {
+    for (const [key, cfg] of Object.entries(data.imageSettings)) {
+      const desktopSrc = cleanUrl(cfg.desktopSrc);
+      const mobileSrc = cleanUrl(cfg.mobileSrc) || undefined;
+      const sourceSrc = cleanUrl(cfg.sourceSrc);
+      const mobileSourceSrc = cleanUrl(cfg.mobileSourceSrc) || sourceSrc || undefined;
+      if (desktopSrc || mobileSrc || sourceSrc) {
+        nextSettings[key] = {
+          ...cfg,
+          desktopSrc: desktopSrc || undefined,
+          mobileSrc,
+          sourceSrc: sourceSrc || undefined,
+          mobileSourceSrc,
+        };
+      }
+    }
+  }
+
+  return {
+    ...data,
+    hero: {
+      ...data.hero,
+      image: cleanUrl(data.hero?.image),
+    },
+    homeCards: {
+      ...data.homeCards,
+      photographyImage: cleanUrl(data.homeCards?.photographyImage),
+      filmsImage: cleanUrl(data.homeCards?.filmsImage),
+    },
+    photographyPage: {
+      ...data.photographyPage,
+      bannerImage: cleanUrl(data.photographyPage?.bannerImage),
+    },
+    filmsPage: {
+      ...data.filmsPage,
+      bannerImage: cleanUrl(data.filmsPage?.bannerImage),
+    },
+    aboutPage: {
+      ...data.aboutPage,
+      portraitImage: cleanUrl(data.aboutPage?.portraitImage),
+    },
+    projects: (data.projects || [])
+      .filter((p) => !isFallbackImageUrl(p.coverImage) || p.gallery?.some((g) => !isFallbackImageUrl(g)))
+      .map((p) => ({
+        ...p,
+        coverImage: cleanUrl(p.coverImage),
+        gallery: (p.gallery || []).filter((g) => Boolean(cleanUrl(g))),
+      })),
+    photographySections: (data.photographySections || []).map((s) => ({
+      ...s,
+      images: (s.images || []).filter((img) => Boolean(cleanUrl(img.src))),
+    })),
+    filmCategories: (data.filmCategories || []).map((c) => ({
+      ...c,
+      image: cleanUrl(c.image),
+    })),
+    imageSettings: nextSettings,
+  };
+}
+
 /**
  * Renders the stored Mobile resized image on mobile screens (<=767px)
  * and the stored Desktop resized image on desktop screens (>=768px).
@@ -301,14 +372,18 @@ function ResponsivePic({
   imageSettings?: Record<string, ResponsiveImageConfig>;
 }) {
   const cfg = imageSettings?.[slotKey];
-  const desktopUrl = cfg?.desktopSrc || src;
-  const mobileUrl = cfg?.mobileSrc;
+  const desktopUrl = cleanUrl(cfg?.desktopSrc) || cleanUrl(src);
+  const mobileUrl = cleanUrl(cfg?.mobileSrc);
+
+  if (!desktopUrl && !mobileUrl) {
+    return <div className={`${className} bg-[#D8D5CD]/30`} aria-label={alt} />;
+  }
 
   if (mobileUrl) {
     return (
       <picture className="contents">
         <source media="(max-width: 767px)" srcSet={mobileUrl} />
-        <img src={desktopUrl} alt={alt} className={className} />
+        <img src={desktopUrl || mobileUrl} alt={alt} className={className} />
       </picture>
     );
   }
@@ -396,7 +471,9 @@ export default function PortfolioClient({
   initialContent?: StoredSiteContent;
   hasServerSaved?: boolean;
 }) {
-  const [content, setContent] = useState<StoredSiteContent>(initialContent);
+  const [content, setContent] = useState<StoredSiteContent>(() =>
+    stripFallbackImages(initialContent)
+  );
   const [contentHydrated, setContentHydrated] =
     useState<boolean>(hasServerSaved);
   const [editMode, setEditMode] = useState<boolean>(false);
@@ -415,7 +492,7 @@ export default function PortfolioClient({
 
   const [view, setView] = useState<ViewState>("home");
   const [activeProjectId, setActiveProjectId] = useState<string>(
-    "the-seasonal-table"
+    initialContent.projects?.[0]?.id || ""
   );
   const [homeCategoryFilter, setHomeCategoryFilter] = useState<string>("all");
   const [photoFilter, setPhotoFilter] = useState<string>("all");
@@ -486,8 +563,7 @@ export default function PortfolioClient({
     role: "Photography & Art Direction",
     discipline: "Fashion & Editorial",
     description: "",
-    coverImage:
-      "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=85",
+    coverImage: "",
     videoUrl: "",
   });
 
@@ -639,11 +715,12 @@ export default function PortfolioClient({
           (browserSaved.updatedAt || 0) > (serverSaved.updatedAt || 0)
             ? browserSaved
             : serverSaved;
-        setContent(newest);
+        const cleaned = stripFallbackImages(newest);
+        setContent(cleaned);
       } else if (browserSaved) {
-        setContent(browserSaved);
+        setContent(stripFallbackImages(browserSaved));
       } else if (serverSaved) {
-        setContent(serverSaved);
+        setContent(stripFallbackImages(serverSaved));
       }
       setContentHydrated(true);
 
@@ -659,7 +736,9 @@ export default function PortfolioClient({
               data.content &&
               Array.isArray(data.content.projects)
             ) {
-              const latestServer = data.content as StoredSiteContent;
+              const latestServer = stripFallbackImages(
+                data.content as StoredSiteContent
+              );
               const currentBestTime = Math.max(
                 serverSaved?.updatedAt || 0,
                 browserSaved?.updatedAt || 0
@@ -1095,20 +1174,37 @@ export default function PortfolioClient({
     setView(targetView);
   };
 
+  const emptyProject: Project = {
+    id: "",
+    title: "",
+    category: "",
+    categorySlug: "fashion",
+    type: "photography",
+    year: "",
+    role: "",
+    discipline: "",
+    description: "",
+    coverImage: "",
+    gallery: [],
+  };
   const projects = content.projects;
   const currentProject =
     projects.find((p) => p.id === activeProjectId) ||
     projects[0] ||
-    DEFAULT_SITE_CONTENT.projects[0];
+    emptyProject;
   const currentProjectIndex = Math.max(
     0,
     projects.findIndex((p) => p.id === currentProject.id)
   );
   const prevProject =
-    projects[(currentProjectIndex - 1 + projects.length) % projects.length] ||
-    currentProject;
+    projects.length > 0
+      ? projects[(currentProjectIndex - 1 + projects.length) % projects.length] ||
+        currentProject
+      : currentProject;
   const nextProject =
-    projects[(currentProjectIndex + 1) % projects.length] || currentProject;
+    projects.length > 0
+      ? projects[(currentProjectIndex + 1) % projects.length] || currentProject
+      : currentProject;
 
   const updateCurrentProject = (patch: Partial<Project>) => {
     const nextProjects = content.projects.map((p) =>
@@ -1151,7 +1247,7 @@ export default function PortfolioClient({
         "Click to edit this project description in Edit Mode.",
       coverImage: newProjectForm.coverImage,
       videoUrl: newProjectForm.videoUrl || undefined,
-      gallery: [newProjectForm.coverImage],
+      gallery: newProjectForm.coverImage ? [newProjectForm.coverImage] : [],
       featured: true,
       director: content.brandName,
       cinematography: content.brandName,

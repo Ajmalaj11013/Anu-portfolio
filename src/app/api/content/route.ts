@@ -8,6 +8,7 @@ import {
   StoredContent,
   fetchFromGitHub,
   getLatestServerSiteContent,
+  sanitizeSiteContent,
 } from "@/lib/site-content";
 
 // Simple in-memory write lock to prevent concurrent file corruption
@@ -38,10 +39,10 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as StoredContent;
-    const payload: StoredContent = {
+    const payload: StoredContent = sanitizeSiteContent({
       ...body,
       updatedAt: body.updatedAt || Date.now(),
-    };
+    });
 
     const jsonString = JSON.stringify(payload, null, 2);
     const { token, repo, branch } = getGitHubConfig();

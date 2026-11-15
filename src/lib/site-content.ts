@@ -9,6 +9,81 @@ export const GH_FILE_PATH = "data/site-content.json";
 
 export type StoredContent = SiteContent & { updatedAt?: number };
 
+function isFallbackUrl(url?: string): boolean {
+  return Boolean(url && url.includes("images.unsplash.com"));
+}
+
+function cleanUrl(url?: string): string {
+  if (!url || isFallbackUrl(url)) return "";
+  return url;
+}
+
+export function sanitizeSiteContent(data: StoredContent): StoredContent {
+  const nextSettings: Record<string, any> = {};
+  if (data.imageSettings) {
+    for (const [key, cfg] of Object.entries(data.imageSettings)) {
+      const desktopSrc = cleanUrl(cfg.desktopSrc);
+      const mobileSrc = cleanUrl(cfg.mobileSrc) || undefined;
+      const sourceSrc = cleanUrl(cfg.sourceSrc);
+      const mobileSourceSrc = cleanUrl(cfg.mobileSourceSrc) || sourceSrc || undefined;
+      if (desktopSrc || mobileSrc || sourceSrc) {
+        nextSettings[key] = {
+          ...cfg,
+          desktopSrc: desktopSrc || undefined,
+          mobileSrc,
+          sourceSrc: sourceSrc || undefined,
+          mobileSourceSrc,
+        };
+      }
+    }
+  }
+
+  return {
+    ...data,
+    hero: {
+      ...data.hero,
+      image: cleanUrl(data.hero?.image),
+    },
+    homeCards: {
+      ...data.homeCards,
+      photographyImage: cleanUrl(data.homeCards?.photographyImage),
+      filmsImage: cleanUrl(data.homeCards?.filmsImage),
+    },
+    photographyPage: {
+      ...data.photographyPage,
+      bannerImage: cleanUrl(data.photographyPage?.bannerImage),
+    },
+    filmsPage: {
+      ...data.filmsPage,
+      bannerImage: cleanUrl(data.filmsPage?.bannerImage),
+    },
+    aboutPage: {
+      ...data.aboutPage,
+      portraitImage: cleanUrl(data.aboutPage?.portraitImage),
+    },
+    projects: (data.projects || [])
+      .filter(
+        (p) =>
+          !isFallbackUrl(p.coverImage) ||
+          p.gallery?.some((g) => !isFallbackUrl(g))
+      )
+      .map((p) => ({
+        ...p,
+        coverImage: cleanUrl(p.coverImage),
+        gallery: (p.gallery || []).filter((g) => Boolean(cleanUrl(g))),
+      })),
+    photographySections: (data.photographySections || []).map((s) => ({
+      ...s,
+      images: (s.images || []).filter((img) => Boolean(cleanUrl(img.src))),
+    })),
+    filmCategories: (data.filmCategories || []).map((c) => ({
+      ...c,
+      image: cleanUrl(c.image),
+    })),
+    imageSettings: nextSettings,
+  };
+}
+
 export async function fetchFromGitHub(): Promise<{
   content: StoredContent | null;
   sha?: string;
@@ -97,7 +172,7 @@ export async function getLatestServerSiteContent(): Promise<{
   if (best) {
     return {
       hasSavedContent: true,
-      content: best,
+      content: sanitizeSiteContent(best),
     };
   }
 
