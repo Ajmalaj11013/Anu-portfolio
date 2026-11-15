@@ -485,7 +485,22 @@
       "offsetY": 12
     },
     "project-gallery-item-over-dose-8594-3": {
-      "offsetY": 12
+      "desktopSrc": "/api/media/1794731056487-project-gallery-item-over-dose-8594-3-desktop.jpg",
+      "mobileSrc": "/api/media/1794731058628-project-gallery-item-over-dose-8594-3-mobile.jpg",
+      "sourceSrc": "/api/media/1794726903948-22.jpg",
+      "mobileSourceSrc": "/api/media/1794726903948-22.jpg",
+      "desktopWidth": 1600,
+      "desktopHeight": 1000,
+      "mobileWidth": 960,
+      "mobileHeight": 720,
+      "desktopZoom": 109,
+      "desktopPanX": 0,
+      "desktopPanY": 0,
+      "mobileZoom": 100,
+      "mobilePanX": 0,
+      "mobilePanY": 0,
+      "desktopFit": "cover",
+      "mobileFit": "cover"
     },
     "project-gallery-item-over-dose-8594-4": {
       "offsetY": 12
@@ -527,5 +542,5 @@
       "mobileFit": "cover"
     }
   },
-  "updatedAt": 1794731037088
+  "updatedAt": 1794731059951
 }
