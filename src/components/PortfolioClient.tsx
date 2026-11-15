@@ -15,6 +15,8 @@ import {
   ArrowDown,
   ChevronUp,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Play,
   Menu,
   X,
@@ -304,7 +306,13 @@ function stripFallbackImages(data: StoredSiteContent): StoredSiteContent {
       const mobileSrc = cleanUrl(cfg.mobileSrc) || undefined;
       const sourceSrc = cleanUrl(cfg.sourceSrc);
       const mobileSourceSrc = cleanUrl(cfg.mobileSourceSrc) || sourceSrc || undefined;
-      if (desktopSrc || mobileSrc || sourceSrc || typeof cfg.offsetY === "number") {
+      if (
+        desktopSrc ||
+        mobileSrc ||
+        sourceSrc ||
+        typeof cfg.offsetX === "number" ||
+        typeof cfg.offsetY === "number"
+      ) {
         nextSettings[key] = {
           ...cfg,
           desktopSrc: desktopSrc || undefined,
@@ -1285,16 +1293,23 @@ export default function PortfolioClient({
     });
   };
 
-  // Nudge a gallery image vertically up or down within its column (in px)
-  const nudgeImageVerticalOffset = (slotKey: string, deltaPx: number | null) => {
+  // Nudge a gallery image horizontally (left/right) or vertically (up/down) in px
+  const nudgeImageOffset = (
+    slotKey: string,
+    deltaX: number | null,
+    deltaY: number | null
+  ) => {
     const prevCfg = content.imageSettings?.[slotKey] || {};
-    const currentOffset = prevCfg.offsetY || 0;
-    const nextOffset = deltaPx === null ? 0 : currentOffset + deltaPx;
+    const currentX = prevCfg.offsetX || 0;
+    const currentY = prevCfg.offsetY || 0;
+    const nextX = deltaX === null ? 0 : currentX + deltaX;
+    const nextY = deltaY === null ? 0 : currentY + deltaY;
     const nextSettings: Record<string, ResponsiveImageConfig> = {
       ...(content.imageSettings || {}),
       [slotKey]: {
         ...prevCfg,
-        offsetY: nextOffset,
+        offsetX: nextX,
+        offsetY: nextY,
       },
     };
     persistContent({
@@ -3671,14 +3686,18 @@ export default function PortfolioClient({
                         dragOverGalleryIndex === i &&
                         draggedGalleryIndex !== null &&
                         draggedGalleryIndex !== i;
+                      const horizontalOffset =
+                        content.imageSettings?.[slotKey]?.offsetX || 0;
                       const verticalOffset =
                         content.imageSettings?.[slotKey]?.offsetY || 0;
                       return (
                         <div
                           key={i}
                           style={
-                            verticalOffset
-                              ? { transform: `translateY(${verticalOffset}px)` }
+                            horizontalOffset || verticalOffset
+                              ? {
+                                  transform: `translate(${horizontalOffset}px, ${verticalOffset}px)`,
+                                }
                               : undefined
                           }
                           draggable={editMode}
@@ -3738,16 +3757,38 @@ export default function PortfolioClient({
                           )}
                           {editMode && (
                             <>
-                              <div className="absolute bottom-2 left-2 z-20 flex items-center gap-1">
+                              <div className="absolute bottom-2 left-2 right-2 z-20 flex flex-wrap items-center gap-1">
                                 <span className="px-1.5 py-0.5 bg-[#171715]/85 text-[#F4F2ED] text-[9px] tracking-widest pointer-events-none">
                                   #{i + 1}
                                 </span>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    nudgeImageVerticalOffset(slotKey, -12);
+                                    nudgeImageOffset(slotKey, -12, 0);
                                   }}
-                                  title="Shift image slightly UP vertically in its column"
+                                  title="Shift image slightly LEFT"
+                                  className="px-1.5 py-0.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] inline-flex items-center text-[9px] tracking-wider"
+                                >
+                                  <ChevronLeft className="w-3 h-3" />
+                                  <span>LEFT</span>
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    nudgeImageOffset(slotKey, 12, 0);
+                                  }}
+                                  title="Shift image slightly RIGHT"
+                                  className="px-1.5 py-0.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] inline-flex items-center text-[9px] tracking-wider"
+                                >
+                                  <ChevronRight className="w-3 h-3" />
+                                  <span>RIGHT</span>
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    nudgeImageOffset(slotKey, 0, -12);
+                                  }}
+                                  title="Shift image slightly UP"
                                   className="px-1.5 py-0.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] inline-flex items-center text-[9px] tracking-wider"
                                 >
                                   <ChevronUp className="w-3 h-3" />
@@ -3756,26 +3797,30 @@ export default function PortfolioClient({
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    nudgeImageVerticalOffset(slotKey, 12);
+                                    nudgeImageOffset(slotKey, 0, 12);
                                   }}
-                                  title="Shift image slightly DOWN vertically in its column"
+                                  title="Shift image slightly DOWN"
                                   className="px-1.5 py-0.5 bg-[#171715]/90 text-[#F4F2ED] hover:bg-[#B7A28B] hover:text-[#171715] inline-flex items-center text-[9px] tracking-wider"
                                 >
                                   <ChevronDown className="w-3 h-3" />
                                   <span>DOWN</span>
                                 </button>
-                                {verticalOffset !== 0 && (
+                                {(horizontalOffset !== 0 ||
+                                  verticalOffset !== 0) && (
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      nudgeImageVerticalOffset(slotKey, null);
+                                      nudgeImageOffset(slotKey, null, null);
                                     }}
-                                    title="Reset vertical offset"
+                                    title="Reset Left/Right & Up/Down offset"
                                     className="px-1.5 py-0.5 bg-[#B7A28B] text-[#171715] text-[9px] tracking-wider font-medium"
                                   >
-                                    {verticalOffset > 0
-                                      ? `+${verticalOffset}px`
-                                      : `${verticalOffset}px`}{" "}
+                                    {horizontalOffset !== 0
+                                      ? `X:${horizontalOffset > 0 ? `+${horizontalOffset}` : horizontalOffset} `
+                                      : ""}
+                                    {verticalOffset !== 0
+                                      ? `Y:${verticalOffset > 0 ? `+${verticalOffset}` : verticalOffset} `
+                                      : ""}
                                     &times;
                                   </button>
                                 )}

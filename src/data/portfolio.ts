@@ -66,6 +66,7 @@ export interface ResponsiveImageConfig {
   mobilePanY?: number;
   desktopFit?: "cover" | "contain";
   mobileFit?: "cover" | "contain";
+  offsetX?: number;
   offsetY?: number;
 }
 
